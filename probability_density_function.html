@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js v7 - 正規分布</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .controls {
+            margin: 20px;
+        }
+
+        svg {
+            display: block;
+            margin: auto;
+        }
+    </style>
+    <script>
+        const margin = { top: 20, right: 30, bottom: 50, left: 50 };
+        const width = 800;
+        const height = 400;            
+        let svg = null;
+
+        function updateGraph() {
+            const mu = parseFloat(document.getElementById("mu").value);
+            const sigma = parseFloat(document.getElementById("sigma").value);
+            const s = parseFloat(document.getElementById("s").value);
+            const k = parseFloat(document.getElementById("k").value);
+
+
+            const xMin = mu - 3 * sigma;
+            const xMax = mu + 3 * sigma;
+
+            const xValues = Array.from({ length: 100 }, (_, i) => xMin + (xMax - xMin) * (i / 99));
+            const data = xValues.map(
+                x => (
+                    {
+                        x,
+                        y: (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-((x - mu) ** 2) / (2 * sigma ** 2) * (1 + s / 6 * ((x - mu) / sigma) ** 3 + k / 24 * ((x - mu) / sigma) ** 4))    
+                    }
+                )
+            );
+
+            const xScale = d3.scaleLinear().domain([xMin, xMax]).range([margin.left, width - margin.right]);
+            const yScale = d3.scaleLinear().domain([0, d3.max(data, d => d.y)]).range([height - margin.bottom, margin.top]);
+
+            svg.select('.x-axis').transition().duration(500).call(d3.axisBottom(xScale));
+            svg.select('.y-axis').transition().duration(500).call(d3.axisLeft(yScale));
+
+            const line = d3.line()
+                .x(d => xScale(d.x))
+                .y(d => yScale(d.y))
+                .curve(d3.curveBasis);
+
+            svg.selectAll(".line").remove();
+            svg.append("path")
+                .datum(data)
+                .attr("class", "line")
+                .attr("fill", "none")
+                .attr("stroke", "blue")
+                .attr("stroke-width", 2)
+                .attr("d", line);
+        }
+
+        function initialize() {
+            svg = d3.select('svg') 
+                .attr('width', width)
+                .attr('height', height);
+
+            svg.append('g').attr('class', 'x-axis').attr('transform', `translate(0,${height - margin.bottom})`);
+            svg.append('g').attr('class', 'y-axis').attr('transform', `translate(${margin.left},0)`);
+
+            $('#mu').on('input', updateGraph);
+            $('#sigma').on('input', updateGraph);
+            $('#s').on('input', updateGraph);
+            $('#k').on('input', updateGraph);
+
+            updateGraph();
+        }
+
+        $(document).ready(initialize);
+    </script>
+</head>
+
+<body>
+
+    <div class="controls">
+        <label>平均 (μ): <input type="number" id="mu" value="0" step="0.01"></label>
+        <label>標準偏差 (σ): <input type="number" id="sigma" value="1" step="0.01" min="0.1"></label>
+        <label>歪度 (S): <input type="number" id="s" value="0" step="0.01"></label>
+        <label>尖度 (K): <input type="number" id="k" value="0" step="0.01"></label>
+    </div>
+
+    <svg></svg>
+
+</body>
+
+</html>
