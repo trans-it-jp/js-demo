@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>一次変換（線形変換） - 3x3行列で学ぶ2D座標変換</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="../js/common.js" defer></script>
+  <script src="../js/page-linear.js" defer></script>
+</head>
+<body>
+  <main class="container">
+    <h1>一次変換（線形変換）</h1>
+
+    <div class="viz-wrap card">
+      <!-- 左：キャンバス -->
+      <div>
+        <div class="tools" id="draw-tools">
+          <label>描画:</label>
+          <button id="mode-none" type="button" class="active">なし</button>
+          <button id="mode-line" type="button">線（2点）</button>
+          <button id="mode-circle" type="button">円（中心→外周）</button>
+          <button id="mode-rect" type="button">四角形（対角2点）</button>
+          <button id="mode-free" type="button">自由曲線（ドラッグ）</button>
+          <button id="clear" type="button">クリア</button>
+          <span class="hint"></span>
+        </div>
+        <div id="viz"></div>
+      </div>
+
+      <!-- 右：パネル -->
+      <aside>
+        <h3>パラメータ</h3>
+        <div class="controls" id="controls">
+          <div class="control-row">
+            <label for="scaleX">scaleX</label>
+            <input id="scaleX" type="range" min="-3" max="3" step="0.1" value="1">
+            <input id="scaleX_num" type="number" min="-3" max="3" step="0.1" value="1">
+          </div>
+          <div class="control-row">
+            <label for="scaleY">scaleY</label>
+            <input id="scaleY" type="range" min="-3" max="3" step="0.1" value="1">
+            <input id="scaleY_num" type="number" min="-3" max="3" step="0.1" value="1">
+          </div>
+          <div class="control-row">
+            <label for="shearX">shearX (x ← x + shx·y)</label>
+            <input id="shearX" type="range" min="-2" max="2" step="0.1" value="0">
+            <input id="shearX_num" type="number" min="-2" max="2" step="0.1" value="0">
+          </div>
+          <div class="control-row">
+            <label for="shearY">shearY (y ← y + shy·x)</label>
+            <input id="shearY" type="range" min="-2" max="2" step="0.1" value="0">
+            <input id="shearY_num" type="number" min="-2" max="2" step="0.1" value="0">
+          </div>
+        </div>
+
+        <div class="legend">
+          <div><i></i>元の図形/線/円/自由曲線/四角形</div>
+          <div><i></i>変換後（緑）</div>
+          <div><i style="background: var(--basisX)"></i>e₁</div>
+          <div><i style="background: var(--basisY)"></i>e₂</div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 行列テーブルは下に横並び -->
+    <section class="card" id="tables"></section>
+    <p><a href="../index.html">← トップに戻る</a></p>
+  </main>
+
+  <script>
+    // スライダーと数値入力の同期（相互再帰を避ける）
+    function bindPair(sliderId, numberId) {
+      const s = document.getElementById(sliderId);
+      const n = document.getElementById(numberId);
+      s.addEventListener('input', () => { n.value = s.value; });
+      n.addEventListener('input', () => { s.value = n.value; });
+    }
+    bindPair('scaleX', 'scaleX_num');
+    bindPair('scaleY', 'scaleY_num');
+    bindPair('shearX', 'shearX_num');
+    bindPair('shearY', 'shearY_num');
+  </script>
+</body>
+</html>

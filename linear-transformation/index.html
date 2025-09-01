@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>3x3行列で学ぶ2D座標変換 (D3.js)</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</head>
+<body>
+  <header class="site-header">
+    <h1>3x3行列で学ぶ 2D 座標変換（D3.js）</h1>
+    <p>同次座標(3x3行列)で一次変換・平行移動・回転を体感しながら学べるミニサイト</p>
+  </header>
+
+  <main class="container">
+    <nav class="card">
+      <h2>レッスン一覧</h2>
+      <ol>
+        <li><a href="./pages/linear.html">一次変換（拡大縮小・せん断・反転の合成）</a></li>
+        <li><a href="./pages/translation.html">平行移動</a></li>
+        <li><a href="./pages/affine.html">一次変換 + 平行移動（アフィン変換）</a></li>
+        <li><a href="./pages/rotation-origin.html">原点中心の回転</a></li>
+        <li><a href="./pages/rotation-pivot.html">任意の点中心の回転（T(-p)・R・T(p) を表示）</a></li>
+      </ol>
+    </nav>
+
+    <section class="card">
+      <h2>使い方</h2>
+      <ul>
+        <li>右上のスライダーや数値入力でパラメータを変えると、図形や基底ベクトルが変換されます。</li>
+        <li>表には実際に使用されている 3x3 行列が表示されます（同次座標）。</li>
+        <li>原点中心以外の回転は <code>T(p)</code> と <code>T(-p)</code>、<code>R(θ)</code> の 3行列の積で実装・表示しています。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2025 Matrix Transform Demo</p>
+  </footer>
+</body>
+</html>

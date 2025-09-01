@@ -1,0 +1,187 @@
+/* Bright, two-column layout + better grid and drawing tools */
+:root {
+  --bg: #f7fafc;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --grid: #d1d5db;              /* ベースグリッド */
+  --grid-transformed: #93c5fd;  /* 変換後グリッド */
+  --axis: #374151;
+  --shape0: #334155;
+  --shape1: #059669;
+  --basisX: #ef4444;
+  --basisY: #3b82f6;
+  --tool: #111827;
+  --tool-bg: #f3f4f6;
+  --active: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans JP", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  line-height: 1.6;
+}
+
+a { color: var(--accent); }
+
+.site-header, .site-footer {
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff 0%, #f3f4f6 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 24px auto;
+  padding: 0 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin: 18px 0;
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+}
+
+/* === キャンバス左／パネル右の2カラム === */
+.viz-wrap {
+  display: grid;
+  grid-template-columns: 1fr 340px; /* 左：SVG、右：サイド */
+  gap: 14px;
+}
+@media (max-width: 980px) {
+  .viz-wrap { grid-template-columns: 1fr; }
+}
+
+.tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: var(--tool-bg);
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+.tools label { color: var(--tool); }
+.tools button {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+}
+.tools button:hover { background: #f9fafb; }
+.tools button.active {
+  border-color: var(--active);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15) inset;
+}
+
+/* ==== パラメーター行を 横並び（タイトル / スライダー / テキスト）に ==== */
+.controls {
+  display: grid;
+  gap: 10px;
+}
+.control-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 110px; /* タイトル / スライダー / テキスト */
+  gap: 8px;
+  align-items: center;
+}
+.control-row label { color: var(--muted); }
+.control-row input[type="range"] { width: 100%; }
+.control-row input[type="number"] {
+  width: 100%;
+  padding: 6px 8px;
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+/* 小さい画面では2列に崩す */
+@media (max-width: 520px) {
+  .control-row { grid-template-columns: 1fr 1fr; }
+  .control-row input[type="number"] { grid-column: 1 / -1; }
+}
+
+aside .legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.legend i {
+  display: inline-block; width: 16px; height: 3px; background: #111827; border-radius: 2px;
+}
+
+/* 行列はグリッドの下に横並び */
+.matrix-tables {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
+  gap: 12px;
+}
+@media (max-width: 980px) {
+  .matrix-tables { grid-auto-flow: row; }
+}
+.matrix-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.matrix-table caption {
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-align: left;
+}
+.matrix-table th, .matrix-table td {
+  border: 1px solid #e5e7eb;
+  padding: 6px 8px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.matrix-table th { background: #f3f4f6; color: var(--muted); }
+
+svg {
+  width: 100%;
+  height: 560px;
+  background: #ffffff;
+  border-radius: 12px;
+  user-select: none;
+}
+.hit-rect { fill: transparent; pointer-events: all; } /* クリックを確実に取る */
+
+.grid line { stroke: var(--grid); stroke-width: 1; }
+.grid-transformed path { stroke: var(--grid-transformed); stroke-width: 1.4; fill: none; }
+.axis line, .axis path { stroke: var(--axis); }
+
+.shape-original { fill: rgba(51,65,85,.06); stroke: var(--shape0); stroke-width: 2; }
+.shape-transformed { fill: rgba(5,150,105,.08); stroke: var(--shape1); stroke-width: 2; }
+
+.vector { stroke-width: 3; }
+.vector.x { stroke: var(--basisX); }
+.vector.y { stroke: var(--basisY); }
+.pivot { fill: #eab308; stroke: #f59e0b; stroke-width: 2; }
+
+/* 手描き */
+.user-line   { stroke: #111827; stroke-width: 2.2; }
+.user-line-t { stroke: #10b981; stroke-width: 2.2; }
+.user-circle   { stroke: #111827; stroke-width: 2; fill: none; }
+.user-circle-t { stroke: #10b981; stroke-width: 2; fill: rgba(16,185,129,.06); }
+.user-rect     { stroke: #111827; stroke-width: 2; fill: none; }
+.user-rect-t   { stroke: #10b981; stroke-width: 2; fill: rgba(16,185,129,.06); }
+.user-free   { stroke: #111827; stroke-width: 2; fill: none; }
+.user-free-t { stroke: #10b981; stroke-width: 2; fill: none; }
+
+.hint { color: var(--muted); font-size: 12px; }
