@@ -1,80 +1,158 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>任意点中心の回転 - 3x3行列で学ぶ2D座標変換</title>
-  <link rel="stylesheet" href="../css/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="../js/common.js" defer></script>
-  <script src="../js/page-rotation-pivot.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>任意の点を中心にした回転 — 2D 座標変換 — JavaScript 学習デモ</title>
+<meta name="description" content="3 つの行列は、どの順に点へ効いているでしょうか。">
+<link rel="stylesheet" href="../../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../../js/core/numeric.js"></script>
+<script src="../../js/linear-algebra/matrix3.js"></script>
+<script src="../../js/viz/plane.js"></script>
+<script src="../../js/ui/i18n.js"></script>
+<script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/tables.js"></script>
+<script src="../app/lesson.js" defer></script>
 </head>
-<body>
-  <main class="container">
-    <h1>任意点中心の回転</h1>
+<body data-lesson="rotation-pivot">
+<a class="skip-link" href="#main">本文へ移動</a>
 
-    <div class="viz-wrap card">
-      <!-- 左：キャンバス -->
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <a href="../../en/linear-transformation/pages/rotation-pivot.html" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../../index.html">デモ一覧</a></li>
+        <li><a href="../index.html">2D 座標変換</a></li>
+        <li>任意の点を中心にした回転</li>
+      </ol>
+    </nav>
+
+    <h1>任意の点を中心にした回転</h1>
+    <p class="lede">原点以外の点 c を中心に回すには、c を原点へ運び、回し、戻します。T(c)·R(θ)·T(−c) の 3 つの行列をそれぞれ表に出してあります。</p>
+
+    <dl class="framing">
       <div>
-        <div class="tools" id="draw-tools">
-          <label>描画:</label>
-          <button id="mode-none" type="button" class="active">なし</button>
-          <button id="mode-line" type="button">線（2点）</button>
-          <button id="mode-circle" type="button">円（中心→外周）</button>
-          <button id="mode-rect" type="button">四角形（対角2点）</button>
-          <button id="mode-free" type="button">自由曲線（ドラッグ）</button>
-          <button id="clear" type="button">クリア</button>
-          <span class="hint"></span>
+        <dt>中心の問い</dt>
+        <dd>3 つの行列は、どの順に点へ効いているでしょうか。</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>座標と、行と列のある数表（行列）の掛け算。高校以降・大学を想定しています。</dd>
+      </div>
+      <div>
+        <dt>動かす前に予想する</dt>
+        <dd>中心を (2, 1) にして 180 度回すと、原点はどこへ移ると思いますか。</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar" id="draw-tools">
+          <span class="toolbar__label">描画</span>
+          <button type="button" data-mode="none">なし</button>
+          <button type="button" data-mode="line">線（2点）</button>
+          <button type="button" data-mode="circle">円（中心→外周）</button>
+          <button type="button" data-mode="rect">四角形（対角2点）</button>
+          <button type="button" data-mode="free">自由曲線（ドラッグ）</button>
+          <button type="button" id="clear-shapes">消す</button>
+          <span class="toolbar__hint">図の上をクリックまたはドラッグすると図形を描けます。描いた図形も同じ行列で変換されます。</span>
         </div>
-        <div id="viz"></div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">破線が元の図形、実線が変換後です。薄い色のグリッドは変換後のマス目を表します。</p>
       </div>
 
-      <!-- 右：パネル -->
       <aside>
-        <h3>パラメータ</h3>
-        <div class="controls" id="controls">
-          <div class="control-row">
-            <label for="cx">中心 x</label>
-            <input id="cx" type="range" min="-10" max="10" step="0.1" value="0">
-            <input id="cx_num" type="number" min="-10" max="10" step="0.1" value="0">
+        <section class="panel">
+          <h2 class="panel__title">条件を変える</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="pivot-x">回転の中心 cx
+              </label>
+              <input id="pivot-x" type="range" min="-10" max="10" step="0.1" value="2">
+              <input id="pivot-x-num" type="number" min="-10" max="10" step="0.1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="pivot-y">回転の中心 cy
+              </label>
+              <input id="pivot-y" type="range" min="-10" max="10" step="0.1" value="1">
+              <input id="pivot-y-num" type="number" min="-10" max="10" step="0.1" value="1">
+            </div>
+            <div class="control">
+              <label class="control__label" for="angle">回転角 θ（度）
+              </label>
+              <input id="angle" type="range" min="-180" max="180" step="1" value="0">
+              <input id="angle-num" type="number" min="-180" max="180" step="1" value="0">
+            </div>
           </div>
-          <div class="control-row">
-            <label for="cy">中心 y</label>
-            <input id="cy" type="range" min="-10" max="10" step="0.1" value="0">
-            <input id="cy_num" type="number" min="-10" max="10" step="0.1" value="0">
-          </div>
-          <div class="control-row">
-            <label for="deg">θ（度）</label>
-            <input id="deg" type="range" min="-180" max="180" step="1" value="0">
-            <input id="deg_num" type="number" min="-180" max="180" step="1" value="0">
-          </div>
-        </div>
+        </section>
 
-        <div class="legend">
-          <div><i></i>元の図形/線/円/自由曲線/四角形</div>
-          <div><i></i>変換後（緑）</div>
-          <div><i style="background: var(--basisX)"></i>e₁</div>
-          <div><i style="background: var(--basisY)"></i>e₂</div>
-        </div>
+        <section class="panel">
+          <h2 class="panel__title">いまの状態</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">凡例</h2>
+          <ul class="legend">
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--plot-shape)" stroke-width="1.5" stroke-dasharray="5 4"/></svg><span>元の図形（破線）</span></li>
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--plot-shape-alt)" stroke-width="2"/></svg><span>変換後の図形（実線）</span></li>
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--series-2)" stroke-width="2.5"/></svg><span>基底 e₁ の像</span></li>
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--series-1)" stroke-width="2.5"/></svg><span>基底 e₂ の像</span></li>
+          </ul>
+        </section>
       </aside>
     </div>
 
-    <!-- 行列テーブルは下に横並び -->
-    <section class="card" id="tables"></section>
-    <p><a href="../index.html">← トップに戻る</a></p>
-  </main>
+    <section style="margin-top: 2rem;">
+      <h2>行列</h2>
+      <div class="tables" id="tables"></div>
+    </section>
 
-  <script>
-    function bindPair(sliderId, numberId) {
-      const s = document.getElementById(sliderId);
-      const n = document.getElementById(numberId);
-      s.addEventListener('input', () => { n.value = s.value; });
-      n.addEventListener('input', () => { s.value = n.value; });
-    }
-    bindPair('cx', 'cx_num');
-    bindPair('cy', 'cy_num');
-    bindPair('deg', 'deg_num');
-  </script>
+    <div class="note prose" style="max-width: none;">
+      <h3>確かめてほしいこと</h3>
+      <ul>
+        <li><strong>比較</strong>：中心を原点に戻すと、前のレッスンと同じ行列になることを確かめてください。</li>
+        <li><strong>説明</strong>：T(−c) が先に効く理由を、合成の順序から言い直してください。</li>
+        <li><strong>転移</strong>：中心 (2, 1)、θ = 180 度で原点の像を手で計算し、図と合うか確かめてください。</li>
+      </ul>
+
+      <h3>この画面の範囲</h3>
+      <ul>
+        <li>扱うのはアフィン変換までです。行列の 3 行目は常に [0, 0, 1] で、射影変換は含みません。</li>
+        <li>図形の描画はポインタ操作だけで、キーボードからは行えません。パラメータはすべて数値入力でも変えられます。</li>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+      </ul>
+    </div>
+
+    <p style="margin-top: 2rem;"><a href="../index.html">レッスン一覧へ戻る</a></p>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

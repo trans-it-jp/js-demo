@@ -1,14 +1,15 @@
-
 # 3×3 行列を用いた 2D 座標変換
 
-このリポジトリは、D3.js を用いた可視化で **2D の座標変換**を体験できるデモサイトです。
+[English](Readme.en.md)
+
+D3.js を用いた可視化で **2D の座標変換**を体験できる教材です。レッスン一覧は [index.html](index.html) から開けます。
 グリッドは正方形で表示され、変換後グリッド／基底ベクトル／ユーザーが描いた図形（線・円・四角形・自由曲線）の変換結果を確認できます。
 
-- 一次変換（線形変換）: `pages/linear.html`
-- 平行移動: `pages/translation.html`
-- 一次変換＋平行移動: `pages/affine.html`
-- 原点中心の回転: `pages/rotate-origin.html`
-- 任意点中心の回転: `pages/rotate-point.html`
+- [一次変換（線形変換）](pages/linear.html)
+- [平行移動](pages/translation.html)
+- [一次変換＋平行移動](pages/affine.html)
+- [原点中心の回転](pages/rotation-origin.html)
+- [任意点中心の回転](pages/rotation-pivot.html)
 
 > 本実装の慣習は **列ベクトル** です。点 $v = [x, y, 1]^T$ に対し、行列は左から掛けます。  
 > 合成 $M = A \cdot B$ を点に適用すると $v' = Mv = (A \cdot B)v = A(Bv)$ となり、**右から左**（$B \rightarrow A$）の順に作用します。
@@ -205,7 +206,7 @@ y' &= c_y + (x-c_x)\sin\theta + (y-c_y)\cos\theta.
 \end{aligned}
 ```
 
-> `pages/rotate-point.html` では、テーブルに $T(c)$・$R(\theta)$・$T(-c)$ の **3 つの行列**が並び、合成行列 $M$ も同時に表示されます。スライダーで $c_x,c_y,\theta$ を動かすと、分解と合成の対応が視覚的に確認できます。
+> [任意点中心の回転](pages/rotation-pivot.html)では、テーブルに $T(c)$・$R(\theta)$・$T(-c)$ の **3 つの行列**が並び、合成行列 $M$ も同時に表示されます。スライダーで $c_x,c_y,\theta$ を動かすと、分解と合成の対応が視覚的に確認できます。
 
 ---
 
@@ -227,15 +228,15 @@ y' &= c_y + (x-c_x)\sin\theta + (y-c_y)\cos\theta.
 ## 例題・演習
 
 1. **せん断の可視化**  
-   `linear.html` で $s_x=s_y=1$、$\mathrm{Shear}_x=1$。正方形が平行四辺形になることを確認し、基底ベクトルの変化を読む。
+   [linear.html](pages/linear.html) で $s_x=s_y=1$、$\mathrm{Shear}_x=1$。正方形が平行四辺形になることを確認し、基底ベクトルの変化を読む。
 2. **円→楕円**  
-   `linear.html` で $s_x=2, s_y=1$ の拡大をかけ、円を描く。楕円になり、長軸・短軸がスケールと一致することを確認。
+   [linear.html](pages/linear.html) で $s_x=2, s_y=1$ の拡大をかけ、円を描く。楕円になり、長軸・短軸がスケールと一致することを確認。
 3. **平行移動の合成順序**  
-   `affine.html` で一次変換 $L$ の後に平行移動 $T$ を合成（`combined = T·L`）。順序を入れ替えたときの違いを観察。
+   [affine.html](pages/affine.html) で一次変換 $L$ の後に平行移動 $T$ を合成（`combined = T·L`）。順序を入れ替えたときの違いを観察。
 4. **任意点回転**  
-   `rotate-point.html` で中心 $(c_x,c_y)$ を動かしながら回転。行列の分解 $T(c)\,R\,T(-c)$ と合成 $M$ を比較。
+   [rotation-pivot.html](pages/rotation-pivot.html) で中心 $(c_x,c_y)$ を動かしながら回転。行列の分解 $T(c)\,R\,T(-c)$ と合成 $M$ を比較。
 5. **逆行列で元に戻す**  
-   `linear.html` で適当な一次変換 $A$ を設定し、$A^{-1}$ を作って合成（例: スケールを逆数、回転角を符号逆に）。合成が恒等になることを実験。
+   [linear.html](pages/linear.html) で適当な一次変換 $A$ を設定し、$A^{-1}$ を作って合成（例: スケールを逆数、回転角を符号逆に）。合成が恒等になることを実験。
 
 ---
 
@@ -299,7 +300,9 @@ A^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix}\quad(\det(A)\ne 0)
 
 ---
 
-### ライセンス・謝辞
+### 実装と依存
 
-- コードは教育目的で作成されています。D3.js は CDN から読み込みます。  
-- 改良提案や誤りの指摘は歓迎します。
+- 行列の計算は [`js/linear-algebra/matrix3.js`](../js/linear-algebra/matrix3.js)、描画は [`js/viz/plane.js`](../js/viz/plane.js) にあります。各フォルダに使い方の説明があります。
+- D3.js v7 を CDN から読み込みます（版は固定）。
+- 再利用条件（ライセンス）は未定です。決まるまで、このリポジトリのコードを再配布・商用利用の可否が確定したものとして扱わないでください。
+- 誤りの指摘は歓迎します。

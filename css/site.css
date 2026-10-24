@@ -1,0 +1,620 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   js-demo 共通スタイル / shared stylesheet
+   トークン → 基本要素 → レイアウト → 部品 の順に定義する。
+   デモ固有の指定はこのファイルに足さず、各デモ側で上書きする。
+   ========================================================================== */
+
+/* --- 1. トークン ---------------------------------------------------------- */
+
+:root {
+  /* 面と文字 */
+  --paper:        #fcfbf9;
+  --surface:      #ffffff;
+  --surface-sunk: #f4f2ee;
+  --ink:          #15181c;
+  --ink-soft:     #4a4f57;
+  --ink-muted:    #767b84;
+  --rule:         #e3dfd8;
+  --rule-strong:  #cdc8bf;
+
+  /* 強調は 1 色に絞る */
+  --accent:       #15616d;
+  --accent-ink:   #0d434c;
+  --accent-wash:  #e8f1f2;
+
+  /* 図の系列色。色覚差でも区別できる組み合わせ（Okabe–Ito）を使い、
+     形・番号・数値と併用する。色だけで情報を伝えない。 */
+  --series-1: #0072b2;
+  --series-2: #d55e00;
+  --series-3: #009e73;
+  --series-4: #cc79a7;
+  --series-5: #e69f00;
+  --series-6: #56b4e9;
+  --series-7: #8d6e00;
+  --series-8: #525252;
+  --series-9: #7b3294;
+  --series-10: #006d4f;
+
+  /* 図の下地 */
+  --plot-bg:        #ffffff;
+  --plot-grid:      #e6e2db;
+  --plot-grid-warp: #9ec7cd;
+  --plot-axis:      #5b6069;
+  --plot-shape:     #2f3540;
+  --plot-shape-alt: #009e73;
+
+  /* 字 */
+  --font-sans: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN",
+               "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic",
+               "Noto Sans JP", Meiryo, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", monospace;
+
+  /* 間隔（4px 刻み） */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+
+  --measure: 34rem;   /* 本文の読みやすい行長（およそ 40 字） */
+  --page:    72rem;   /* ページ全体の最大幅 */
+  --radius:  2px;     /* 角は落としすぎない */
+}
+
+/* --- 2. 基本要素 ---------------------------------------------------------- */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.75;
+  font-feature-settings: "palt" 1;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 1.875rem; }
+h2 { font-size: 1.375rem; }
+h3 { font-size: 1.0625rem; }
+h4 { font-size: 0.9375rem; }
+
+p, ul, ol, dl, table, figure, pre { margin: 0; }
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+a:hover { color: var(--accent-ink); }
+
+:where(a, button, input, select, summary):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+code, kbd, samp, pre { font-family: var(--font-mono); font-size: 0.875em; }
+
+code {
+  padding: 0.1em 0.35em;
+  background: var(--surface-sunk);
+  border-radius: var(--radius);
+}
+
+hr {
+  height: 0;
+  margin: var(--s-6) 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+img { max-width: 100%; height: auto; }
+
+/* 読み物の縦リズム。連続する本文だけに効かせる。 */
+.prose > * + * { margin-top: var(--s-4); }
+.prose h2 { margin-top: var(--s-6); }
+.prose h3 { margin-top: var(--s-5); }
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose li + li { margin-top: var(--s-1); }
+.measure { max-width: var(--measure); }
+
+/* --- 3. レイアウト -------------------------------------------------------- */
+
+.page {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--s-5);
+}
+
+.site-head {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+}
+
+.site-head__inner {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: var(--s-4) var(--s-5);
+}
+
+.site-head__title {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.site-head__title a { color: inherit; text-decoration: none; }
+.site-head__title a:hover { text-decoration: underline; }
+
+.site-head__nav {
+  display: flex;
+  gap: var(--s-4);
+  margin-left: auto;
+  font-size: 0.875rem;
+}
+
+.site-main { padding: var(--s-7) 0 var(--s-8); }
+
+/* パン屑。階層そのものが情報なので区切りを文字で示す。 */
+.crumbs {
+  margin-bottom: var(--s-5);
+  color: var(--ink-muted);
+  font-size: 0.875rem;
+}
+.crumbs ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  padding: 0;
+  list-style: none;
+}
+.crumbs li + li::before {
+  content: "/";
+  margin-right: var(--s-2);
+  color: var(--rule-strong);
+}
+
+/* --- 4. 見出しブロック ---------------------------------------------------- */
+
+.lede {
+  max-width: 44rem;
+  margin-top: var(--s-4);
+  color: var(--ink-soft);
+  font-size: 1.0625rem;
+}
+
+/* デモの前提と到達点。枠線が「この題の条件」という区切りを担う。 */
+.framing {
+  display: grid;
+  gap: var(--s-4);
+  margin-top: var(--s-6);
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+@media (min-width: 48rem) {
+  .framing { grid-template-columns: repeat(3, 1fr); gap: var(--s-5); }
+}
+.framing dt {
+  margin-bottom: var(--s-1);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.framing dd { margin: 0; font-size: 0.9375rem; line-height: 1.7; }
+
+/* --- 5. 目録（トップページ） ---------------------------------------------- */
+
+.catalog {
+  display: grid;
+  gap: var(--s-5);
+  margin-top: var(--s-6);
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 46rem) {
+  .catalog { grid-template-columns: repeat(2, 1fr); }
+}
+
+.demo-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+.demo-card:hover { border-color: var(--accent); }
+
+.demo-card__figure {
+  margin: 0;
+  padding: var(--s-5) var(--s-5) 0;
+  background: var(--surface);
+}
+.demo-card__figure svg { display: block; width: 100%; height: auto; }
+
+.demo-card__body { padding: var(--s-4) var(--s-5) var(--s-5); }
+.demo-card__title { font-size: 1.125rem; }
+.demo-card__title a { color: inherit; text-decoration: none; }
+.demo-card__title a:hover { text-decoration: underline; }
+.demo-card__desc {
+  margin-top: var(--s-2);
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+
+/* 題材の属性。見出し付きの定義リストで検索の手掛かりを示す。 */
+.demo-card__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-1) var(--s-3);
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  font-size: 0.8125rem;
+}
+.demo-card__meta dt { color: var(--ink-muted); }
+.demo-card__meta dd { margin: 0; color: var(--ink-soft); }
+
+.status {
+  display: inline-block;
+  padding: 0.05em 0.5em;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+.status--review { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
+
+/* --- 6. レッスン一覧（順序のある並び） ------------------------------------ */
+
+.lessons {
+  margin-top: var(--s-5);
+  padding: 0;
+  list-style: none;
+  counter-reset: lesson;
+  border-top: 1px solid var(--rule);
+}
+.lessons li {
+  display: flex;
+  gap: var(--s-4);
+  align-items: baseline;
+  padding: var(--s-4) 0;
+  border-bottom: 1px solid var(--rule);
+  counter-increment: lesson;
+}
+.lessons li::before {
+  content: counter(lesson);
+  min-width: 1.5rem;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+.lessons a { font-weight: 500; }
+.lessons p { margin-top: var(--s-1); color: var(--ink-soft); font-size: 0.875rem; }
+
+/* --- 7. デモ本体のレイアウト ---------------------------------------------- */
+
+.demo {
+  display: grid;
+  gap: var(--s-5);
+  margin-top: var(--s-6);
+}
+@media (min-width: 60rem) {
+  .demo {
+    grid-template-columns: minmax(0, 1fr) 19rem;
+    align-items: start;
+  }
+}
+
+.panel {
+  padding: var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.panel + .panel { margin-top: var(--s-5); }
+.panel__title {
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.9375rem;
+}
+
+/* 図。viewBox で拡大・小画面に追従させる。 */
+.plot {
+  background: var(--plot-bg);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.plot svg { display: block; width: 100%; height: auto; }
+
+.plot__caption {
+  margin-top: var(--s-2);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+/* --- 8. 操作部品 ---------------------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-3);
+}
+.toolbar__label {
+  margin-right: var(--s-1);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+.toolbar__hint {
+  flex-basis: 100%;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+button {
+  padding: 0.35em 0.85em;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+button:hover:not(:disabled) { background: var(--surface-sunk); border-color: var(--ink-muted); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+button.is-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+button.is-primary:hover:not(:disabled) { background: var(--accent-ink); border-color: var(--accent-ink); }
+
+/* 押されている状態を色だけでなく枠と印でも示す。 */
+button[aria-pressed="true"] {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+button[aria-pressed="true"]::before { content: "✓ "; }
+
+.controls { display: grid; gap: var(--s-4); }
+
+.control {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--s-1) var(--s-3);
+  align-items: center;
+}
+.control__label {
+  grid-column: 1 / -1;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.control__note {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+input[type="range"] {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+input[type="number"] {
+  width: 5.25rem;
+  padding: 0.25em 0.4em;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+/* 現在の状態。数値で読めるようにする。 */
+.readout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-1) var(--s-3);
+  margin: 0;
+  font-size: 0.875rem;
+}
+.readout dt { color: var(--ink-muted); }
+.readout dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- 9. 凡例 -------------------------------------------------------------- */
+
+.legend {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+}
+.legend li { display: flex; align-items: center; gap: var(--s-2); }
+.legend svg { flex: none; display: block; }
+
+/* --- 10. 表（行列・クラスタ内訳） ----------------------------------------- */
+
+.tables {
+  display: grid;
+  gap: var(--s-5);
+  margin-top: var(--s-4);
+}
+@media (min-width: 40rem) {
+  .tables { grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+caption {
+  margin-bottom: var(--s-2);
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: left;
+}
+th, td {
+  padding: 0.3em 0.5em;
+  border: 1px solid var(--rule);
+  text-align: right;
+}
+thead th, tbody th {
+  background: var(--surface-sunk);
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+td {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.table-scroll { overflow-x: auto; }
+
+/* --- 11. 注記 ------------------------------------------------------------- */
+
+.note {
+  margin-top: var(--s-5);
+  padding: var(--s-4) var(--s-5);
+  background: var(--surface-sunk);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+.note > * + * { margin-top: var(--s-2); }
+.note h3 { color: var(--ink); font-size: 0.9375rem; }
+.note ul { padding-left: 1.3em; }
+
+/* --- 12. フッタ ----------------------------------------------------------- */
+
+.site-foot {
+  margin-top: var(--s-8);
+  padding: var(--s-6) 0;
+  background: var(--surface);
+  border-top: 1px solid var(--rule);
+}
+
+.site-foot__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--s-5);
+}
+
+.site-foot__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  text-decoration: none;
+}
+.site-foot__brand img {
+  display: block;
+  width: 180px;
+  height: auto;
+}
+.site-foot__brand:hover { text-decoration: underline; }
+
+.site-foot__meta {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  text-align: right;
+}
+.site-foot__meta > * + * { margin-top: var(--s-1); }
+
+@media (max-width: 36rem) {
+  .site-foot__inner { flex-direction: column; align-items: flex-start; }
+  .site-foot__meta { text-align: left; }
+}
+
+/* --- 13. 補助 ------------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--s-3);
+  top: -3rem;
+  z-index: 10;
+  padding: var(--s-2) var(--s-3);
+  background: var(--accent);
+  border-radius: var(--radius);
+  color: #fff;
+  text-decoration: none;
+  transition: top 0.12s ease;
+}
+.skip-link:focus { top: var(--s-3); color: #fff; }
+
+/* 動きを減らす設定を尊重する。 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  .site-head__nav, .toolbar, .skip-link { display: none; }
+  body { background: #fff; }
+}

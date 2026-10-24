@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2D coordinate transforms — JavaScript Learning Demos</title>
+<meta name="description" content="Five lessons on linear transforms, translation and rotation, using 3×3 matrices in homogeneous coordinates.">
+<link rel="stylesheet" href="../../css/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript Learning Demos</a></p>
+    <nav class="site-head__nav" aria-label="Language">
+      <a href="../../linear-transformation/index.html" hreflang="ja">日本語</a>
+      <span aria-current="true">English</span>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="../index.html">All demos</a></li>
+        <li>2D coordinate transforms</li>
+      </ol>
+    </nav>
+
+    <h1>2D coordinate transforms</h1>
+    <p class="lede">Moving a shape around turns out to be multiplication by a table of numbers. To write translation in that same form these lessons use 3×3 matrices in homogeneous coordinates, working up from a plain linear transform to rotation about an arbitrary point.</p>
+
+    <dl class="framing">
+      <div>
+        <dt>Assumed background</dt>
+        <dd>Coordinates and matrix multiplication. Written for upper-secondary level and above.</dd>
+      </div>
+      <div>
+        <dt>Shared convention</dt>
+        <dd>A point is a column vector <code>v = [x, y, 1]^T</code>, and matrices multiply from the left.</dd>
+      </div>
+      <div>
+        <dt>Order of composition</dt>
+        <dd>Applying <code>M = A·B</code> gives <code>A(Bv)</code>: the rightmost matrix acts first.</dd>
+      </div>
+    </dl>
+
+    <h2 style="margin-top: 3rem;">Lessons</h2>
+    <ol class="lessons">
+      <li>
+        <div>
+          <a href="pages/linear.html">Linear transforms</a>
+          <p>Scaling, shear and reflection in one matrix, and why its columns are the images of the basis vectors.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <a href="pages/translation.html">Translation</a>
+          <p>The operation a 2×2 matrix cannot express, and what the third column and third row are doing.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <a href="pages/affine.html">Linear transform and translation combined</a>
+          <p>Order changes the result. Built as <code>T·L</code>, a point sees <code>L</code> first.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <a href="pages/rotation-origin.html">Rotation about the origin</a>
+          <p>Lengths and angles stay put, and the determinant stays at 1 — visible in the numbers.</p>
+        </div>
+      </li>
+      <li>
+        <div>
+          <a href="pages/rotation-pivot.html">Rotation about an arbitrary point</a>
+          <p>The product <code>T(c)·R(θ)·T(−c)</code>, shown as three separate steps: move to the origin, rotate, move back.</p>
+        </div>
+      </li>
+    </ol>
+
+    <div class="note prose" style="max-width: none;">
+      <h3>What this material covers</h3>
+      <ul>
+        <li>Affine transforms only. The third row of the matrix is always <code>[0, 0, 1]</code>; projective transforms are not included.</li>
+        <li>In each lesson, lines, circles, rectangles and freehand strokes you draw are transformed by the same matrix.</li>
+        <li>Shapes can only be drawn with a pointer, not from the keyboard. Every parameter has both a slider and a number field.</li>
+        <li>No check of learning effect has been carried out. This material is a draft.</li>
+      </ul>
+
+      <h3>Fuller explanation</h3>
+      <p>Definitions, inverse matrices, the general form for rotation about a point, and worked examples are in the <a href="../../linear-transformation/Readme.en.md">written notes</a>.</p>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社 (Trans-IT)" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript Learning Demos</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

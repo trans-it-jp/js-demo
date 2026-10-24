@@ -1,86 +1,168 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>一次変換（線形変換） - 3x3行列で学ぶ2D座標変換</title>
-  <link rel="stylesheet" href="../css/styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="../js/common.js" defer></script>
-  <script src="../js/page-linear.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一次変換 — 2D 座標変換 — JavaScript 学習デモ</title>
+<meta name="description" content="行列の 1 列目と 2 列目は、図の何に対応しているでしょうか。">
+<link rel="stylesheet" href="../../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../../js/core/numeric.js"></script>
+<script src="../../js/linear-algebra/matrix3.js"></script>
+<script src="../../js/viz/plane.js"></script>
+<script src="../../js/ui/i18n.js"></script>
+<script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/tables.js"></script>
+<script src="../app/lesson.js" defer></script>
 </head>
-<body>
-  <main class="container">
-    <h1>一次変換（線形変換）</h1>
+<body data-lesson="linear">
+<a class="skip-link" href="#main">本文へ移動</a>
 
-    <div class="viz-wrap card">
-      <!-- 左：キャンバス -->
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <a href="../../en/linear-transformation/pages/linear.html" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../../index.html">デモ一覧</a></li>
+        <li><a href="../index.html">2D 座標変換</a></li>
+        <li>一次変換</li>
+      </ol>
+    </nav>
+
+    <h1>一次変換</h1>
+    <p class="lede">拡大縮小・せん断・反転を、1 つの行列としてまとめて見ます。基底ベクトル e₁ と e₂ がどこへ移るかが、行列の列そのものです。</p>
+
+    <dl class="framing">
       <div>
-        <div class="tools" id="draw-tools">
-          <label>描画:</label>
-          <button id="mode-none" type="button" class="active">なし</button>
-          <button id="mode-line" type="button">線（2点）</button>
-          <button id="mode-circle" type="button">円（中心→外周）</button>
-          <button id="mode-rect" type="button">四角形（対角2点）</button>
-          <button id="mode-free" type="button">自由曲線（ドラッグ）</button>
-          <button id="clear" type="button">クリア</button>
-          <span class="hint"></span>
+        <dt>中心の問い</dt>
+        <dd>行列の 1 列目と 2 列目は、図の何に対応しているでしょうか。</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>座標と、行と列のある数表（行列）の掛け算。高校以降・大学を想定しています。</dd>
+      </div>
+      <div>
+        <dt>動かす前に予想する</dt>
+        <dd>sx を −1 にすると、家の形はどう変わると思いますか。</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar" id="draw-tools">
+          <span class="toolbar__label">描画</span>
+          <button type="button" data-mode="none">なし</button>
+          <button type="button" data-mode="line">線（2点）</button>
+          <button type="button" data-mode="circle">円（中心→外周）</button>
+          <button type="button" data-mode="rect">四角形（対角2点）</button>
+          <button type="button" data-mode="free">自由曲線（ドラッグ）</button>
+          <button type="button" id="clear-shapes">消す</button>
+          <span class="toolbar__hint">図の上をクリックまたはドラッグすると図形を描けます。描いた図形も同じ行列で変換されます。</span>
         </div>
-        <div id="viz"></div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">破線が元の図形、実線が変換後です。薄い色のグリッドは変換後のマス目を表します。</p>
       </div>
 
-      <!-- 右：パネル -->
       <aside>
-        <h3>パラメータ</h3>
-        <div class="controls" id="controls">
-          <div class="control-row">
-            <label for="scaleX">scaleX</label>
-            <input id="scaleX" type="range" min="-3" max="3" step="0.1" value="1">
-            <input id="scaleX_num" type="number" min="-3" max="3" step="0.1" value="1">
+        <section class="panel">
+          <h2 class="panel__title">条件を変える</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="scale-x">x 方向の拡大 sx
+                <span class="control__note">負にすると左右が反転します</span>
+              </label>
+              <input id="scale-x" type="range" min="-3" max="3" step="0.1" value="1">
+              <input id="scale-x-num" type="number" min="-3" max="3" step="0.1" value="1">
+            </div>
+            <div class="control">
+              <label class="control__label" for="scale-y">y 方向の拡大 sy
+                <span class="control__note">負にすると上下が反転します</span>
+              </label>
+              <input id="scale-y" type="range" min="-3" max="3" step="0.1" value="1">
+              <input id="scale-y-num" type="number" min="-3" max="3" step="0.1" value="1">
+            </div>
+            <div class="control">
+              <label class="control__label" for="shear-x">せん断 shx
+                <span class="control__note">x ← x + shx·y</span>
+              </label>
+              <input id="shear-x" type="range" min="-2" max="2" step="0.1" value="0">
+              <input id="shear-x-num" type="number" min="-2" max="2" step="0.1" value="0">
+            </div>
+            <div class="control">
+              <label class="control__label" for="shear-y">せん断 shy
+                <span class="control__note">y ← y + shy·x</span>
+              </label>
+              <input id="shear-y" type="range" min="-2" max="2" step="0.1" value="0">
+              <input id="shear-y-num" type="number" min="-2" max="2" step="0.1" value="0">
+            </div>
           </div>
-          <div class="control-row">
-            <label for="scaleY">scaleY</label>
-            <input id="scaleY" type="range" min="-3" max="3" step="0.1" value="1">
-            <input id="scaleY_num" type="number" min="-3" max="3" step="0.1" value="1">
-          </div>
-          <div class="control-row">
-            <label for="shearX">shearX (x ← x + shx·y)</label>
-            <input id="shearX" type="range" min="-2" max="2" step="0.1" value="0">
-            <input id="shearX_num" type="number" min="-2" max="2" step="0.1" value="0">
-          </div>
-          <div class="control-row">
-            <label for="shearY">shearY (y ← y + shy·x)</label>
-            <input id="shearY" type="range" min="-2" max="2" step="0.1" value="0">
-            <input id="shearY_num" type="number" min="-2" max="2" step="0.1" value="0">
-          </div>
-        </div>
+        </section>
 
-        <div class="legend">
-          <div><i></i>元の図形/線/円/自由曲線/四角形</div>
-          <div><i></i>変換後（緑）</div>
-          <div><i style="background: var(--basisX)"></i>e₁</div>
-          <div><i style="background: var(--basisY)"></i>e₂</div>
-        </div>
+        <section class="panel">
+          <h2 class="panel__title">いまの状態</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">凡例</h2>
+          <ul class="legend">
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--plot-shape)" stroke-width="1.5" stroke-dasharray="5 4"/></svg><span>元の図形（破線）</span></li>
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--plot-shape-alt)" stroke-width="2"/></svg><span>変換後の図形（実線）</span></li>
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--series-2)" stroke-width="2.5"/></svg><span>基底 e₁ の像</span></li>
+          <li><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="var(--series-1)" stroke-width="2.5"/></svg><span>基底 e₂ の像</span></li>
+          </ul>
+        </section>
       </aside>
     </div>
 
-    <!-- 行列テーブルは下に横並び -->
-    <section class="card" id="tables"></section>
-    <p><a href="../index.html">← トップに戻る</a></p>
-  </main>
+    <section style="margin-top: 2rem;">
+      <h2>行列</h2>
+      <div class="tables" id="tables"></div>
+    </section>
 
-  <script>
-    // スライダーと数値入力の同期（相互再帰を避ける）
-    function bindPair(sliderId, numberId) {
-      const s = document.getElementById(sliderId);
-      const n = document.getElementById(numberId);
-      s.addEventListener('input', () => { n.value = s.value; });
-      n.addEventListener('input', () => { s.value = n.value; });
-    }
-    bindPair('scaleX', 'scaleX_num');
-    bindPair('scaleY', 'scaleY_num');
-    bindPair('shearX', 'shearX_num');
-    bindPair('shearY', 'shearY_num');
-  </script>
+    <div class="note prose" style="max-width: none;">
+      <h3>確かめてほしいこと</h3>
+      <ul>
+        <li><strong>比較</strong>：sx だけを 2 にしたときと、sy だけを 2 にしたときを見比べてください。</li>
+        <li><strong>説明</strong>：表に出ている行列の 1 列目と、図の e₁ の矢印の先を照らし合わせてください。</li>
+        <li><strong>転移</strong>：行列式が負になる設定を自分で 1 つ作り、図のどこで見分けられるか説明してください。</li>
+      </ul>
+
+      <h3>この画面の範囲</h3>
+      <ul>
+        <li>扱うのはアフィン変換までです。行列の 3 行目は常に [0, 0, 1] で、射影変換は含みません。</li>
+        <li>図形の描画はポインタ操作だけで、キーボードからは行えません。パラメータはすべて数値入力でも変えられます。</li>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+      </ul>
+    </div>
+
+    <p style="margin-top: 2rem;"><a href="../index.html">レッスン一覧へ戻る</a></p>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>

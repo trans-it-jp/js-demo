@@ -1,286 +1,169 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>k-means法デモ</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        #form {
-            display: flex;
-            margin: 10px;
-        }
-
-        #form div {
-            margin: 5px;
-        }
-
-        #form label {
-            display: inline-block;
-            width: 100px;
-        }
-
-        #form input {
-            width: 50px;
-        }
-
-        #start {
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #start:hover {
-            background-color: #0056b3;
-        }
-
-        #reset {
-            padding: 5px 10px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        #reset:hover {
-            background-color: #bd2130;
-        }
-
-        #chart {
-            border: 1px solid #ccc;
-            width: 500px;
-            height: 500px;
-            background-color: black;
-        }
-    </style>
-    <script>
-        let step = 0;
-        let data = null;
-        let clusters = null;
-
-        const colors = [
-            'red', 'lime', 'blue', 'orange', 'purple', 'cyan', 'magenta', 'green', 'pink', 'teal'
-        ];
-
-        function createData(k, n) {
-            const samples = Array.from(
-                { length: n },
-                () => (
-                    {
-                        x: Math.random() * 500,
-                        y: Math.random() * 500,
-                        color: 'white'
-                    }
-                )
-            );
-
-            const centroids = Array.from(
-                { length: k },
-                (_, i) => (
-                    {
-                        x: Math.random() * 500,
-                        y: Math.random() * 500,
-                        color: colors[i]
-                    }
-                )
-            );
-
-            return [samples, centroids];
-        }
-
-
-        function initialize() {
-            const k = parseInt(document.getElementById('k').value);
-            const n = parseInt(document.getElementById('n').value);
-            data = createData(k, n);
-            samples = data[0]
-            centroids = data[1]
-
-            d3.select('#chart').selectAll('circle').remove();
-            d3.select('#chart').selectAll('rect').remove();
-            d3.select('#chart').selectAll('line').remove();
-
-            clusters = null;
-
-            d3.select('#chart').selectAll('circle')
-                .data(samples)
-                .enter()
-                .append('circle')
-                .attr('cx', d => d.x)
-                .attr('cy', d => d.y)
-                .attr('r', 3)
-                .attr('fill', d => d.color);
-
-            d3.select('#chart').selectAll('rect').remove();
-            d3.select('#chart').selectAll('rect')
-                .data(centroids)
-                .enter()
-                .append('rect')
-                .attr('x', d => d.x - 5)
-                .attr('y', d => d.y - 5)
-                .attr('width', 10)
-                .attr('height', 10)
-                .attr('fill', d => d.color)
-                .attr('stroke', 'white');
-        }
-
-        function getClusters(samples, centroids) {
-            newClusters = [];
-            for (let i = 0; i < samples.length; i++) {
-                let clusterNumber = -1;
-                let minDistance = 1000000;
-                for (let j = 0; j < centroids.length; j++) {
-                    const distance = Math.sqrt(
-                        Math.pow(samples[i].x - centroids[j].x, 2) +
-                        Math.pow(samples[i].y - centroids[j].y, 2)
-                    );
-                    if (distance < minDistance) {
-                        clusterNumber = j;
-                        minDistance = distance;
-                    }
-                }
-                newClusters.push(clusterNumber);
-            }
-            return newClusters;
-        }
-
-        function changeClusters() {
-            samples = data[0];
-            centroids = data[1];
-
-            newClusters = getClusters(samples, centroids);
-
-            for (let i = 0; i < samples.length; i++) {
-                samples[i].color = centroids[newClusters[i]].color;
-            }
-
-            d3.select('#chart').selectAll('circle')
-                .data(samples)
-                .attr('fill', d => d.color);
-
-            lines = [];
-            for (let i = 0; i < samples.length; i++) {
-                centroid = centroids[newClusters[i]];
-                lines.push(
-                    {
-                        x1: centroid.x,
-                        y1: centroid.y,
-                        x2: samples[i].x,
-                        y2: samples[i].y,
-                        color: centroid.color
-                    }
-                );
-            }
-
-            if (clusters == null) {
-                d3.select('#chart').selectAll('line')
-                    .data(lines)
-                    .enter()
-                    .append('line')
-                    .attr('x1', d => d.x1)
-                    .attr('y1', d => d.y1)
-                    .attr('x2', d => d.x2)
-                    .attr('y2', d => d.y2)
-                    .attr('stroke', d => d.color);
-            }
-            else {
-                d3.select('#chart').selectAll('line')
-                    .data(lines)
-                    .transition()
-                    .duration(1000)
-                    .attr('x1', d => d.x1)
-                    .attr('y1', d => d.y1)
-                    .attr('x2', d => d.x2)
-                    .attr('y2', d => d.y2)
-                    .attr('stroke', d => d.color);
-            }
-
-            d3.select('#chart').selectAll('rect').remove();
-            d3.select('#chart').selectAll('rect')
-                .data(centroids)
-                .enter()
-                .append('rect')
-                .attr('x', d => d.x - 5)
-                .attr('y', d => d.y - 5)
-                .attr('width', 10)
-                .attr('height', 10)
-                .attr('fill', d => d.color)
-                .attr('stroke', 'white');            
-
-            clusters = newClusters;
-        }
-
-        function moveCentroids() {
-            samples = data[0];
-            centroids = data[1];
-
-            for (let i = 0; i < centroids.length; i++) {
-                const clusterSamples = samples.filter((d, j) => clusters[j] == i);
-                const sumX = clusterSamples.reduce((acc, d) => acc + d.x, 0);
-                const sumY = clusterSamples.reduce((acc, d) => acc + d.y, 0);
-                const newCentroidX = sumX / clusterSamples.length;
-                const newCentroidY = sumY / clusterSamples.length;
-                centroids[i].x = newCentroidX;
-                centroids[i].y = newCentroidY;
-            }
-
-            d3.select('#chart').selectAll('rect')
-                .data(centroids)
-                .transition()
-                .duration(1000)
-                .attr('x', d => d.x - 5)
-                .attr('y', d => d.y - 5);
-        }
-
-        function next() {
-            if (step == 0) {
-                initialize();
-                $('#start').text('次へ');
-            }
-            else if (step % 2 == 1) {
-                changeClusters();
-            }
-            else {
-                moveCentroids();
-            }
-
-            step = step + 1;
-        }
-
-        function reset() {
-            step = 0;
-            next();
-        }
-
-        $(document).ready(function() {
-            reset();
-        });
-    </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>k-means 法 — JavaScript 学習デモ</title>
+<meta name="description" content="クラスタ数を自分で決めると結果がどう変わるかを、割当と中心の更新を1手ずつ進めて確かめるデモ。">
+<link rel="stylesheet" href="../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../js/core/seeded-random.js"></script>
+<script src="../js/core/numeric.js"></script>
+<script src="../js/clustering/kmeans.js"></script>
+<script src="../js/viz/scatter.js"></script>
+<script src="../js/ui/i18n.js"></script>
+<script src="../js/ui/controls.js"></script>
+<script src="../js/ui/tables.js"></script>
+<script src="app.js" defer></script>
 </head>
-
 <body>
-    <h1>k-means 法デモ</h1>
-    <svg id="chart" width="1000" height="500"></svg>
-    <div id="form">
-        <div>
-            <label for="k">クラスター数:</label>
-            <input type="number" id="k" name="k" value="3" min="2" max="10">
-        </div>
-        <div>
-            <label for="n">サンプル数:</label>
-            <input type="number" id="n" name="n" value="300" min="1" max="1000">
-        </div>
-        <div>
-            <button id="reset" type="button" onclick="reset()">初期化</button>
-            <button id="start" type="button" onclick="next()">開始</button>            
-        </div>
-    </div>
-</body>
+<a class="skip-link" href="#main">本文へ移動</a>
 
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <span aria-current="true">日本語</span>
+      <a href="../en/k-means/index.html" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../index.html">デモ一覧</a></li>
+        <li>k-means 法</li>
+      </ol>
+    </nav>
+
+    <h1>k-means 法</h1>
+    <p class="lede">点の集まりをいくつかのまとまりに分ける手順を、<strong>割当</strong>と<strong>中心の更新</strong>の二段階に分けて1手ずつ進めます。いま何が起きたのかを画面で確かめながら動かしてください。</p>
+
+    <dl class="framing">
+      <div>
+        <dt>中心の問い</dt>
+        <dd>クラスタ数 k を自分で決めると、何が変わるでしょうか。</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>座標と平均が分かること。高校以降・大学・社会人を想定しています。</dd>
+      </div>
+      <div>
+        <dt>動かす前に予想する</dt>
+        <dd>塊が3つのデータに k=5 を与えると、中心は5つのうちどこへ落ち着くと思いますか。</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar">
+          <button type="button" id="step" class="is-primary">次へ進む</button>
+          <button type="button" id="run">収束まで進める</button>
+          <button type="button" id="reset">初期化</button>
+          <button type="button" id="toggle-links" aria-pressed="true">割当線を表示</button>
+        </div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">点はクラスタごとに色と形を変え、中心は番号付きの大きな記号で示しています。色を区別できない場合は形と番号で追えます。</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="cluster-table"></div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">条件を変える</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="clusters">
+                クラスタ数 k
+                <span class="control__note">手順に与える、分けたいまとまりの数</span>
+              </label>
+              <input id="clusters" type="range" min="1" max="10" step="1" value="3">
+              <input id="clusters-num" type="number" min="1" max="10" step="1" value="3">
+            </div>
+            <div class="control">
+              <label class="control__label" for="groups">
+                データの塊の数
+                <span class="control__note">k とずらすと何が起きるか比べられます</span>
+              </label>
+              <input id="groups" type="range" min="1" max="8" step="1" value="3">
+              <input id="groups-num" type="number" min="1" max="8" step="1" value="3">
+            </div>
+            <div class="control">
+              <label class="control__label" for="points">点の数</label>
+              <input id="points" type="range" min="10" max="1000" step="10" value="300">
+              <input id="points-num" type="number" min="1" max="1000" step="10" value="300">
+            </div>
+            <div class="control">
+              <label class="control__label" for="seed">
+                乱数の種
+                <span class="control__note">同じ種なら必ず同じ初期状態になります</span>
+              </label>
+              <input id="seed" type="range" min="0" max="999" step="1" value="42">
+              <input id="seed-num" type="number" min="0" max="999999" step="1" value="42">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">いまの状態</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">凡例</h2>
+          <ul class="legend" id="legend"></ul>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose measure" style="max-width: none;">
+      <h3>確かめてほしいこと</h3>
+      <ul>
+        <li><strong>比較</strong>：塊の数を3のまま、k を 2 → 3 → 5 と変えて、中心の落ち着く先を比べてください。</li>
+        <li><strong>説明</strong>：「次へ進む」を押したとき、点の色が変わる手と、中心が動く手が交互に来ます。どちらの手で何が決まったか言い直してみてください。</li>
+        <li><strong>転移</strong>：種を変えて同じ k で試すと、結果は同じになりますか。変わるとしたら、それは何が原因でしょうか。</li>
+      </ul>
+
+      <h3>この手順の限界</h3>
+      <ul>
+        <li>距離はユークリッド距離です。尺度の違う軸をそのまま混ぜると結果が歪みます。</li>
+        <li>球状に近い塊を想定しています。細長い分布や密度の違う分布には向きません。</li>
+        <li>初期値によって結果が変わります。種を変えて比べられるようにしてあります。</li>
+        <li>k は人が決めます。データから自動では決まりません。</li>
+        <li>外れ値に引かれて中心が動きます。</li>
+        <li>どの点も割り当てられないクラスタが出た場合は、その中心を最も遠い点へ移しています。この扱いは実装上の選択の一つで、唯一の正解ではありません。</li>
+      </ul>
+
+      <h3>既知の未対応</h3>
+      <ul>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+        <li>対応端末の実機確認は未了です。</li>
+      </ul>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
 </html>
