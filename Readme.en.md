@@ -61,12 +61,17 @@ The Japanese pages sit at the default locations and the English ones mirror them
 │   ├── pages/*.html                five Japanese lessons
 │   └── app/lesson.js               page logic shared by all five lessons
 │
-└── en/                             English pages, mirroring the structure above
-    ├── index.html
-    ├── k-means/index.html
-    └── linear-transformation/
-        ├── index.html
-        └── pages/*.html
+├── en/                             English pages, mirroring the structure above
+│   ├── index.html
+│   ├── k-means/index.html
+│   └── linear-transformation/
+│       ├── index.html
+│       └── pages/*.html
+│
+├── tests/                          verification, runnable in Node and in a browser
+├── tools/                          link and contrast checks
+├── guides/                         how to add a demo; the accessibility checklist
+└── templates/demo.html             the demo page template
 ```
 
 ## The libraries
@@ -84,6 +89,24 @@ What the demos are made of lives under `js/`, split by purpose. Each folder docu
 Dependencies run one way: `core` → `linear-algebra` / `clustering` → `viz` / `ui` → each demo. Demo code also uses `core` directly.
 
 There is no build step. Load the files with `<script>` in order and they register onto `window.JsDemo`. The only external dependency is D3.js v7, loaded from a CDN at a pinned version.
+
+## Before publishing
+
+There is no build step, but three checks run before anything is published. None of them needs an external package.
+
+```bash
+node tests/run.js              # the calculations; one failure means do not publish
+node tools/check-links.js      # broken links and Japanese/English pairing
+node tools/check-contrast.js   # colour contrast (4.5:1 for text, 3:1 for controls and figures)
+```
+
+The same verification opens in a browser as well ([tests/index.html](tests/index.html)).
+
+What a machine cannot measure — keyboard operation, screen readers, real devices, projection — a person confirms, following the [accessibility checklist](guides/accessibility.en.md). Filling in that checklist is not a claim of WCAG conformance.
+
+## Adding a demo
+
+There is a [guide](guides/adding-a-demo.en.md) and a [page template](templates/demo.html). The template carries the six stages of the learning flow — question, prediction, operation, comparison, explanation, transfer — as markers.
 
 ## Running it locally
 

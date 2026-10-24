@@ -61,12 +61,17 @@
 │   ├── pages/*.html                日本語のレッスン 5 枚
 │   └── app/lesson.js               5 レッスン共通の画面側
 │
-└── en/                             英語版。日本語版と同じ階層
-    ├── index.html
-    ├── k-means/index.html
-    └── linear-transformation/
-        ├── index.html
-        └── pages/*.html
+├── en/                             英語版。日本語版と同じ階層
+│   ├── index.html
+│   ├── k-means/index.html
+│   └── linear-transformation/
+│       ├── index.html
+│       └── pages/*.html
+│
+├── tests/                          計算の検証（Node とブラウザの両方で走る）
+├── tools/                          リンクとコントラスト比の点検
+├── guides/                         題材追加の手順、アクセシビリティ確認票
+└── templates/demo.html             デモページの雛形
 ```
 
 ## ライブラリ
@@ -84,6 +89,24 @@
 依存は一方向です。`core` → `linear-algebra` / `clustering` → `viz` / `ui` → 各デモ。デモ側のコードから `core` を直接使うこともあります。
 
 ビルド手順はありません。`<script>` で順に読み込むと `window.JsDemo` に登録されていきます。外部の依存は D3.js v7 だけで、CDN から版を固定して読み込みます。
+
+## 公開前の確認
+
+ビルド手順は無いが、公開前に通すものが 3 つある。外部パッケージは使わない。
+
+```bash
+node tests/run.js              # 計算の照合。1 件でも落ちたら公開しない
+node tools/check-links.js      # リンク切れと日英ページの対応
+node tools/check-contrast.js   # 色のコントラスト比（文字 4.5:1、部品・図 3:1）
+```
+
+同じ検証はブラウザでも開ける（[tests/index.html](tests/index.html)）。
+
+自動で測れないもの（キーボード操作・読み上げ・実機・投影）は[アクセシビリティ確認票](guides/accessibility.md)に沿って人が確かめる。確認票を埋めることは WCAG 適合の証明ではない。
+
+## 題材を追加する
+
+[題材を追加する手順](guides/adding-a-demo.md)と[デモページの雛形](templates/demo.html)がある。雛形には学習の 6 段階（問い・予想・操作・比較・説明・転移）が印で入っている。
 
 ## 手元で開く
 

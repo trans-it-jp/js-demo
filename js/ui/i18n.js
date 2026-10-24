@@ -33,6 +33,7 @@
       "status.clusters": "クラスタ数 k",
 
       "button.step": "次へ進む",
+      "button.stepBack": "一手戻る",
       "button.runToEnd": "収束まで進める",
       "button.reset": "初期化",
       "button.stepDone": "収束済み",
@@ -94,6 +95,7 @@
       "status.clusters": "Clusters k",
 
       "button.step": "Next step",
+      "button.stepBack": "Back one step",
       "button.runToEnd": "Run to convergence",
       "button.reset": "Reset",
       "button.stepDone": "Converged",

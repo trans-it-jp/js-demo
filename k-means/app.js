@@ -20,6 +20,7 @@
   var model = null;
   var showLinks = true;
   var lastInfo = null;
+  var stepCount = 0;   /* 初期化から何手進めたか。一手戻るときに使う。 */
 
   function readParams() {
     return {
@@ -34,8 +35,12 @@
     };
   }
 
-  /** 設定が変わったら作り直す。同じ種なら必ず同じ初期状態になる。 */
-  function rebuild() {
+  /**
+   * 設定から模型を組み直し、steps 手だけ進める。
+   * 同じ種なら必ず同じ初期状態になるので、途中の状態を保存しておかなくても
+   * 「最初から n 手進めた状態」をいつでも作り直せる。一手戻るはこれを使う。
+   */
+  function build(steps) {
     var p = readParams();
     var random = Random.create(p.seed);
     var data = KMeans.makeBlobs({
@@ -51,7 +56,21 @@
       emptyClusterPolicy: "farthest"
     });
     lastInfo = null;
+    stepCount = 0;
+    for (var i = 0; i < steps; i += 1) {
+      if (model.converged) { break; }
+      lastInfo = model.step();
+      stepCount += 1;
+    }
     render();
+  }
+
+  /** 設定が変わったときは最初の状態へ戻す。 */
+  function rebuild() { build(0); }
+
+  /** 1 手戻る。種から作り直して 1 手少なく進める。 */
+  function stepBack() {
+    if (stepCount > 0) { build(stepCount - 1); }
   }
 
   function phaseText() {
@@ -98,8 +117,10 @@
 
     var stepButton = Controls.byId("step");
     var runButton = Controls.byId("run");
+    var backButton = Controls.byId("step-back");
     stepButton.disabled = model.converged;
     runButton.disabled = model.converged;
+    backButton.disabled = stepCount === 0;
     stepButton.textContent = model.converged ? t("button.stepDone") : t("button.step");
 
     var message = phaseText();
@@ -200,11 +221,17 @@
 
     Controls.byId("step").addEventListener("click", function () {
       lastInfo = model.step();
+      stepCount += 1;
       render();
     });
 
+    Controls.byId("step-back").addEventListener("click", stepBack);
+
     Controls.byId("run").addEventListener("click", function () {
-      lastInfo = model.run(200);
+      while (!model.converged && stepCount < 400) {
+        lastInfo = model.step();
+        stepCount += 1;
+      }
       render();
     });
 

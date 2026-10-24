@@ -127,4 +127,4 @@
     round: roundMatrix,
     determinant2: determinant2
   };
-})(window);
+})(typeof window !== "undefined" ? window : globalThis);

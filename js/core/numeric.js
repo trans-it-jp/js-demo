@@ -105,4 +105,4 @@
     distanceSquared: distanceSquared,
     mean: mean
   };
-})(window);
+})(typeof window !== "undefined" ? window : globalThis);

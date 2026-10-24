@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>検証 — JavaScript 学習デモ</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../css/site.css">
+<script src="../js/core/seeded-random.js"></script>
+<script src="../js/core/numeric.js"></script>
+<script src="../js/linear-algebra/matrix3.js"></script>
+<script src="../js/clustering/kmeans.js"></script>
+<script src="cases.js"></script>
+<style>
+  .result { border-collapse: collapse; width: 100%; margin-top: var(--s-4); }
+  .result th, .result td { text-align: left; }
+  .result td.verdict { width: 4.5rem; font-family: var(--font-mono); font-weight: 600; }
+  .result tr.pass td.verdict { color: var(--accent-ink); }
+  .result tr.fail td.verdict { color: #b60205; }
+  .result td.detail { color: #b60205; font-family: var(--font-mono); font-size: 0.8125rem; }
+  .summary { margin-top: var(--s-5); padding: var(--s-4) var(--s-5); border-radius: var(--radius); }
+  .summary.ok { background: var(--accent-wash); color: var(--accent-ink); }
+  .summary.ng { background: #fdecea; color: #b60205; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript 学習デモ</a></p>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <h1>検証</h1>
+    <p class="lede">計算部分を既知値・境界値と照合します。描画も DOM も使わないので、同じ内容が <code>node tests/run.js</code> でも走ります。ここが通らないものは公開しません。</p>
+
+    <div class="note prose" style="max-width: none;">
+      <p><strong>このページで分かること</strong>：乱数の再現性、数値の整形、行列の合成と任意点回転の一般式との一致、k-means の収束・単調性・空クラスタの扱い。</p>
+      <p><strong>分からないこと</strong>：画面の見た目、操作の反映、実機での表示。これらは実際のデモページを開いて確かめます。</p>
+    </div>
+
+    <div id="summary" class="summary">実行中…</div>
+    <table class="result" id="result"></table>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var cases = JsDemo.Tests.cases;
+  var table = document.getElementById("result");
+  var summary = document.getElementById("summary");
+  var failed = 0;
+  var currentGroup = "";
+
+  function cell(tag, text, className) {
+    var el = document.createElement(tag);
+    el.textContent = text;
+    if (className) { el.className = className; }
+    return el;
+  }
+
+  cases.forEach(function (testCase) {
+    if (testCase.group !== currentGroup) {
+      currentGroup = testCase.group;
+      var head = document.createElement("tbody");
+      var headRow = document.createElement("tr");
+      var th = document.createElement("th");
+      th.colSpan = 3;
+      th.textContent = currentGroup;
+      th.style.paddingTop = "1.25rem";
+      headRow.appendChild(th);
+      head.appendChild(headRow);
+      table.appendChild(head);
+    }
+
+    var message = null;
+    try {
+      testCase.run();
+    } catch (error) {
+      message = error.message;
+      failed += 1;
+    }
+
+    var body = table.lastChild;
+    var row = document.createElement("tr");
+    row.className = message ? "fail" : "pass";
+    row.appendChild(cell("td", message ? "FAIL" : "PASS", "verdict"));
+    row.appendChild(cell("td", testCase.name));
+    row.appendChild(cell("td", message || "", "detail"));
+    body.appendChild(row);
+  });
+
+  summary.className = "summary " + (failed ? "ng" : "ok");
+  summary.textContent = (cases.length - failed) + " / " + cases.length + " 件が通った"
+    + (failed ? "（" + failed + " 件が落ちた）" : "");
+  document.title = (failed ? "失敗 " + failed + " — " : "") + "検証 — JavaScript 学習デモ";
+})();
+</script>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

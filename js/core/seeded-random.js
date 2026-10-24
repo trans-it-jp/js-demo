@@ -107,4 +107,4 @@
     create: createRandom,
     hashSeed: hashSeed
   };
-})(window);
+})(typeof window !== "undefined" ? window : globalThis);

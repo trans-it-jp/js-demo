@@ -15,9 +15,10 @@
   --surface-sunk: #f4f2ee;
   --ink:          #15181c;
   --ink-soft:     #4a4f57;
-  --ink-muted:    #767b84;
+  --ink-muted:    #666b73;
   --rule:         #e3dfd8;
-  --rule-strong:  #cdc8bf;
+  --rule-strong:  #cdc8bf;   /* 表・区切りの罫線（装飾） */
+  --control-border: #94908a; /* 入力欄とボタンの枠。白の上で 3:1 を満たす */
 
   /* 強調は 1 色に絞る */
   --accent:       #15616d;
@@ -30,8 +31,8 @@
   --series-2: #d55e00;
   --series-3: #009e73;
   --series-4: #cc79a7;
-  --series-5: #e69f00;
-  --series-6: #56b4e9;
+  --series-5: #bf8400;
+  --series-6: #4597c4;
   --series-7: #8d6e00;
   --series-8: #525252;
   --series-9: #7b3294;
@@ -384,7 +385,7 @@ img { max-width: 100%; height: auto; }
 button {
   padding: 0.35em 0.85em;
   background: var(--surface);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: inherit;
@@ -442,7 +443,7 @@ input[type="number"] {
   width: 5.25rem;
   padding: 0.25em 0.4em;
   background: var(--surface);
-  border: 1px solid var(--rule-strong);
+  border: 1px solid var(--control-border);
   border-radius: var(--radius);
   color: var(--ink);
   font-family: var(--font-mono);
@@ -533,7 +534,47 @@ td {
 .note h3 { color: var(--ink); font-size: 0.9375rem; }
 .note ul { padding-left: 1.3em; }
 
-/* --- 12. フッタ ----------------------------------------------------------- */
+/* --- 12. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
+
+/* 決まっていない項目は「未定」と出す。空欄にして決定済みに見せない。 */
+.page-meta {
+  margin-top: var(--s-6);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+}
+
+.page-meta__title {
+  margin-bottom: var(--s-4);
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+
+.page-meta__list {
+  display: grid;
+  gap: var(--s-2) var(--s-5);
+  margin: 0;
+  font-size: 0.875rem;
+}
+@media (min-width: 40rem) {
+  .page-meta__list {
+    grid-template-columns: 10rem 1fr;
+    gap: var(--s-2) var(--s-5);
+  }
+}
+
+.page-meta__list dt {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+.page-meta__list dd {
+  margin: 0 0 var(--s-2);
+  color: var(--ink-soft);
+}
+@media (min-width: 40rem) {
+  .page-meta__list dd { margin-bottom: 0; }
+}
+
+/* --- 13. フッタ ----------------------------------------------------------- */
 
 .site-foot {
   margin-top: var(--s-8);
@@ -578,7 +619,7 @@ td {
   .site-foot__meta { text-align: left; }
 }
 
-/* --- 13. 補助 ------------------------------------------------------------- */
+/* --- 14. 補助 ------------------------------------------------------------- */
 
 .visually-hidden {
   position: absolute;

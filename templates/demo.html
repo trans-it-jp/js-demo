@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<!--
+  js-demo — デモページの雛形
+
+  使い方は guides/adding-a-demo.md を読む。
+  このファイルを目的の場所へ複写し、{{ }} の箇所を置き換える。
+  <!-- 1. 問い --> のような印は、学習の流れのどこかを示すもの。
+  組み替えてもよいが、6 つの段階（問い・予想・操作・比較・説明・転移）を落とさない。
+
+  パスは linear-transformation/pages/ など 2 階層の深さを前提にしている。
+  置き場所が変わったら ../../ の数を直す。日本語版は lang="ja"、
+  英語版は lang="en" にし、en/ 以下の同じ階層へ置く。
+-->
+<html lang="{{lang: ja または en}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{題名}} — JavaScript 学習デモ</title>
+<meta name="description" content="{{中心の問いを一文で}}">
+<link rel="stylesheet" href="../../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<!-- 使うものだけ読む。版は必ず固定する。 -->
+<script src="../../js/core/seeded-random.js"></script>
+<script src="../../js/core/numeric.js"></script>
+<script src="../../js/ui/i18n.js"></script>
+<script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/tables.js"></script>
+<script src="{{このデモの app.js}}" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <span aria-current="true">日本語</span>
+      <a href="{{もう一方の言語の同じページ}}" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../../index.html">デモ一覧</a></li>
+        <li>{{題名}}</li>
+      </ol>
+    </nav>
+
+    <h1>{{題名}}</h1>
+
+    <!-- 1. 問い — 何を考えるか。到達点は一つに絞る。 -->
+    <p class="lede">{{この題で何ができるようになるか。2〜3 文。}}</p>
+
+    <dl class="framing">
+      <div>
+        <dt>中心の問い</dt>
+        <dd>{{一つだけ。答えが複数ある書き方にしない。}}</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>{{学年ではなく前提概念で書く。}}</dd>
+      </div>
+      <!-- 2. 予想 — 動かす前に一つ選ばせる。 -->
+      <div>
+        <dt>動かす前に予想する</dt>
+        <dd>{{具体的な条件を示して予想させる。}}</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar">
+          {{操作ボタン。初期化・次へ進む・一手戻るなどは同じ名前で揃える。}}
+        </div>
+
+        <!-- 3. 操作 — 図は viewBox で組む。幅は CSS が決める。 -->
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">{{図の読み方。色を区別できない場合の手掛かりも書く。}}</p>
+
+        <!-- 状態の変化を読み上げへ伝える領域 -->
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <!-- 図の代替。同じ数値を表でも出す。 -->
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="{{表の差し込み先}}"></div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">条件を変える</h2>
+          <div class="controls">
+            <!-- どの値にもスライダーと数値入力の両方を置く。
+                 id は <name> と <name>-num で揃えると Controls.bindPairs が使える。 -->
+            <div class="control">
+              <label class="control__label" for="{{name}}">
+                {{ラベル}}
+                <span class="control__note">{{補足。無ければ消す。}}</span>
+              </label>
+              <input id="{{name}}" type="range" min="" max="" step="" value="">
+              <input id="{{name}}-num" type="number" min="" max="" step="" value="">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">いまの状態</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">凡例</h2>
+          <ul class="legend" id="legend"></ul>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose" style="max-width: none;">
+      <h3>確かめてほしいこと</h3>
+      <ul>
+        <!-- 4. 比較 — 元の条件や反例と並べる。 -->
+        <li><strong>比較</strong>：{{一つの条件だけ変えて並べる手順。}}</li>
+        <!-- 5. 説明 — 理由を本人の言葉で言い直させる。 -->
+        <li><strong>説明</strong>：{{なぜそうなるか、何は変わらないか。}}</li>
+        <!-- 6. 転移 — 別の値・別の例でも説明できるか。 -->
+        <li><strong>転移</strong>：{{別の例で同じ説明が通るか確かめる問い。}}</li>
+      </ul>
+
+      <h3>この画面の範囲</h3>
+      <ul>
+        <li>{{モデルの限界。何を含まないか。}}</li>
+        <li>{{既知の未対応。}}</li>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+      </ul>
+    </div>
+
+    <!-- 版・出典・担当・訂正受付。全デモで同じ形にする。決まっていなければ「未定」。 -->
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
+      <dl class="page-meta__list">
+        <dt>版</dt><dd>{{YYYY-MM-DD}}</dd>
+        <dt>公開日</dt><dd>{{YYYY-MM-DD}}</dd>
+        <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
+        <dt>再利用条件</dt><dd>未定。再配布・商用利用の可否は確定していません</dd>
+        <dt>保守・訂正の担当</dt><dd>未定</dd>
+        <dt>既知の制約</dt><dd>このページの「この画面の範囲」に記載</dd>
+        <dt>問題報告</dt><dd><a href="https://trans-it.jp/">トランジット株式会社</a>へご連絡ください。個人情報を含む内容は送らないでください</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

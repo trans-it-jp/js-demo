@@ -270,4 +270,4 @@
     PHASE_ASSIGN: PHASE_ASSIGN,
     PHASE_UPDATE: PHASE_UPDATE
   };
-})(window);
+})(typeof window !== "undefined" ? window : globalThis);
