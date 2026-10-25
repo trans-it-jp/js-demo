@@ -54,7 +54,7 @@
       </div>
       <div>
         <dt>動かす前に予想する</dt>
-        <dd>塊が3つのデータに k=5 を与えると、中心は5つのうちどこへ落ち着くと思いますか。</dd>
+        <dd>点は一様にばらまかれていて、まとまりはありません。k=3 を与えると、分かれ目はどこにできると思いますか。</dd>
       </div>
     </dl>
 
@@ -91,14 +91,6 @@
               <input id="clusters-num" type="number" min="1" max="10" step="1" value="3">
             </div>
             <div class="control">
-              <label class="control__label" for="groups">
-                データの塊の数
-                <span class="control__note">k とずらすと何が起きるか比べられます</span>
-              </label>
-              <input id="groups" type="range" min="1" max="8" step="1" value="3">
-              <input id="groups-num" type="number" min="1" max="8" step="1" value="3">
-            </div>
-            <div class="control">
               <label class="control__label" for="points">点の数</label>
               <input id="points" type="range" min="1" max="1000" step="1" value="300">
               <input id="points-num" type="number" min="1" max="1000" step="1" value="300">
@@ -108,7 +100,7 @@
 
         <section class="panel">
           <h2 class="panel__title">授業で共有する</h2>
-          <p class="share__help">このリンクを開くと、いまの条件（クラスタ数・点の数・塊の数）で始まります。データの配置は開くたびに変わります。個人情報は含まれません。</p>
+          <p class="share__help">このリンクを開くと、いまの条件（クラスタ数・点の数）で始まります。データの配置は開くたびに変わります。個人情報は含まれません。</p>
           <div class="share">
             <label class="visually-hidden" for="share-url">共有用のリンク</label>
             <input type="text" id="share-url" class="share__url" readonly>
@@ -131,15 +123,16 @@
     <div class="note prose measure" style="max-width: none;">
       <h3>確かめてほしいこと</h3>
       <ul>
-        <li><strong>比較</strong>：塊の数を3のまま、k を 2 → 3 → 5 と変えて、中心の落ち着く先を比べてください。</li>
+        <li><strong>比較</strong>：k を 2 → 3 → 5 と変えて、分かれ方を比べてください。どの k でも「それらしい」境界ができます。</li>
         <li><strong>説明</strong>：「次へ進む」を押したとき、点の色が変わる手と、中心が動く手が交互に来ます。どちらの手で何が決まったか言い直してみてください。</li>
         <li><strong>転移</strong>：「初期化」で別の配置にして同じ k で試すと、結果は同じ形になりますか。変わるとしたら、それは何が原因でしょうか。</li>
       </ul>
 
       <h3>この手順の限界</h3>
       <ul>
+        <li><strong>データにまとまりが無くても、必ず k 個に分けます。</strong>このデモの点は一様にばらまいてあり、本来の「正しい分かれ方」はありません。境界ができたことを、まとまりが見つかった証拠にしないでください。</li>
         <li>距離はユークリッド距離です。尺度の違う軸をそのまま混ぜると結果が歪みます。</li>
-        <li>球状に近い塊を想定しています。細長い分布や密度の違う分布には向きません。</li>
+        <li>まとまりがある場合も、球状に近い塊を想定しています。細長い分布や密度の違う分布には向きません。</li>
         <li>初期値によって結果が変わります。「初期化」で別の配置にして比べられます。</li>
         <li>k は人が決めます。データから自動では決まりません。</li>
         <li>外れ値に引かれて中心が動きます。</li>

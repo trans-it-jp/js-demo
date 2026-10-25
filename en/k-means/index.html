@@ -54,7 +54,7 @@
       </div>
       <div>
         <dt>Predict before you run it</dt>
-        <dd>Data holds three blobs and you set k to 5. Where do you expect the five centroids to settle?</dd>
+        <dd>The points are scattered uniformly, with no groups in them. With k set to 3, where do you expect the dividing lines to fall?</dd>
       </div>
     </dl>
 
@@ -91,14 +91,6 @@
               <input id="clusters-num" type="number" min="1" max="10" step="1" value="3">
             </div>
             <div class="control">
-              <label class="control__label" for="groups">
-                Blobs in the data
-                <span class="control__note">Set it away from k to compare what happens</span>
-              </label>
-              <input id="groups" type="range" min="1" max="8" step="1" value="3">
-              <input id="groups-num" type="number" min="1" max="8" step="1" value="3">
-            </div>
-            <div class="control">
               <label class="control__label" for="points">Number of points</label>
               <input id="points" type="range" min="1" max="1000" step="1" value="300">
               <input id="points-num" type="number" min="1" max="1000" step="1" value="300">
@@ -108,7 +100,7 @@
 
         <section class="panel">
           <h2 class="panel__title">Share with a class</h2>
-          <p class="share__help">Opening this link starts with the same settings: the number of clusters, points and blobs. The data is laid out afresh each time. It contains no personal data.</p>
+          <p class="share__help">Opening this link starts with the same settings: the number of clusters and points. The data is laid out afresh each time. It contains no personal data.</p>
           <div class="share">
             <label class="visually-hidden" for="share-url">Link to share</label>
             <input type="text" id="share-url" class="share__url" readonly>
@@ -131,15 +123,16 @@
     <div class="note prose" style="max-width: none;">
       <h3>Things to check</h3>
       <ul>
-        <li><strong>Compare</strong>: keep three blobs in the data and try k as 2, then 3, then 5. Compare where the centroids settle.</li>
+        <li><strong>Compare</strong>: try k as 2, then 3, then 5, and compare how the field gets divided. Every k produces boundaries that look plausible.</li>
         <li><strong>Explain</strong>: pressing "Next step" alternates between a step that recolours points and a step that moves centroids. Say in your own words what each of the two decided.</li>
         <li><strong>Transfer</strong>: press "Reset" for a different layout and run the same k again. Does it settle the same way? If it differs, what caused that?</li>
       </ul>
 
       <h3>Limits of this procedure</h3>
       <ul>
+        <li><strong>It splits the data into k parts whether or not any grouping is there.</strong> The points in this demo are scattered uniformly, so there is no "correct" division to find. Boundaries appearing is not evidence that groups were found.</li>
         <li>Distance is Euclidean. Mixing axes with different units distorts the result.</li>
-        <li>Roughly round blobs are assumed. Elongated or unevenly dense distributions do not suit it.</li>
+        <li>Where grouping does exist, roughly round blobs are assumed. Elongated or unevenly dense distributions do not suit it.</li>
         <li>The result depends on the initial centroids. "Reset" gives a different layout to compare against.</li>
         <li>k is chosen by a person; it does not follow from the data.</li>
         <li>Outliers pull centroids towards them.</li>

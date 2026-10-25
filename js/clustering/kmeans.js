@@ -234,7 +234,42 @@
   }
 
   /**
-   * デモ用の合成データ。いくつかの塊の周りに点を置く。
+   * 一様にばらまいた点。範囲のどこも同じ確からしさで選ぶ。
+   *
+   * まとまりの無いデータに k-means をかけると、それでも必ず k 個に分かれる。
+   * 「手順が分けた」のか「もともと分かれていた」のかを区別させたいので、
+   * デモの既定はこちらにしてある。最初から塊が見えていると、
+   * 手順が塊を見つけたように錯覚しやすい。
+   *
+   * @param {Object} options
+   * @param {Object} options.random  JsDemo.Random.create() が返す生成器
+   * @param {number} options.count   点の数
+   * @param {number} [options.width]
+   * @param {number} [options.height]
+   * @param {number} [options.margin]  縁に張り付かせないための余白（割合）
+   */
+  function makeUniform(options) {
+    var random = options.random;
+    var count = Math.max(1, Math.round(options.count));
+    var width = options.width === undefined ? 1 : options.width;
+    var height = options.height === undefined ? 1 : options.height;
+    var margin = options.margin === undefined ? 0.02 : options.margin;
+
+    var points = [];
+    for (var i = 0; i < count; i += 1) {
+      points.push([
+        random.range(margin, 1 - margin) * width,
+        random.range(margin, 1 - margin) * height
+      ]);
+    }
+    return { points: points, centers: [] };
+  }
+
+  /**
+   * いくつかの塊の周りに点を置く合成データ。
+   *
+   * 現在のデモでは使っていない（既定は makeUniform）。
+   * 「まとまりのあるデータ」と「無いデータ」を見比べる題材を作るときのために残す。
    * 塊の数と k をずらせるので、k を人が決めることの影響を見せられる。
    *
    * 見た目が作り物にならないよう、塊ごとに次を変える。
@@ -363,6 +398,7 @@
 
   JsDemo.KMeans = {
     create: create,
+    makeUniform: makeUniform,
     makeBlobs: makeBlobs,
     PHASE_ASSIGN: PHASE_ASSIGN,
     PHASE_UPDATE: PHASE_UPDATE

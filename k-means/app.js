@@ -15,15 +15,14 @@
   var ShareLink = JsDemo.ShareLink;
   var t = JsDemo.I18n.t;
 
-  var PARAMS = ["clusters", "points", "groups"];
+  var PARAMS = ["clusters", "points"];
 
   /* URL へ載せる初期条件。数値だけに限り、自由入力は受け取らない。
      範囲は入力欄から読む。ここに書き写すと画面と食い違ったときに
      共有した値が黙って変わるため、出どころを 1 つにしておく。 */
   var SHARE_FIELDS = [
     { param: "k", control: "clusters", integer: true },
-    { param: "n", control: "points", integer: true },
-    { param: "groups", control: "groups", integer: true }
+    { param: "n", control: "points", integer: true }
   ];
 
   /* 配置は毎回変える。種は画面にも URL にも出さない。
@@ -56,8 +55,6 @@
                             { min: 1, max: 10, integer: true }),
       count: Numeric.readNumber(Controls.byId("points").value,
                                 { min: 1, max: 1000, integer: true }),
-      groups: Numeric.readNumber(Controls.byId("groups").value,
-                                 { min: 1, max: 8, integer: true }),
       seed: seed
     };
   }
@@ -72,12 +69,9 @@
     animate = opts.animate === true;
     var p = readParams();
     var random = Random.create(p.seed);
-    var data = KMeans.makeBlobs({
-      random: random,
-      count: p.count,
-      groups: p.groups,
-      spread: 0.07
-    });
+    /* 一様にばらまく。まとまりの無いデータでも手順は必ず k 個に分けるので、
+       「手順が分けた」のか「もともと分かれていた」のかを考えさせられる。 */
+    var data = KMeans.makeUniform({ random: random, count: p.count });
     model = KMeans.create({
       points: data.points,
       k: p.k,
@@ -107,7 +101,7 @@
   /** 入力欄の値を URL の名前（短い形）へ置き換える */
   function shareValues() {
     var p = readParams();
-    return { k: p.k, n: p.count, groups: p.groups };
+    return { k: p.k, n: p.count };
   }
 
   /** アドレス欄と共有欄を、いまの初期条件に合わせる */
@@ -276,7 +270,6 @@
     var shared = ShareLink.read(SHARE_SPEC);
     if (pairs.clusters) { pairs.clusters.set(shared.k); }
     if (pairs.points) { pairs.points.set(shared.n); }
-    if (pairs.groups) { pairs.groups.set(shared.groups); }
 
     ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 

@@ -350,6 +350,48 @@
           points.length, "内訳の合計が点の数と合わない");
   });
 
+  test("kmeans", "makeUniform は点をちょうどの数だけ範囲内に置く", function () {
+    [1, 50, 300, 1000].forEach(function (count) {
+      var data = KMeans.makeUniform({ random: Random.create(count), count: count });
+      equal(data.points.length, count, "count=" + count + " の点の数");
+      equal(data.centers.length, 0, "塊は無い");
+      data.points.forEach(function (p) {
+        isTrue(p[0] >= 0 && p[0] <= 1 && p[1] >= 0 && p[1] <= 1, "範囲外: " + p);
+      });
+    });
+  });
+
+  test("kmeans", "makeUniform に偏りが無い", function () {
+    /* 一様なら、四分割した各領域にだいたい同じ数が入る。
+       塊を作っていないこと（＝最初から分かれて見えないこと）の確認。 */
+    var data = KMeans.makeUniform({ random: Random.create(99), count: 4000 });
+    var quads = [0, 0, 0, 0];
+    data.points.forEach(function (p) {
+      quads[(p[0] > 0.5 ? 1 : 0) + (p[1] > 0.5 ? 2 : 0)] += 1;
+    });
+    var expected = 1000;
+    quads.forEach(function (n, i) {
+      isTrue(Math.abs(n - expected) < 150,
+             "四分割 " + i + " の点が偏っている: " + n + "（目安 " + expected + "±150）");
+    });
+  });
+
+  test("kmeans", "一様な点でも必ず k 個に分かれる", function () {
+    /* まとまりが無くても手順は k 個に分ける。デモで伝えたい点なので、
+       実際にそうなることを確かめておく。 */
+    [2, 3, 5].forEach(function (k) {
+      var data = KMeans.makeUniform({ random: Random.create(k * 7), count: 400 });
+      var m = KMeans.create({ points: data.points, k: k, random: Random.create(k * 7) });
+      m.run(300);
+      isTrue(m.converged, "k=" + k + " で収束しなかった");
+      var sizes = m.clusterSizes();
+      equal(sizes.length, k, "k=" + k + " のクラスタ数");
+      sizes.forEach(function (n, i) {
+        isTrue(n > 0, "k=" + k + " のクラスタ " + (i + 1) + " が空");
+      });
+    });
+  });
+
   test("kmeans", "makeBlobs は範囲内の点を作る", function () {
     var data = KMeans.makeBlobs({
       random: Random.create(11), count: 300, groups: 3
