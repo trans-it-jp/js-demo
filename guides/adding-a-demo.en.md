@@ -26,6 +26,10 @@ en/<demo-name>/
 
 Copy [`templates/demo.html`](../templates/demo.html) and replace the `{{ }}` parts. The template carries the six stages of the learning flow — question, prediction, operation, comparison, explanation, transfer — as markers. Do not drop a stage.
 
+The template is **the copy-source for future demos**. The existing k-means and 2D coordinate transform pages were written before it, and the template records their structure; there is no need to rebuild them from it.
+
+Choosing a prediction, progressively revealed hints and switching vocabulary are not in it yet — the template only prompts for them in prose. They are to be built separately.
+
 If the depth changes, fix the number of `../..` segments. The English copy takes `lang="en"`, goes under `en/`, and the two link to each other.
 
 ### b. The calculation
