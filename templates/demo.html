@@ -6,11 +6,6 @@
   この雛形より先に作られており、雛形はその構造を写したもの。
   既存2デモを組み直す必要は無い（Issue #16）。
 
-  入っていないもの（Issue #49 で実装予定）:
-    - 操作前に予想を一つ選ぶ／書く仕組み（いまは文章で促すだけ）
-    - 段階的に開くヒント、発展解説・教師向け情報の折りたたみ
-    - 小学生向けの語彙と大学の式の切り替え
-
   使い方は guides/adding-a-demo.md を読む。
   このファイルを目的の場所へ複写し、{{ }} の箇所を置き換える。
   <!-- 1. 問い --> のような印は、学習の流れのどこかを示すもの。
@@ -35,6 +30,7 @@
 <script src="../../js/core/numeric.js"></script>
 <script src="../../js/ui/i18n.js"></script>
 <script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/learning.js"></script>
 <script src="../../js/ui/tables.js"></script>
 <script src="{{このデモの app.js}}" defer></script>
 </head>
@@ -75,7 +71,7 @@
         <dt>前提</dt>
         <dd>{{学年ではなく前提概念で書く。}}</dd>
       </div>
-      <!-- 2. 予想 — 動かす前に一つ選ばせる。 -->
+      <!-- 2. 予想 — 動かす前に一つ選ばせる。選ばなくても操作はできる。 -->
       <div>
         <dt>動かす前に予想する</dt>
         <dd>{{具体的な条件を示して予想させる。}}</dd>
@@ -102,6 +98,22 @@
       </div>
 
       <aside>
+        <!-- 予想。強制しない。選ばなくても操作できる。
+             data-answer を付けると正誤を返す。正解が一つに決まらない問いでは外す。 -->
+        <section class="panel">
+          <h2 class="panel__title">動かす前に予想する</h2>
+          <fieldset class="predict" id="predict">
+            <legend class="predict__question">{{問い。一つだけ。}}</legend>
+            <div class="predict__choices">
+              <label><input type="radio" name="predict" value="a">{{選択肢1}}</label>
+              <label><input type="radio" name="predict" value="b">{{選択肢2}}</label>
+              <label><input type="radio" name="predict" value="c">{{選択肢3}}</label>
+            </div>
+            <p class="predict__note">選ばなくても操作できます。選ぶと、あとで結果と見比べられます。</p>
+          </fieldset>
+          <p class="predict__result" id="predict-result" role="status" aria-live="polite"></p>
+        </section>
+
         <section class="panel">
           <h2 class="panel__title">条件を変える</h2>
           <div class="controls">
@@ -140,6 +152,40 @@
         <!-- 6. 転移 — 別の値・別の例でも説明できるか。 -->
         <li><strong>転移</strong>：{{別の例で同じ説明が通るか確かめる問い。}}</li>
       </ul>
+
+      <!-- 段階的に開くヒント。答えを先に見せない。
+           JavaScript が動かない場合に全部読めるよう、hidden は付けたままにしない運用も可。 -->
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>{{1段目のヒント。考える向きだけ示す。}}</p>
+        <p class="hints__step" hidden>{{2段目。もう少し踏み込む。}}</p>
+        <p class="hints__step" hidden>{{3段目。ここで答えに届く。}}</p>
+        <button type="button" class="hints__more">次のヒント</button>
+      </div>
+
+      <!-- 発展解説。主画面に詰め込まず、開きたい人だけ開く。 -->
+      <details class="fold">
+        <summary>もっと詳しく</summary>
+        <div class="fold__body">
+          <!-- 語彙の切り替え。やさしい言い方と式を常時並べない。
+               段階の数は決め打ちしない。data-level を増やせば増やせる。 -->
+          <div class="wording" id="wording">
+            <span class="wording__label">言い方</span>
+            <button type="button" data-level="plain">やさしく</button>
+            <button type="button" data-level="formal">式で</button>
+          </div>
+          <p data-level="plain">{{やさしい言い方。}}</p>
+          <p data-level="formal">{{式を使った言い方。}}</p>
+        </div>
+      </details>
+
+      <!-- 教師向け。予想される誤解と短い課題案。 -->
+      <details class="fold">
+        <summary>教える方へ</summary>
+        <div class="fold__body">
+          <p>{{この題で起きやすい誤解。}}</p>
+          <p>{{5〜10分の短い課題案。}}</p>
+        </div>
+      </details>
 
       <h3>この画面の範囲</h3>
       <ul>

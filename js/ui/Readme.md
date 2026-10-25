@@ -8,6 +8,7 @@
 | --- | --- |
 | `i18n.js` | JavaScript が組み立てる文言の日英辞書（`JsDemo.I18n`） |
 | `controls.js` | スライダーと数値入力の同期、モードボタン、状態表示（`JsDemo.Controls`） |
+| `learning.js` | 予想・段階的なヒント・語彙の切り替え（`JsDemo.Learning`） |
 | `share-link.js` | 初期条件を URL へ載せて共有する（`JsDemo.ShareLink`） |
 | `tables.js` | 行列や内訳を数値の表にする（`JsDemo.Tables`） |
 
@@ -125,6 +126,32 @@ JsDemo.ShareLink.build(values, SPEC);     // "?seed=7"（既定値と同じも�
 ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 ShareLink.refreshField("share-url", values, spec);
 ```
+
+## JsDemo.Learning
+
+学習の流れを支える仕掛け。予想・段階的なヒント・語彙の切り替え。
+
+```js
+const prediction = JsDemo.Learning.wirePrediction({
+  field: "predict", result: "predict-result"
+});
+prediction.chosen;              // 選ばれた予想（選んでいなければ null）
+prediction.reveal("実際の結果"); // 選んだ人にだけ答え合わせを出す
+prediction.reset();             // 別のデータにしたときに消す
+
+const hints = JsDemo.Learning.wireHints("hints");   // 1 段ずつ開く
+hints.reset();
+
+JsDemo.Learning.wireWording({ controls: "wording" }); // 語彙を出し分ける
+```
+
+**予想は強制しない。** 選ばなくても操作できる（代表者の判断、2026-10-25）。触った回数を理解度にしない方針と、最初の一手で詰まらせないため。そのかわり、選んだ人には結果との答え合わせを返す。合っていても外れても同じ見た目にし、外したことを責める配色にしない。
+
+**折りたたみは `<details>` を使う。** JavaScript が動かなくても開ける。
+
+**語彙の段階数は決め打ちしない。** `data-level` の値を増やせば増やせる。実際にいくつ要るかは【T02】学習設計の結果で決める。
+
+**誰が何を選んだかは記録も送信もしない。** 状態は画面の中だけに持つ。
 
 ## JsDemo.Tables
 

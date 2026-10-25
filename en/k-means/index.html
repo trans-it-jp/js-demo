@@ -13,6 +13,7 @@
 <script src="../../js/viz/scatter.js"></script>
 <script src="../../js/ui/i18n.js"></script>
 <script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/learning.js"></script>
 <script src="../../js/ui/share-link.js"></script>
 <script src="../../js/ui/tables.js"></script>
 <script src="../../k-means/app.js" defer></script>
@@ -80,6 +81,20 @@
 
       <aside>
         <section class="panel">
+          <h2 class="panel__title">Predict before you run it</h2>
+          <fieldset class="predict" id="predict">
+            <legend class="predict__question">The points are scattered uniformly, with no groups in them. With k set to 3, where do you expect the dividing lines to fall?</legend>
+            <div class="predict__choices">
+              <label><input type="radio" name="predict" value="a">Roughly three vertical bands</label>
+              <label><input type="radio" name="predict" value="b">Roughly three horizontal bands</label>
+              <label><input type="radio" name="predict" value="c">Differently every time</label>
+            </div>
+            <p class="predict__note">You can operate the demo without choosing. Choosing lets you compare against the result afterwards.</p>
+          </fieldset>
+          <p class="predict__result" id="predict-result" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
           <h2 class="panel__title">Change the conditions</h2>
           <div class="controls">
             <div class="control">
@@ -127,6 +142,34 @@
         <li><strong>Explain</strong>: pressing "Next step" alternates between a step that recolours points and a step that moves centroids. Say in your own words what each of the two decided.</li>
         <li><strong>Transfer</strong>: press "Reset" for a different layout and run the same k again. Does it settle the same way? If it differs, what caused that?</li>
       </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>Look at where the initial centroids were placed.</p>
+        <p class="hints__step" hidden>The points are equally dense everywhere, so a boundary falls where two centroids are equally far away.</p>
+        <p class="hints__step" hidden>The boundaries follow only from the centroid positions. Different starting centroids give a different division.</p>
+        <button type="button" class="hints__more">Next hint</button>
+      </div>
+
+      <details class="fold">
+        <summary>In more detail</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">Wording</span>
+            <button type="button" data-level="plain">Plainly</button>
+            <button type="button" data-level="formal">Formally</button>
+          </div>
+          <p data-level="plain">Each point joins whichever centre is nearest. Once the groups are settled, each centre moves to the middle of its own group. Then it all repeats.</p>
+          <p data-level="formal">Assign each point x to its nearest centroid c, then move each centroid to the mean of its cluster. The sum of squared distances Σ‖x − c‖² decreases on every iteration and the procedure stops once no assignment changes.</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>For teachers</summary>
+        <div class="fold__body">
+          <p>A common misreading: treating the boundaries as evidence that groups were found in the data. The points here are uniform, so there is no correct division to find.</p>
+          <p>A short task (5–10 minutes): compare k at 2, 3 and 5, then discuss whether one of them can be called correct. Realising that none can is the point.</p>
+        </div>
+      </details>
 
       <h3>Limits of this procedure</h3>
       <ul>

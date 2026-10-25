@@ -8,6 +8,7 @@ Input wiring, numeric tables, and the Japanese and English wording. Anything spe
 | --- | --- |
 | `i18n.js` | Japanese and English strings that JavaScript assembles (`JsDemo.I18n`) |
 | `controls.js` | Slider/number-field pairing, mode buttons, status output (`JsDemo.Controls`) |
+| `learning.js` | Predictions, progressive hints, switchable wording (`JsDemo.Learning`) |
 | `share-link.js` | Putting initial conditions in the URL so they can be shared (`JsDemo.ShareLink`) |
 | `tables.js` | Matrices and breakdowns rendered as tables of numbers (`JsDemo.Tables`) |
 
@@ -125,6 +126,32 @@ Wire the share field with `wireField` and `refreshField`, so both demos behave t
 ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 ShareLink.refreshField("share-url", values, spec);
 ```
+
+## JsDemo.Learning
+
+The mechanisms behind the learning flow: predictions, progressively revealed hints, and switchable wording.
+
+```js
+const prediction = JsDemo.Learning.wirePrediction({
+  field: "predict", result: "predict-result"
+});
+prediction.chosen;                  // the chosen prediction, or null
+prediction.reveal("what happened"); // shown only to someone who predicted
+prediction.reset();                 // cleared when the data changes
+
+const hints = JsDemo.Learning.wireHints("hints");   // one step at a time
+hints.reset();
+
+JsDemo.Learning.wireWording({ controls: "wording" }); // switch the wording
+```
+
+**Predicting is never required.** The demo works without it (decided 2026-10-25). Counting interactions is not a measure of understanding, and nobody should be stopped at the first move. Anyone who does predict gets the comparison afterwards — styled the same whether they were right or wrong, with no colour that scolds a miss.
+
+**Folding uses `<details>`,** so it opens even without JavaScript.
+
+**The number of wording levels is not fixed.** Add more `data-level` values to add more. How many are actually needed follows from the T02 learning design.
+
+**Nothing about who chose what is stored or sent.** The state lives only in the page.
 
 ## JsDemo.Tables
 

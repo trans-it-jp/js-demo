@@ -466,7 +466,99 @@ input[type="number"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* --- 9. 共有用のリンク ---------------------------------------------------- */
+/* --- 9. 学習の仕掛け（予想・ヒント・語彙） -------------------------------- */
+
+/* 予想。選ばなくても操作できるので、行き止まりに見せない。 */
+.predict {
+  margin: 0;
+  padding: var(--s-4) var(--s-5);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.predict__question {
+  padding: 0;
+  margin-bottom: var(--s-3);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.predict__choices { display: grid; gap: var(--s-2); }
+
+.predict__choices label {
+  display: flex;
+  gap: var(--s-2);
+  align-items: baseline;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+.predict__choices input { margin: 0; accent-color: var(--accent); }
+
+.predict__note {
+  margin-top: var(--s-3);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+/* 答え合わせ。合っていても外れても同じ見た目にする。
+   外したことを責める配色にしない。 */
+.predict__result {
+  margin-top: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: var(--accent-wash);
+  border-radius: var(--radius);
+  color: var(--accent-ink);
+  font-size: 0.875rem;
+}
+.predict__result:empty { display: none; }
+
+/* ヒント。答えを先に見せない。 */
+.hints { margin-top: var(--s-4); }
+.hints__step {
+  margin-bottom: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface-sunk);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+.hints__step:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* 発展・教師向けの折りたたみ。<details> なので JavaScript なしでも開く。 */
+.fold {
+  margin-top: var(--s-4);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.fold > summary {
+  padding: var(--s-3) var(--s-4);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.fold > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fold[open] > summary { border-bottom: 1px solid var(--rule); }
+.fold__body {
+  padding: var(--s-4);
+  font-size: 0.875rem;
+}
+.fold__body > * + * { margin-top: var(--s-3); }
+
+/* 語彙の切り替え。やさしい言い方と式を常時並べない。 */
+.wording {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  align-items: center;
+  margin-bottom: var(--s-3);
+}
+.wording__label {
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
+/* --- 10. 共有用のリンク --------------------------------------------------- */
 
 .share__help {
   margin-bottom: var(--s-3);
@@ -500,7 +592,7 @@ input[type="number"] {
 }
 .share__status:empty { margin-top: 0; }
 
-/* --- 10. 凡例 ------------------------------------------------------------- */
+/* --- 11. 凡例 ------------------------------------------------------------- */
 
 .legend {
   display: grid;
@@ -513,7 +605,7 @@ input[type="number"] {
 .legend li { display: flex; align-items: center; gap: var(--s-2); }
 .legend svg { flex: none; display: block; }
 
-/* --- 11. 表（行列・クラスタ内訳） ----------------------------------------- */
+/* --- 12. 表（行列・クラスタ内訳） ----------------------------------------- */
 
 .tables {
   display: grid;
@@ -554,7 +646,7 @@ td {
 }
 .table-scroll { overflow-x: auto; }
 
-/* --- 12. 注記 ------------------------------------------------------------- */
+/* --- 13. 注記 ------------------------------------------------------------- */
 
 .note {
   margin-top: var(--s-5);
@@ -568,7 +660,7 @@ td {
 .note h3 { color: var(--ink); font-size: 0.9375rem; }
 .note ul { padding-left: 1.3em; }
 
-/* --- 13. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
+/* --- 14. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
 
 /* 決まっていない項目は「未定」と出す。空欄にして決定済みに見せない。 */
 .page-meta {
@@ -608,7 +700,7 @@ td {
   .page-meta__list dd { margin-bottom: 0; }
 }
 
-/* --- 14. フッタ ----------------------------------------------------------- */
+/* --- 15. フッタ ----------------------------------------------------------- */
 
 .site-foot {
   margin-top: var(--s-8);
@@ -653,7 +745,7 @@ td {
   .site-foot__meta { text-align: left; }
 }
 
-/* --- 15. 補助 ------------------------------------------------------------- */
+/* --- 16. 補助 ------------------------------------------------------------- */
 
 .visually-hidden {
   position: absolute;
