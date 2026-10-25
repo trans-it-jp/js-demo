@@ -99,6 +99,7 @@ node tests/run.js              # 計算の照合。1 件でも落ちたら公開
 node tools/check-links.js      # リンク切れと日英ページの対応
 node tools/check-contrast.js   # 色のコントラスト比（文字 4.5:1、部品・図 3:1）
 node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
+node tools/check-transitions.js # 色をアニメーションさせていないか
 ```
 
 同じ検証はブラウザでも開ける（[tests/index.html](tests/index.html)）。

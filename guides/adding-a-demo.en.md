@@ -85,6 +85,7 @@ node tests/run.js              # the calculations; one failure means do not publ
 node tools/check-links.js      # broken links and Japanese/English pairing
 node tools/check-contrast.js   # colour contrast ratios
 node tools/check-controls.js   # slider and number field ranges agree
+node tools/check-transitions.js # no colour is animated
 python -m http.server 8000     # check display and interaction in a real browser
 ```
 

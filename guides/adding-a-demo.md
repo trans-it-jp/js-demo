@@ -85,6 +85,7 @@ node tests/run.js              # 計算の照合。1 件でも落ちたら公開
 node tools/check-links.js      # リンク切れと日英の対応
 node tools/check-contrast.js   # 色のコントラスト比
 node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
+node tools/check-transitions.js # 色をアニメーションさせていないか
 python -m http.server 8000     # 実ブラウザで表示・操作を確認
 ```
 

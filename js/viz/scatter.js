@@ -123,12 +123,19 @@
           function (update) { return update; },
           function (exit) { return exit.remove(); }
         );
+      /* 色は遷移させない。
+         系列色は CSS 変数（var(--series-1)）で、d3 はこれを色として
+         補間できず var(--series-1.5) のような未定義の値を作る。
+         未定義になった線は描かれないので、動いて見えず
+         「消えて引き直された」ように見えてしまう。
+         色は即時に変え、動かすのは座標だけにする。 */
+      linkSelection.attr("stroke", function (d) { return colorOf(d.cluster); });
+
       maybeAnimate(linkSelection, duration)
         .attr("x1", function (d) { return x(d.p[0]); })
         .attr("y1", function (d) { return y(d.p[1]); })
         .attr("x2", function (d) { return x(d.c[0]); })
-        .attr("y2", function (d) { return y(d.c[1]); })
-        .attr("stroke", function (d) { return colorOf(d.cluster); });
+        .attr("y2", function (d) { return y(d.c[1]); });
 
       gPoints.selectAll("path")
         .data(points.map(function (p, i) { return { p: p, cluster: assignments[i] }; }))

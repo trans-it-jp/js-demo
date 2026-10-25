@@ -26,6 +26,7 @@ CDN versions are pinned exactly. A major-version specifier such as `d3@7` lets t
 - Figures use `viewBox`, and CSS decides the width, so they survive small screens and zoom.
 - The internal coordinate space is a 640-unit square. x and y share one scale, keeping cells square.
 - Colours come from CSS custom properties (`--series-1` and so on). Change the palette in `css/site.css`.
+- **Never animate a colour.** D3 cannot interpolate `var(--series-1)` as a colour and produces undefined values such as `var(--series-1.5)`. A shape with an undefined colour is not drawn, so instead of moving it appears to vanish and be redrawn. Set colours instantly and animate only geometry. `tools/check-transitions.js` enforces this.
 - No information is carried by colour alone. Shape, dashes, numbers and figures carry it too.
 
 ## JsDemo.Plane
