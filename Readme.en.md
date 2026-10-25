@@ -153,7 +153,7 @@ A suggested credit line:
 https://trans-it-jp.github.io/js-demo/
 ```
 
-D3.js is loaded from a CDN and not redistributed here (ISC License).
+[NOTICE](NOTICE) sets out what each licence covers, who holds the copyright, and the third-party components. D3.js is loaded from a CDN and not redistributed here (ISC License).
 
 No claim is made about curriculum alignment, learning outcomes or exam results.
 

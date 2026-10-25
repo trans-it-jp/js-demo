@@ -153,7 +153,7 @@ python -m http.server 8000
 https://trans-it-jp.github.io/js-demo/
 ```
 
-D3.js は CDN から読み込んでおり、このリポジトリでは再配布していません（ISC License）。
+対象の内訳・著作権者・第三者の部品は [NOTICE](NOTICE) にまとめています。D3.js は CDN から読み込んでおり、このリポジトリでは再配布していません（ISC License）。
 
 学習指導要領への準拠や、学習効果・成績向上は保証していません。
 

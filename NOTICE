@@ -1,0 +1,53 @@
+このリポジトリの公開条件
+Licensing of this repository
+
+---
+
+ソースコード / Source code
+  MIT License — LICENSE
+
+教材本文 / Teaching material
+  Creative Commons Attribution 4.0 International (CC BY 4.0) — LICENSE-CONTENT
+
+  対象は、問い・解説・ヒント・教師向けの記述・凡例・Readme の解説。
+  The questions, explanations, hints, teacher notes, legends, and the written
+  notes in the Readme files.
+
+著作権者 / Copyright holder
+  Copyright (c) 2026 トランジット株式会社 (Trans-IT)
+  https://trans-it.jp/
+
+出典の表示例 / Suggested credit line
+
+  「JavaScript 学習デモ」トランジット株式会社 / CC BY 4.0
+  https://trans-it-jp.github.io/js-demo/
+
+  "JavaScript Learning Demos" by Trans-IT, CC BY 4.0
+  https://trans-it-jp.github.io/js-demo/
+
+---
+
+第三者の部品 / Third-party components
+
+D3.js
+  ISC License, Copyright 2010-2023 Mike Bostock
+  https://github.com/d3/d3/blob/main/LICENSE
+
+  CDN から読み込んでおり、このリポジトリでは再配布していない。
+  Loaded from a CDN; not redistributed here.
+
+これ以外の第三者のコード・図・データ・文章は含めていない。他者が作った教材は
+参照・紹介にとどめる方針で、転用しない（guides/adding-a-demo.md 6章）。
+
+No other third-party code, figures, data or prose is included. Teaching material
+made by others is referenced, never absorbed (guides/adding-a-demo.md, section 6).
+
+---
+
+注記 / Note
+
+上記のライセンスは、当社が権利を持つ部分にのみ及ぶ。
+学習指導要領への準拠や、学習効果・成績向上は保証していない。
+
+The licences above reach only the parts we own.
+No claim is made about curriculum alignment, learning outcomes or exam results.

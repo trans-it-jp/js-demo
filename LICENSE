@@ -19,30 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-
----
-
-This license covers the source code of this repository.
-
-The teaching material — the questions, explanations, hints, teacher notes and
-the written notes in Readme files — is published separately under
-Creative Commons Attribution 4.0 International. See LICENSE-CONTENT.
-
-このライセンスはこのリポジトリのソースコードに適用されます。
-
-教材の本文（問い・解説・ヒント・教師向けの記述・Readme の解説）は
-クリエイティブ・コモンズ 表示 4.0 国際 で別に公開しています。
-LICENSE-CONTENT を参照してください。
-
-
----
-
-Third-party components
-
-D3.js is loaded from a CDN and is not redistributed in this repository.
-It is published under the ISC License, Copyright 2010-2023 Mike Bostock.
-https://github.com/d3/d3/blob/main/LICENSE
-
-D3.js は CDN から読み込んでおり、このリポジトリでは再配布していません。
-ISC License（Copyright 2010-2023 Mike Bostock）で公開されています。

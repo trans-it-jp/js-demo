@@ -103,7 +103,7 @@ Pin external libraries to an **exact version** (`d3@7.9.0`, never `d3@7`). A maj
 
 A school network may not reach an external CDN at all. Before adding a dependency, check that it is genuinely needed.
 
-**Check the licence and write it down.** Loading a library from a CDN rather than vendoring it keeps its terms off what this repository distributes, but an attribution duty can remain. When you add one, record its name, its licence, and whether it is vendored or referenced under "Third-party components" in [`LICENSE`](../LICENSE). Do not add anything whose terms you cannot read, or that restricts commercial use or modification.
+**Check the licence and write it down.** Loading a library from a CDN rather than vendoring it keeps its terms off what this repository distributes, but an attribution duty can remain. When you add one, record its name, its licence, and whether it is vendored or referenced under "Third-party components" in [`NOTICE`](../NOTICE). Do not add anything whose terms you cannot read, or that restricts commercial use or modification.
 
 ## 6. What never goes in the public repository
 
