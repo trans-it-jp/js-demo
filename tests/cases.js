@@ -361,6 +361,108 @@
     });
   });
 
+  test("kmeans", "makeBlobs は点の数をちょうど返す", function () {
+    [1, 7, 50, 301, 1000].forEach(function (count) {
+      [1, 3, 8].forEach(function (groups) {
+        if (count < groups) { return; }
+        var data = KMeans.makeBlobs({
+          random: Random.create(count * 31 + groups), count: count, groups: groups
+        });
+        equal(data.points.length, count,
+              "count=" + count + " groups=" + groups + " の点の数");
+        equal(data.centers.length, groups,
+              "count=" + count + " groups=" + groups + " の塊の数");
+      });
+    });
+  });
+
+  test("kmeans", "塊の点数が均等に割り切れない", function () {
+    /* 完全に同数だと人が置いた図に見える。重みで散らしていることを確かめる。 */
+    var data = KMeans.makeBlobs({
+      random: Random.create(5), count: 300, groups: 3, noise: 0
+    });
+    var sizes = data.centers.map(function () { return 0; });
+    data.points.forEach(function (p) {
+      var best = 0;
+      var bestDistance = Infinity;
+      data.centers.forEach(function (c, i) {
+        var d = Numeric.distance(p, c);
+        if (d < bestDistance) { bestDistance = d; best = i; }
+      });
+      sizes[best] += 1;
+    });
+    isTrue(new Set(sizes).size > 1, "すべて同数になった: " + sizes);
+  });
+
+  test("kmeans", "塊の中心が近づきすぎない", function () {
+    /* 中心が重なると、別々の塊が 1 つに見えてしまう。 */
+    [2, 3, 4, 5].forEach(function (groups) {
+      for (var seed = 1; seed <= 20; seed += 1) {
+        var data = KMeans.makeBlobs({
+          random: Random.create(seed * 97 + groups), count: 200, groups: groups
+        });
+        var nearest = Infinity;
+        for (var i = 0; i < data.centers.length; i += 1) {
+          for (var j = i + 1; j < data.centers.length; j += 1) {
+            var d = Numeric.distance(data.centers[i], data.centers[j]);
+            if (d < nearest) { nearest = d; }
+          }
+        }
+        isTrue(nearest > 0.1,
+               "groups=" + groups + " seed=" + seed + " で中心が近すぎる: " +
+               nearest.toFixed(3));
+      }
+    });
+  });
+
+  test("kmeans", "塊ごとに広がりと向きが違う", function () {
+    /* 同じ大きさの真円が並ぶと作り物に見える。
+       各塊の点の広がりを測り、すべて同じにはならないことを確かめる。 */
+    var data = KMeans.makeBlobs({
+      random: Random.create(13), count: 600, groups: 3, noise: 0
+    });
+    var spreads = data.centers.map(function (c) {
+      var sum = 0;
+      var n = 0;
+      data.points.forEach(function (p) {
+        var nearest = 0;
+        var best = Infinity;
+        data.centers.forEach(function (other, i) {
+          var d = Numeric.distanceSquared(p, other);
+          if (d < best) { best = d; nearest = i; }
+        });
+        if (data.centers[nearest] === c) { sum += Math.sqrt(best); n += 1; }
+      });
+      return n === 0 ? 0 : Numeric.round(sum / n, 3);
+    });
+    isTrue(new Set(spreads).size > 1, "広がりがすべて同じ: " + spreads);
+  });
+
+  test("kmeans", "どの塊にも属さない点が混ざる", function () {
+    var withNoise = KMeans.makeBlobs({
+      random: Random.create(21), count: 300, groups: 3, noise: 0.1, spread: 0.04
+    });
+    var withoutNoise = KMeans.makeBlobs({
+      random: Random.create(21), count: 300, groups: 3, noise: 0, spread: 0.04
+    });
+    /* 離れた点の数で見る。ノイズを入れたほうが必ず多くなる。 */
+    function farCount(data) {
+      var far = 0;
+      data.points.forEach(function (p) {
+        var best = Infinity;
+        data.centers.forEach(function (c) {
+          var d = Numeric.distance(p, c);
+          if (d < best) { best = d; }
+        });
+        if (best > 0.2) { far += 1; }
+      });
+      return far;
+    }
+    isTrue(farCount(withNoise) > farCount(withoutNoise),
+           "ノイズ有り " + farCount(withNoise) +
+           " / 無し " + farCount(withoutNoise));
+  });
+
   /* --- ui: 共有用の URL --------------------------------------------------- */
 
   var ShareLink = JsDemo.ShareLink;

@@ -81,15 +81,26 @@ After the first iteration, an assignment step that moves no point means no centr
 ```js
 const data = JsDemo.KMeans.makeBlobs({
   random,
-  count: 300,      // number of points
+  count: 300,      // number of points; exactly this many come back
   groups: 3,       // number of blobs; may differ from k
-  spread: 0.08,    // blob spread, as a fraction of the extent
+  spread: 0.08,    // baseline spread; each blob varies around it
+  noise: 0.06,     // fraction of points belonging to no blob
   width: 1,
   height: 1
 });
-data.points;    // [[x, y], ...] within 0–1
+data.points;    // [[x, y], ...] within 0–1, in shuffled order
 data.centers;   // the blob centres, to compare against what k-means finds
 ```
+
+**It is built not to look manufactured.** Identical circles at even spacing read as a diagram someone drew. Each blob differs in:
+
+| What varies | Why |
+| --- | --- |
+| Spread (separately in x and y) and orientation | So no two blobs are the same circle |
+| How many points it holds | Exactly equal counts look unnatural |
+| Distance from the other centres | Overlapping centres make two blobs look like one |
+
+A few points belong to no blob at all. A point falling outside the field is resampled rather than clamped: clamping lines points up along the edge.
 
 Because `groups` and `k` are independent, a page can show what follows from a person choosing the number of clusters.
 

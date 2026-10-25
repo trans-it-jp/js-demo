@@ -26,11 +26,9 @@
     { param: "groups", control: "groups", integer: true }
   ];
 
-  /* 種は画面に出さない。利用者が触るものではないため。
-     ただし共有URLには載せる。載せないと「同じ配置を配る」ができない。 */
-  var SEED_MIN = 0;
-  var SEED_MAX = 999999;
-  var SEED_SPEC = { min: SEED_MIN, max: SEED_MAX, integer: true, fallback: -1 };
+  /* 配置は毎回変える。種は画面にも URL にも出さない。
+     同じ配置を配る必要は無いという判断（2026-10-25）。
+     乱数生成そのものは JsDemo.Random を通す。検証で同じ列を再現できるようにするため。 */
   var SHARE_SPEC = null;
   var seed = 0;
 
@@ -44,11 +42,12 @@
 
   /**
    * 新しい種を選ぶ。
-   * デモの中身は種から決まる（同じ種なら同じ配置）が、
-   * 「どの種で始めるか」だけは毎回変えたい。ここだけ真の乱数を使う。
+   * 画面を開くたび、また初期化のたびに違う配置にするため、
+   * ここだけは真の乱数（Math.random）を使う。
+   * 種から先は JsDemo.Random に任せるので、同じ種なら同じ配置になる。
    */
   function pickSeed() {
-    return Math.floor(SEED_MIN + Math.random() * (SEED_MAX - SEED_MIN + 1));
+    return Math.floor(Math.random() * 1e9);
   }
 
   function readParams() {
@@ -108,7 +107,7 @@
   /** 入力欄の値を URL の名前（短い形）へ置き換える */
   function shareValues() {
     var p = readParams();
-    return { seed: seed, k: p.k, n: p.count, groups: p.groups };
+    return { k: p.k, n: p.count, groups: p.groups };
   }
 
   /** アドレス欄と共有欄を、いまの初期条件に合わせる */
@@ -271,14 +270,8 @@
        値は ShareLink 側で範囲と型を検査済み。 */
     var pairs = Controls.bindPairs(PARAMS, rebuild);
     SHARE_SPEC = ShareLink.specFromControls(SHARE_FIELDS);
-    /* 種だけは入力欄が無いので手で足す。fallback を -1 にしてあるので、
-       実際の種（0 以上）は必ず URL へ出る。 */
-    SHARE_SPEC.seed = SEED_SPEC;
-    /* URL に種があればそれを使い、無ければ新しく選ぶ。
-       初めて開いた人には毎回違う配置を見せつつ、
-       共有したリンクには必ず種が載るので同じ配置を再現できる。 */
-    var fromUrl = ShareLink.parse(window.location.search, { seed: SEED_SPEC });
-    seed = fromUrl.seed >= 0 ? fromUrl.seed : pickSeed();
+    /* 開くたびに新しい配置にする。URL からは条件だけを受け取る。 */
+    seed = pickSeed();
 
     var shared = ShareLink.read(SHARE_SPEC);
     if (pairs.clusters) { pairs.clusters.set(shared.k); }

@@ -234,34 +234,131 @@
   }
 
   /**
-   * デモ用の合成データ。いくつかの塊の周りに正規分布で点を置く。
+   * デモ用の合成データ。いくつかの塊の周りに点を置く。
    * 塊の数と k をずらせるので、k を人が決めることの影響を見せられる。
+   *
+   * 見た目が作り物にならないよう、塊ごとに次を変える。
+   * 同じ大きさの真円が等間隔に並ぶと、人が置いた図に見えてしまう。
+   *   - 広がり（縦横で別々）と向き
+   *   - 含まれる点の数
+   *   - 塊どうしが重なりすぎない位置
+   * さらに、どの塊にも属さない点を少し混ぜる。
    */
   function makeBlobs(options) {
     var random = options.random;
-    var count = options.count;
-    var groups = Math.max(1, options.groups);
+    var count = Math.max(1, Math.round(options.count));
+    var groups = Math.max(1, Math.round(options.groups));
     var spread = options.spread === undefined ? 0.09 : options.spread;
     var width = options.width === undefined ? 1 : options.width;
     var height = options.height === undefined ? 1 : options.height;
+    /* どの塊にも属さない点の割合。少し混ぜると現実のデータらしくなる。 */
+    var noise = options.noise === undefined ? 0.06 : options.noise;
 
-    var centers = [];
-    for (var g = 0; g < groups; g += 1) {
-      centers.push([random.range(0.18, 0.82) * width,
-                    random.range(0.18, 0.82) * height]);
-    }
+    var centers = pickCenters(random, groups, width, height);
+    var shapes = centers.map(function () {
+      return {
+        /* 縦横で広がりを変え、向きも回す。真円が並ばないようにする。 */
+        sx: spread * random.range(0.55, 1.75),
+        sy: spread * random.range(0.55, 1.75),
+        angle: random.range(0, Math.PI),
+        weight: random.range(0.55, 1.7)
+      };
+    });
+
+    var noiseCount = Math.min(count - groups, Math.round(count * noise));
+    if (noiseCount < 0) { noiseCount = 0; }
+    var sizes = shareOut(count - noiseCount, shapes.map(function (s) {
+      return s.weight;
+    }));
 
     var points = [];
-    for (var i = 0; i < count; i += 1) {
-      var c = centers[i % groups];
-      var x = c[0] + random.normal(0, spread * width);
-      var y = c[1] + random.normal(0, spread * height);
-      points.push([
-        Math.min(width, Math.max(0, x)),
-        Math.min(height, Math.max(0, y))
-      ]);
+    centers.forEach(function (center, index) {
+      var shape = shapes[index];
+      var cos = Math.cos(shape.angle);
+      var sin = Math.sin(shape.angle);
+      for (var i = 0; i < sizes[index]; i += 1) {
+        points.push(samplePoint(random, center, shape, cos, sin, width, height));
+      }
+    });
+    for (var n = 0; n < noiseCount; n += 1) {
+      points.push([random.range(0.04, 0.96) * width,
+                   random.range(0.04, 0.96) * height]);
     }
-    return { points: points, centers: centers };
+
+    return { points: random.shuffle(points), centers: centers };
+  }
+
+  /**
+   * 塊の中心を選ぶ。近すぎる位置は選び直す。
+   * 中心が重なると、別々の塊が 1 つの塊に見えてしまう。
+   */
+  function pickCenters(random, groups, width, height) {
+    /* 塊が増えるほど間隔は詰まるので、必要な距離を緩める。 */
+    var needed = 0.52 / Math.sqrt(groups);
+    var centers = [];
+    for (var g = 0; g < groups; g += 1) {
+      var best = null;
+      var bestDistance = -1;
+      /* 何度か試して、既存の中心から最も離れた候補を採る。
+         試行を打ち切っても必ず 1 つは返るので、無限に回らない。 */
+      for (var attempt = 0; attempt < 40; attempt += 1) {
+        var candidate = [random.range(0.16, 0.84) * width,
+                         random.range(0.16, 0.84) * height];
+        var nearest = Infinity;
+        for (var i = 0; i < centers.length; i += 1) {
+          var d = Numeric.distance(candidate, centers[i]);
+          if (d < nearest) { nearest = d; }
+        }
+        if (nearest > bestDistance) { bestDistance = nearest; best = candidate; }
+        if (nearest >= needed) { break; }
+      }
+      centers.push(best);
+    }
+    return centers;
+  }
+
+  /**
+   * 合計 total を重みの比で割り振る。各塊に最低 1 点は入れる。
+   * 端数は大きい重みから配り、合計が total に一致するようにする。
+   */
+  function shareOut(total, weights) {
+    var sum = weights.reduce(function (a, b) { return a + b; }, 0);
+    var sizes = weights.map(function (w) {
+      return Math.max(1, Math.floor((total * w) / sum));
+    });
+    var assigned = sizes.reduce(function (a, b) { return a + b; }, 0);
+    var order = weights.map(function (w, i) { return { w: w, i: i }; })
+      .sort(function (a, b) { return b.w - a.w; });
+    var cursor = 0;
+    while (assigned < total) {
+      sizes[order[cursor % order.length].i] += 1;
+      assigned += 1;
+      cursor += 1;
+    }
+    while (assigned > total) {
+      var index = order[cursor % order.length].i;
+      if (sizes[index] > 1) { sizes[index] -= 1; assigned -= 1; }
+      cursor += 1;
+    }
+    return sizes;
+  }
+
+  /**
+   * 塊の中から 1 点を取る。
+   * 外へ出た点は切り詰めずに取り直す。切り詰めると縁に点が並んで不自然になる。
+   */
+  function samplePoint(random, center, shape, cos, sin, width, height) {
+    var x = 0;
+    var y = 0;
+    for (var attempt = 0; attempt < 12; attempt += 1) {
+      var u = random.normal(0, shape.sx) * width;
+      var v = random.normal(0, shape.sy) * height;
+      x = center[0] + u * cos - v * sin;
+      y = center[1] + u * sin + v * cos;
+      if (x >= 0 && x <= width && y >= 0 && y <= height) { return [x, y]; }
+    }
+    /* 取り直しても収まらない場合だけ、範囲へ収める。 */
+    return [Math.min(width, Math.max(0, x)), Math.min(height, Math.max(0, y))];
   }
 
   JsDemo.KMeans = {
