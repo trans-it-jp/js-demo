@@ -8,6 +8,7 @@
 | --- | --- |
 | `i18n.js` | JavaScript が組み立てる文言の日英辞書（`JsDemo.I18n`） |
 | `controls.js` | スライダーと数値入力の同期、モードボタン、状態表示（`JsDemo.Controls`） |
+| `share-link.js` | 初期条件を URL へ載せて共有する（`JsDemo.ShareLink`） |
 | `tables.js` | 行列や内訳を数値の表にする（`JsDemo.Tables`） |
 
 ## 読み込み方
@@ -91,6 +92,30 @@ JsDemo.Controls.renderReadout("readout", [
 
 JsDemo.Controls.announce("live", "収束しました");   // aria-live="polite" の要素へ
 ```
+
+## JsDemo.ShareLink
+
+画面の初期条件を URL へ載せ、授業で同じ状態を共有できるようにする。
+
+```js
+const SPEC = {
+  seed:   { min: 0, max: 9999, integer: true, fallback: 42 },
+  k:      { min: 1, max: 10,   integer: true, fallback: 3 }
+};
+
+JsDemo.ShareLink.read(SPEC);              // いまの URL から検査済みの値を読む
+JsDemo.ShareLink.sync(values, SPEC);      // アドレス欄を書き換える（履歴は増やさない）
+JsDemo.ShareLink.currentUrl(values, SPEC);// 共有欄に出す URL の文字列
+
+JsDemo.ShareLink.parse("?seed=7", SPEC);  // 純粋な関数。Node からも検証できる
+JsDemo.ShareLink.build(values, SPEC);     // "?seed=7"（既定値と同じものは省く）
+```
+
+**載せるのは数値だけ。** 自由入力の文字列を受け取らないので、個人情報が URL に入る余地がない。仕様に無い名前は捨てる。
+
+**読んだ値は必ず検査する。** URL は誰でも書き換えられるので、範囲外・空欄・数でない値は `Numeric.readNumber` が範囲と既定値へ寄せる。そのまま計算へ渡さない。
+
+**範囲は入力欄から読む。** 仕様に範囲を書き写すと画面と食い違い、共有した値が黙って変わる。`tools/check-controls.js` がスライダーと数値入力の範囲の一致を点検する。
 
 ## JsDemo.Tables
 

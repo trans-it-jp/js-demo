@@ -13,13 +13,16 @@ var path = require("path");
 var root = path.join(__dirname, "..");
 
 /* 計算だけのライブラリは DOM を使わないので Node でそのまま読める。
-   描画（js/viz）と画面（js/ui）は d3 と DOM が要るため、ここでは扱わない。
+   js/ui/share-link.js は読み込み時に DOM へ触らないので、ここでも検証できる
+   （parse と build は純粋な関数）。
+   描画（js/viz）と画面の配線は d3 と DOM が要るため、ここでは扱わない。
    それらは tests/index.html をブラウザで開いて確かめる。 */
 [
   "js/core/seeded-random.js",
   "js/core/numeric.js",
   "js/linear-algebra/matrix3.js",
   "js/clustering/kmeans.js",
+  "js/ui/share-link.js",
   "tests/cases.js"
 ].forEach(function (file) {
   require(path.join(root, file));

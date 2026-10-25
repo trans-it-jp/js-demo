@@ -32,6 +32,11 @@
       "status.points": "点の数",
       "status.clusters": "クラスタ数 k",
 
+      "share.title": "授業で共有する",
+      "share.help": "このリンクを開くと、いまの条件（種・クラスタ数・点の数・塊の数）で同じ初期状態から始まります。個人情報は含まれません。",
+      "share.copy": "リンクをコピー",
+      "share.copied": "コピーしました",
+      "share.copyFailed": "自動でコピーできませんでした。選択してあるので、そのまま複写してください",
       "button.step": "次へ進む",
       "button.stepBack": "一手戻る",
       "button.runToEnd": "収束まで進める",
@@ -94,6 +99,11 @@
       "status.points": "Number of points",
       "status.clusters": "Clusters k",
 
+      "share.title": "Share with a class",
+      "share.help": "Opening this link starts from the same initial state: the seed, the number of clusters, points and blobs. It contains no personal data.",
+      "share.copy": "Copy the link",
+      "share.copied": "Copied",
+      "share.copyFailed": "Could not copy automatically. The text is selected, so copy it by hand",
       "button.step": "Next step",
       "button.stepBack": "Back one step",
       "button.runToEnd": "Run to convergence",

@@ -466,7 +466,41 @@ input[type="number"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* --- 9. 凡例 -------------------------------------------------------------- */
+/* --- 9. 共有用のリンク ---------------------------------------------------- */
+
+.share__help {
+  margin-bottom: var(--s-3);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.share {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.share__url {
+  flex: 1 1 10rem;
+  min-width: 0;
+  padding: 0.3em 0.5em;
+  background: var(--surface-sunk);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.share__status {
+  margin-top: var(--s-2);
+  color: var(--accent-ink);
+  font-size: 0.8125rem;
+}
+.share__status:empty { margin-top: 0; }
+
+/* --- 10. 凡例 ------------------------------------------------------------- */
 
 .legend {
   display: grid;
@@ -479,7 +513,7 @@ input[type="number"] {
 .legend li { display: flex; align-items: center; gap: var(--s-2); }
 .legend svg { flex: none; display: block; }
 
-/* --- 10. 表（行列・クラスタ内訳） ----------------------------------------- */
+/* --- 11. 表（行列・クラスタ内訳） ----------------------------------------- */
 
 .tables {
   display: grid;
@@ -520,7 +554,7 @@ td {
 }
 .table-scroll { overflow-x: auto; }
 
-/* --- 11. 注記 ------------------------------------------------------------- */
+/* --- 12. 注記 ------------------------------------------------------------- */
 
 .note {
   margin-top: var(--s-5);
@@ -534,7 +568,7 @@ td {
 .note h3 { color: var(--ink); font-size: 0.9375rem; }
 .note ul { padding-left: 1.3em; }
 
-/* --- 12. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
+/* --- 13. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
 
 /* 決まっていない項目は「未定」と出す。空欄にして決定済みに見せない。 */
 .page-meta {
@@ -574,7 +608,7 @@ td {
   .page-meta__list dd { margin-bottom: 0; }
 }
 
-/* --- 13. フッタ ----------------------------------------------------------- */
+/* --- 14. フッタ ----------------------------------------------------------- */
 
 .site-foot {
   margin-top: var(--s-8);
@@ -619,7 +653,7 @@ td {
   .site-foot__meta { text-align: left; }
 }
 
-/* --- 14. 補助 ------------------------------------------------------------- */
+/* --- 15. 補助 ------------------------------------------------------------- */
 
 .visually-hidden {
   position: absolute;

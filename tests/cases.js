@@ -361,5 +361,110 @@
     });
   });
 
+  /* --- ui: 共有用の URL --------------------------------------------------- */
+
+  var ShareLink = JsDemo.ShareLink;
+  /* 画面の入力欄と同じ範囲。app.js は入力欄から読むが、ここでは
+     parse / build の挙動そのものを確かめるため値を書いてある。 */
+  var SHARE_SPEC = {
+    seed: { min: 0, max: 9999, integer: true, fallback: 42 },
+    k: { min: 1, max: 10, integer: true, fallback: 3 },
+    n: { min: 1, max: 1000, integer: true, fallback: 300 },
+    groups: { min: 1, max: 8, integer: true, fallback: 3 }
+  };
+
+  test("share-link", "指定が無ければ既定値になる", function () {
+    var v = ShareLink.parse("", SHARE_SPEC);
+    equal(v.seed, 42, "seed");
+    equal(v.k, 3, "k");
+    equal(v.n, 300, "n");
+    equal(v.groups, 3, "groups");
+  });
+
+  test("share-link", "指定した値を読む", function () {
+    var v = ShareLink.parse("?seed=7&k=5&n=120&groups=2", SHARE_SPEC);
+    equal(v.seed, 7, "seed");
+    equal(v.k, 5, "k");
+    equal(v.n, 120, "n");
+    equal(v.groups, 2, "groups");
+  });
+
+  test("share-link", "先頭の ? は有無どちらでも読める", function () {
+    equal(ShareLink.parse("seed=9", SHARE_SPEC).seed, 9, "? 無し");
+    equal(ShareLink.parse("?seed=9", SHARE_SPEC).seed, 9, "? 有り");
+  });
+
+  test("share-link", "範囲外の値は範囲へ収める", function () {
+    var v = ShareLink.parse("?seed=99999&k=99&n=-5&groups=1000", SHARE_SPEC);
+    equal(v.seed, 9999, "seed の上限");
+    equal(v.k, 10, "k の上限");
+    equal(v.n, 1, "n の下限");
+    equal(v.groups, 8, "groups の上限");
+  });
+
+  test("share-link", "数でない値は既定値になる", function () {
+    var v = ShareLink.parse("?seed=abc&k=&n=%20&groups=null", SHARE_SPEC);
+    equal(v.seed, 42, "文字");
+    equal(v.k, 3, "空欄");
+    equal(v.n, 300, "空白");
+    equal(v.groups, 3, "null という文字列");
+  });
+
+  test("share-link", "小数は整数へ丸める", function () {
+    equal(ShareLink.parse("?k=3.7", SHARE_SPEC).k, 4, "k");
+  });
+
+  test("share-link", "知らない名前は捨てる", function () {
+    var v = ShareLink.parse("?seed=7&name=%E5%B1%B1%E7%94%B0&email=a%40b.example", SHARE_SPEC);
+    equal(v.seed, 7, "既知の値は読む");
+    equal(Object.keys(v).sort().join(","), "groups,k,n,seed", "仕様にある名前だけが残る");
+    equal(v.name, undefined, "name は取り込まない");
+    equal(v.email, undefined, "email は取り込まない");
+  });
+
+  test("share-link", "壊れた encoding でも落ちない", function () {
+    var v = ShareLink.parse("?seed=7&%E4%=1&bad=%", SHARE_SPEC);
+    equal(v.seed, 7, "読める分は読む");
+  });
+
+  test("share-link", "既定値と同じものは URL へ出さない", function () {
+    equal(ShareLink.build({ seed: 42, k: 3, n: 300, groups: 3 }, SHARE_SPEC), "",
+          "すべて既定なら空");
+    equal(ShareLink.build({ seed: 7, k: 3, n: 300, groups: 3 }, SHARE_SPEC), "?seed=7",
+          "違うものだけ出す");
+  });
+
+  test("share-link", "作った URL をそのまま読み戻せる", function () {
+    var original = { seed: 123, k: 6, n: 50, groups: 2 };
+    var restored = ShareLink.parse(ShareLink.build(original, SHARE_SPEC), SHARE_SPEC);
+    equal(restored.seed, 123, "seed");
+    equal(restored.k, 6, "k");
+    equal(restored.n, 50, "n");
+    equal(restored.groups, 2, "groups");
+  });
+
+  test("share-link", "URL から作った条件で同じ結果になる", function () {
+    var v = ShareLink.parse("?seed=777&k=4&n=150&groups=4", SHARE_SPEC);
+
+    function runFrom(values) {
+      var points = KMeans.makeBlobs({
+        random: Random.create(values.seed),
+        count: values.n,
+        groups: values.groups,
+        spread: 0.07
+      }).points;
+      var m = KMeans.create({
+        points: points, k: values.k, random: Random.create(values.seed)
+      });
+      m.run(300);
+      return m;
+    }
+
+    var a = runFrom(v);
+    var b = runFrom(v);
+    equal(a.inertia(), b.inertia(), "2 乗和");
+    equal(a.centroids.join(";"), b.centroids.join(";"), "中心");
+  });
+
   JsDemo.Tests = { cases: cases };
 })(typeof window !== "undefined" ? window : globalThis);

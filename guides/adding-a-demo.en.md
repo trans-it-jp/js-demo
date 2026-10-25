@@ -80,6 +80,7 @@ Cover known values, boundary cases, invalid input and seeded reproducibility. **
 node tests/run.js              # the calculations; one failure means do not publish
 node tools/check-links.js      # broken links and Japanese/English pairing
 node tools/check-contrast.js   # colour contrast ratios
+node tools/check-controls.js   # slider and number field ranges agree
 python -m http.server 8000     # check display and interaction in a real browser
 ```
 

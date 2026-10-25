@@ -80,6 +80,7 @@ test("分野名", "何を確かめるか", function () {
 node tests/run.js              # 計算の照合。1 件でも落ちたら公開しない
 node tools/check-links.js      # リンク切れと日英の対応
 node tools/check-contrast.js   # 色のコントラスト比
+node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
 python -m http.server 8000     # 実ブラウザで表示・操作を確認
 ```
 

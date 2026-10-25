@@ -8,6 +8,7 @@ Input wiring, numeric tables, and the Japanese and English wording. Anything spe
 | --- | --- |
 | `i18n.js` | Japanese and English strings that JavaScript assembles (`JsDemo.I18n`) |
 | `controls.js` | Slider/number-field pairing, mode buttons, status output (`JsDemo.Controls`) |
+| `share-link.js` | Putting initial conditions in the URL so they can be shared (`JsDemo.ShareLink`) |
 | `tables.js` | Matrices and breakdowns rendered as tables of numbers (`JsDemo.Tables`) |
 
 ## Loading
@@ -91,6 +92,30 @@ JsDemo.Controls.renderReadout("readout", [
 
 JsDemo.Controls.announce("live", "Converged");   // into an element with aria-live="polite"
 ```
+
+## JsDemo.ShareLink
+
+Puts a page's initial conditions into the URL, so one starting state can be shared with a class.
+
+```js
+const SPEC = {
+  seed:   { min: 0, max: 9999, integer: true, fallback: 42 },
+  k:      { min: 1, max: 10,   integer: true, fallback: 3 }
+};
+
+JsDemo.ShareLink.read(SPEC);              // validated values from the current URL
+JsDemo.ShareLink.sync(values, SPEC);      // rewrite the address bar (no new history entry)
+JsDemo.ShareLink.currentUrl(values, SPEC);// the URL string to show in the share field
+
+JsDemo.ShareLink.parse("?seed=7", SPEC);  // pure functions, verifiable from Node
+JsDemo.ShareLink.build(values, SPEC);     // "?seed=7" (defaults are omitted)
+```
+
+**Numbers only.** No free-text field is accepted, so there is no way for personal data to end up in the URL. Names outside the spec are discarded.
+
+**Every value read is checked.** Anyone can edit a URL, so out-of-range, empty and non-numeric values are pulled back to the range or the default by `Numeric.readNumber` before any calculation sees them.
+
+**The range comes from the input elements.** Copying it into the spec lets the two drift, and a shared value then changes silently. `tools/check-controls.js` verifies that each slider and number field agree.
 
 ## JsDemo.Tables
 

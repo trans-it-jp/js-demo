@@ -98,6 +98,7 @@ There is no build step, but three checks run before anything is published. None 
 node tests/run.js              # the calculations; one failure means do not publish
 node tools/check-links.js      # broken links and Japanese/English pairing
 node tools/check-contrast.js   # colour contrast (4.5:1 for text, 3:1 for controls and figures)
+node tools/check-controls.js   # slider and number field ranges agree
 ```
 
 The same verification opens in a browser as well ([tests/index.html](tests/index.html)).

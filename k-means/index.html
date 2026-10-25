@@ -13,6 +13,7 @@
 <script src="../js/viz/scatter.js"></script>
 <script src="../js/ui/i18n.js"></script>
 <script src="../js/ui/controls.js"></script>
+<script src="../js/ui/share-link.js"></script>
 <script src="../js/ui/tables.js"></script>
 <script src="app.js" defer></script>
 </head>
@@ -99,20 +100,30 @@
             </div>
             <div class="control">
               <label class="control__label" for="points">点の数</label>
-              <input id="points" type="range" min="10" max="1000" step="10" value="300">
-              <input id="points-num" type="number" min="1" max="1000" step="10" value="300">
+              <input id="points" type="range" min="1" max="1000" step="1" value="300">
+              <input id="points-num" type="number" min="1" max="1000" step="1" value="300">
             </div>
             <div class="control">
               <label class="control__label" for="seed">
                 乱数の種
                 <span class="control__note">同じ種なら必ず同じ初期状態になります</span>
               </label>
-              <input id="seed" type="range" min="0" max="999" step="1" value="42">
-              <input id="seed-num" type="number" min="0" max="999999" step="1" value="42">
+              <input id="seed" type="range" min="0" max="9999" step="1" value="42">
+              <input id="seed-num" type="number" min="0" max="9999" step="1" value="42">
             </div>
           </div>
         </section>
 
+        <section class="panel">
+          <h2 class="panel__title">授業で共有する</h2>
+          <p class="share__help">このリンクを開くと、いまの条件（種・クラスタ数・点の数・塊の数）で同じ初期状態から始まります。個人情報は含まれません。</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">共有用のリンク</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">リンクをコピー</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
         <section class="panel">
           <h2 class="panel__title">いまの状態</h2>
           <dl class="readout" id="readout"></dl>
