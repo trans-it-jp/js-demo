@@ -64,8 +64,7 @@
           <button type="button" id="step" class="is-primary">次へ進む</button>
           <button type="button" id="step-back">一手戻る</button>
           <button type="button" id="run">収束まで進める</button>
-          <button type="button" id="restart">最初へ戻す</button>
-          <button type="button" id="new-data">別のデータ</button>
+          <button type="button" id="reset">初期化</button>
           <button type="button" id="toggle-links" aria-pressed="true">割当線を表示</button>
         </div>
 
@@ -104,20 +103,12 @@
               <input id="points" type="range" min="1" max="1000" step="1" value="300">
               <input id="points-num" type="number" min="1" max="1000" step="1" value="300">
             </div>
-            <div class="control">
-              <label class="control__label" for="seed">
-                乱数の種
-                <span class="control__note">同じ種なら必ず同じ配置になります。「別のデータ」で選び直します</span>
-              </label>
-              <input id="seed" type="range" min="0" max="9999" step="1" value="42">
-              <input id="seed-num" type="number" min="0" max="9999" step="1" value="42">
-            </div>
           </div>
         </section>
 
         <section class="panel">
           <h2 class="panel__title">授業で共有する</h2>
-          <p class="share__help">このリンクを開くと、いまの条件（種・クラスタ数・点の数・塊の数）で同じ初期状態から始まります。個人情報は含まれません。</p>
+          <p class="share__help">このリンクを開くと、いまの配置と条件のまま同じ状態から始まります。個人情報は含まれません。</p>
           <div class="share">
             <label class="visually-hidden" for="share-url">共有用のリンク</label>
             <input type="text" id="share-url" class="share__url" readonly>
@@ -142,14 +133,14 @@
       <ul>
         <li><strong>比較</strong>：塊の数を3のまま、k を 2 → 3 → 5 と変えて、中心の落ち着く先を比べてください。</li>
         <li><strong>説明</strong>：「次へ進む」を押したとき、点の色が変わる手と、中心が動く手が交互に来ます。どちらの手で何が決まったか言い直してみてください。</li>
-        <li><strong>転移</strong>：種を変えて同じ k で試すと、結果は同じになりますか。変わるとしたら、それは何が原因でしょうか。</li>
+        <li><strong>転移</strong>：「初期化」で別の配置にして同じ k で試すと、結果は同じ形になりますか。変わるとしたら、それは何が原因でしょうか。</li>
       </ul>
 
       <h3>この手順の限界</h3>
       <ul>
         <li>距離はユークリッド距離です。尺度の違う軸をそのまま混ぜると結果が歪みます。</li>
         <li>球状に近い塊を想定しています。細長い分布や密度の違う分布には向きません。</li>
-        <li>初期値によって結果が変わります。種を変えて比べられるようにしてあります。</li>
+        <li>初期値によって結果が変わります。「初期化」で別の配置にして比べられます。</li>
         <li>k は人が決めます。データから自動では決まりません。</li>
         <li>外れ値に引かれて中心が動きます。</li>
         <li>どの点も割り当てられないクラスタが出た場合は、その中心を最も遠い点へ移しています。この扱いは実装上の選択の一つで、唯一の正解ではありません。</li>

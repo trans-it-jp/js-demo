@@ -15,37 +15,40 @@
   var ShareLink = JsDemo.ShareLink;
   var t = JsDemo.I18n.t;
 
-  var PARAMS = ["clusters", "points", "groups", "seed"];
+  var PARAMS = ["clusters", "points", "groups"];
 
   /* URL へ載せる初期条件。数値だけに限り、自由入力は受け取らない。
      範囲は入力欄から読む。ここに書き写すと画面と食い違ったときに
      共有した値が黙って変わるため、出どころを 1 つにしておく。 */
   var SHARE_FIELDS = [
-    { param: "seed", control: "seed", integer: true },
     { param: "k", control: "clusters", integer: true },
     { param: "n", control: "points", integer: true },
     { param: "groups", control: "groups", integer: true }
   ];
+
+  /* 種は画面に出さない。利用者が触るものではないため。
+     ただし共有URLには載せる。載せないと「同じ配置を配る」ができない。 */
+  var SEED_MIN = 0;
+  var SEED_MAX = 999999;
+  var SEED_SPEC = { min: SEED_MIN, max: SEED_MAX, integer: true, fallback: -1 };
   var SHARE_SPEC = null;
+  var seed = 0;
 
   var scatter = null;
   var model = null;
   var showLinks = true;
   var lastInfo = null;
   var stepCount = 0;   /* 初期化から何手進めたか。一手戻るときに使う。 */
-  var seedPair = null;
+
   var animate = false; /* 直前の操作を動かして見せるか */
 
   /**
    * 新しい種を選ぶ。
-   * デモの中身は種から決まる（同じ種なら同じ結果）が、
+   * デモの中身は種から決まる（同じ種なら同じ配置）が、
    * 「どの種で始めるか」だけは毎回変えたい。ここだけ真の乱数を使う。
    */
   function pickSeed() {
-    var slider = Controls.byId("seed");
-    var max = Numeric.toFinite(slider.max, 9999);
-    var min = Numeric.toFinite(slider.min, 0);
-    return Math.floor(min + Math.random() * (max - min + 1));
+    return Math.floor(SEED_MIN + Math.random() * (SEED_MAX - SEED_MIN + 1));
   }
 
   function readParams() {
@@ -56,8 +59,7 @@
                                 { min: 1, max: 1000, integer: true }),
       groups: Numeric.readNumber(Controls.byId("groups").value,
                                  { min: 1, max: 8, integer: true }),
-      seed: Numeric.readNumber(Controls.byId("seed").value,
-                               { min: 0, max: 999999, integer: true })
+      seed: seed
     };
   }
 
@@ -97,20 +99,16 @@
   /** 設定が変わったときは最初の状態へ戻す。図は動かさない。 */
   function rebuild() { build(0); }
 
-  /** 同じ種のまま最初へ戻す */
-  function restart() { build(0); }
-
-  /** 新しい種を選び、別の配置で始める */
-  function newData() {
-    var pair = seedPair;
-    if (pair) { pair.set(pickSeed()); }
+  /** 初期化。塊の中心も点も中心の初期位置も、すべて選び直す。 */
+  function reset() {
+    seed = pickSeed();
     build(0);
   }
 
   /** 入力欄の値を URL の名前（短い形）へ置き換える */
   function shareValues() {
     var p = readParams();
-    return { seed: p.seed, k: p.k, n: p.count, groups: p.groups };
+    return { seed: seed, k: p.k, n: p.count, groups: p.groups };
   }
 
   /** アドレス欄と共有欄を、いまの初期条件に合わせる */
@@ -160,8 +158,7 @@
       {
         label: t("status.converged"),
         value: model.converged ? t("status.convergedYes") : t("status.convergedNo")
-      },
-      { label: t("status.seed"), value: String(readParams().seed) }
+      }
     ];
     Controls.renderReadout("readout", rows);
 
@@ -274,14 +271,16 @@
        値は ShareLink 側で範囲と型を検査済み。 */
     var pairs = Controls.bindPairs(PARAMS, rebuild);
     SHARE_SPEC = ShareLink.specFromControls(SHARE_FIELDS);
-    seedPair = pairs.seed;
-
+    /* 種だけは入力欄が無いので手で足す。fallback を -1 にしてあるので、
+       実際の種（0 以上）は必ず URL へ出る。 */
+    SHARE_SPEC.seed = SEED_SPEC;
     /* URL に種があればそれを使い、無ければ新しく選ぶ。
        初めて開いた人には毎回違う配置を見せつつ、
-       共有したリンクには必ず種が載るので同じ状態を再現できる。 */
-    var seedInUrl = /(^|[?&])seed=/.test(window.location.search);
+       共有したリンクには必ず種が載るので同じ配置を再現できる。 */
+    var fromUrl = ShareLink.parse(window.location.search, { seed: SEED_SPEC });
+    seed = fromUrl.seed >= 0 ? fromUrl.seed : pickSeed();
+
     var shared = ShareLink.read(SHARE_SPEC);
-    if (pairs.seed) { pairs.seed.set(seedInUrl ? shared.seed : pickSeed()); }
     if (pairs.clusters) { pairs.clusters.set(shared.k); }
     if (pairs.points) { pairs.points.set(shared.n); }
     if (pairs.groups) { pairs.groups.set(shared.groups); }
@@ -308,8 +307,7 @@
       render();
     });
 
-    Controls.byId("restart").addEventListener("click", restart);
-    Controls.byId("new-data").addEventListener("click", newData);
+    Controls.byId("reset").addEventListener("click", reset);
 
     var linkToggle = Controls.byId("toggle-links");
     linkToggle.setAttribute("aria-pressed", String(showLinks));

@@ -64,8 +64,7 @@
           <button type="button" id="step" class="is-primary">Next step</button>
           <button type="button" id="step-back">Back one step</button>
           <button type="button" id="run">Run to convergence</button>
-          <button type="button" id="restart">Back to start</button>
-          <button type="button" id="new-data">New data</button>
+          <button type="button" id="reset">Reset</button>
           <button type="button" id="toggle-links" aria-pressed="true">Show assignment links</button>
         </div>
 
@@ -104,20 +103,12 @@
               <input id="points" type="range" min="1" max="1000" step="1" value="300">
               <input id="points-num" type="number" min="1" max="1000" step="1" value="300">
             </div>
-            <div class="control">
-              <label class="control__label" for="seed">
-                Random seed
-                <span class="control__note">One seed always gives the same layout. "New data" picks another</span>
-              </label>
-              <input id="seed" type="range" min="0" max="9999" step="1" value="42">
-              <input id="seed-num" type="number" min="0" max="9999" step="1" value="42">
-            </div>
           </div>
         </section>
 
         <section class="panel">
           <h2 class="panel__title">Share with a class</h2>
-          <p class="share__help">Opening this link starts from the same initial state: the seed, the number of clusters, points and blobs. It contains no personal data.</p>
+          <p class="share__help">Opening this link starts from the same layout and the same settings. It contains no personal data.</p>
           <div class="share">
             <label class="visually-hidden" for="share-url">Link to share</label>
             <input type="text" id="share-url" class="share__url" readonly>
@@ -142,14 +133,14 @@
       <ul>
         <li><strong>Compare</strong>: keep three blobs in the data and try k as 2, then 3, then 5. Compare where the centroids settle.</li>
         <li><strong>Explain</strong>: pressing "Next step" alternates between a step that recolours points and a step that moves centroids. Say in your own words what each of the two decided.</li>
-        <li><strong>Transfer</strong>: change the seed and run the same k again. Is the result the same? If it differs, what caused that?</li>
+        <li><strong>Transfer</strong>: press "Reset" for a different layout and run the same k again. Does it settle the same way? If it differs, what caused that?</li>
       </ul>
 
       <h3>Limits of this procedure</h3>
       <ul>
         <li>Distance is Euclidean. Mixing axes with different units distorts the result.</li>
         <li>Roughly round blobs are assumed. Elongated or unevenly dense distributions do not suit it.</li>
-        <li>The result depends on the initial centroids, which is why the seed is adjustable here.</li>
+        <li>The result depends on the initial centroids. "Reset" gives a different layout to compare against.</li>
         <li>k is chosen by a person; it does not follow from the data.</li>
         <li>Outliers pull centroids towards them.</li>
         <li>When a cluster ends up with no points, its centroid is moved to the farthest point. That is one implementation choice among several, not the single correct answer.</li>
