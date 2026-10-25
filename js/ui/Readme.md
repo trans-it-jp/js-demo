@@ -115,7 +115,16 @@ JsDemo.ShareLink.build(values, SPEC);     // "?seed=7"（既定値と同じも�
 
 **読んだ値は必ず検査する。** URL は誰でも書き換えられるので、範囲外・空欄・数でない値は `Numeric.readNumber` が範囲と既定値へ寄せる。そのまま計算へ渡さない。
 
-**範囲は入力欄から読む。** 仕様に範囲を書き写すと画面と食い違い、共有した値が黙って変わる。`tools/check-controls.js` がスライダーと数値入力の範囲の一致を点検する。
+**範囲は入力欄から読む。** 仕様に範囲を書き写すと画面と食い違い、共有した値が黙って変わる。`specFromControls` が min・max・step・初期値を入力欄から取る。`tools/check-controls.js` がスライダーと数値入力の一致を点検する。
+
+**入力欄の刻みに合わせる。** 刻み 1 の角度欄に `?deg=37.5` を渡しても画面には 38 しか出せない。ブラウザの丸めに任せず `parse` で合わせ、表示と URL を一致させる。小数は URL へ出すときに 3 桁へ丸め、`1.2000000000000002` のような値が出ないようにする。
+
+共有欄の配線は `wireField` と `refreshField` を使う。両デモで同じ作りになる。
+
+```js
+ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
+ShareLink.refreshField("share-url", values, spec);
+```
 
 ## JsDemo.Tables
 

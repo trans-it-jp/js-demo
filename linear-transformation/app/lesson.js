@@ -15,6 +15,7 @@
   var Plane = JsDemo.Plane;
   var Controls = JsDemo.Controls;
   var Tables = JsDemo.Tables;
+  var ShareLink = JsDemo.ShareLink;
   var t = JsDemo.I18n.t;
 
   var LESSONS = {
@@ -77,14 +78,46 @@
     }
   };
 
+  /* 入力の id と URL の名前の対応。URL は短く読みやすい名前にする。
+     すべて小数を取りうるので integer は立てない（角度も 0.5 度を許す）。 */
+  var PARAM_NAMES = {
+    "scale-x": "sx",
+    "scale-y": "sy",
+    "shear-x": "shx",
+    "shear-y": "shy",
+    "tx": "tx",
+    "ty": "ty",
+    "angle": "deg",
+    "pivot-x": "cx",
+    "pivot-y": "cy"
+  };
+
   var DRAW_MODES = ["none", "line", "circle", "rect", "free"];
 
   var plane = null;
   var lesson = null;
   var pairs = null;
+  var shareSpec = null;
+  var shareFields = null;
+
+  /** いまの値を URL の名前へ置き換える */
+  function shareValues(values) {
+    var out = {};
+    shareFields.forEach(function (field) {
+      out[field.param] = values[field.control];
+    });
+    return out;
+  }
+
+  function refreshShareLink(values) {
+    var shared = shareValues(values);
+    ShareLink.sync(shared, shareSpec);
+    ShareLink.refreshField("share-url", shared, shareSpec);
+  }
 
   function update() {
     var values = Controls.readAll(pairs);
+    refreshShareLink(values);
     var out = lesson.build(values);
     var combined = out.combined;
 
@@ -132,6 +165,23 @@
     });
 
     pairs = Controls.bindPairs(lesson.params, update);
+
+    /* このレッスンが使う入力だけを共有の対象にする。
+       範囲は入力欄から読むので、画面と食い違わない。 */
+    shareFields = lesson.params.map(function (control) {
+      return { param: PARAM_NAMES[control], control: control };
+    });
+    shareSpec = ShareLink.specFromControls(shareFields);
+
+    var shared = ShareLink.read(shareSpec);
+    shareFields.forEach(function (field) {
+      var pair = pairs[field.control];
+      if (pair) { pair.set(shared[field.param]); }
+    });
+
+    ShareLink.wireField({
+      field: "share-url", button: "share-copy", status: "share-status"
+    });
 
     Controls.bindModeButtons("draw-tools", "none", function (mode) {
       if (DRAW_MODES.indexOf(mode) >= 0) { plane.setMode(mode); }

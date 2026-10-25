@@ -12,6 +12,7 @@
 <script src="../../../js/viz/plane.js"></script>
 <script src="../../../js/ui/i18n.js"></script>
 <script src="../../../js/ui/controls.js"></script>
+<script src="../../../js/ui/share-link.js"></script>
 <script src="../../../js/ui/tables.js"></script>
 <script src="../../../linear-transformation/app/lesson.js" defer></script>
 </head>
@@ -118,6 +119,17 @@
               <input id="ty-num" type="number" min="-10" max="10" step="0.1" value="0">
             </div>
           </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Share with a class</h2>
+          <p class="share__help">Opening this link starts from the same state, with the parameters set as they are now. It contains no personal data.</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">Link to share</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">Copy the link</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
         </section>
 
         <section class="panel">

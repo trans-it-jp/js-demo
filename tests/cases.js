@@ -443,6 +443,77 @@
     equal(restored.groups, 2, "groups");
   });
 
+  /* 2D 座標変換のレッスンは小数を扱う。整数前提の扱いと分けて確かめる。 */
+  var LESSON_SPEC = {
+    sx: { min: -3, max: 3, integer: false, fallback: 1 },
+    sy: { min: -3, max: 3, integer: false, fallback: 1 },
+    shx: { min: -2, max: 2, integer: false, fallback: 0 },
+    deg: { min: -180, max: 180, integer: false, fallback: 0 },
+    cx: { min: -10, max: 10, integer: false, fallback: 2 }
+  };
+
+  test("share-link", "小数をそのまま読み書きできる", function () {
+    var v = ShareLink.parse("?sx=1.5&shx=-0.7&deg=37.5", LESSON_SPEC);
+    equal(v.sx, 1.5, "sx");
+    equal(v.shx, -0.7, "shx");
+    equal(v.deg, 37.5, "deg");
+  });
+
+  test("share-link", "小数は丸めて URL へ出す", function () {
+    /* 0.1 を足し合わせると 1.2000000000000002 のような値が出る。
+       そのまま URL に出すと読みにくく、共有した値も揺れる。 */
+    equal(ShareLink.build({ sx: 1.2000000000000002 }, LESSON_SPEC), "?sx=1.2", "丸め");
+    equal(ShareLink.build({ deg: 0.1 + 0.2 }, LESSON_SPEC), "?deg=0.3", "0.1+0.2");
+  });
+
+  test("share-link", "小数でも範囲へ収める", function () {
+    var v = ShareLink.parse("?sx=99.9&shx=-50&deg=1000", LESSON_SPEC);
+    equal(v.sx, 3, "sx の上限");
+    equal(v.shx, -2, "shx の下限");
+    equal(v.deg, 180, "deg の上限");
+  });
+
+  test("share-link", "小数の既定値は URL へ出さない", function () {
+    equal(ShareLink.build({ sx: 1, sy: 1, shx: 0, deg: 0, cx: 2 }, LESSON_SPEC), "",
+          "すべて既定なら空");
+    equal(ShareLink.build({ sx: 1, sy: 1, shx: 0, deg: 45, cx: 2 }, LESSON_SPEC), "?deg=45",
+          "違うものだけ出す");
+  });
+
+  test("share-link", "小数でも往復で一致する", function () {
+    var original = { sx: -1.4, sy: 2.3, shx: 0.6, deg: -112.5, cx: -7.8 };
+    var restored = ShareLink.parse(ShareLink.build(original, LESSON_SPEC), LESSON_SPEC);
+    Object.keys(original).forEach(function (key) {
+      equal(restored[key], original[key], key);
+    });
+  });
+
+  test("share-link", "入力欄の刻みに合わせる", function () {
+    /* 刻み 1 の角度欄に 37.5 は入らない。画面に出せない値を URL が
+       持ったままにならないよう、読み込んだ時点で刻みへ合わせる。 */
+    var stepped = {
+      deg: { min: -180, max: 180, step: 1, integer: false, fallback: 0 },
+      sx: { min: -3, max: 3, step: 0.1, integer: false, fallback: 1 }
+    };
+    equal(ShareLink.parse("?deg=37.5", stepped).deg, 38, "刻み 1");
+    equal(ShareLink.parse("?sx=1.23", stepped).sx, 1.2, "刻み 0.1");
+    equal(ShareLink.parse("?sx=1.2", stepped).sx, 1.2, "刻みに乗る値はそのまま");
+    equal(ShareLink.parse("?deg=-60", stepped).deg, -60, "負の値");
+  });
+
+  test("share-link", "刻みに合わせても範囲を超えない", function () {
+    var stepped = { deg: { min: -180, max: 180, step: 7, integer: false, fallback: 0 } };
+    var v = ShareLink.parse("?deg=179", stepped).deg;
+    isTrue(v >= -180 && v <= 180, "範囲外になった: " + v);
+  });
+
+  test("share-link", "小数の値で同じ行列になる", function () {
+    var v = ShareLink.parse("?deg=37.5&cx=2.5", LESSON_SPEC);
+    var a = Matrix3.rotationAbout(v.cx, 1, Matrix3.toRadians(v.deg)).combined;
+    var b = Matrix3.rotationAbout(2.5, 1, Matrix3.toRadians(37.5)).combined;
+    nearMatrix(a, b, 1e-15, "URL から作った行列が一致しない");
+  });
+
   test("share-link", "URL から作った条件で同じ結果になる", function () {
     var v = ShareLink.parse("?seed=777&k=4&n=150&groups=4", SHARE_SPEC);
 

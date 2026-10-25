@@ -21,26 +21,12 @@
      範囲は入力欄から読む。ここに書き写すと画面と食い違ったときに
      共有した値が黙って変わるため、出どころを 1 つにしておく。 */
   var SHARE_FIELDS = [
-    { param: "seed", control: "seed" },
-    { param: "k", control: "clusters" },
-    { param: "n", control: "points" },
-    { param: "groups", control: "groups" }
+    { param: "seed", control: "seed", integer: true },
+    { param: "k", control: "clusters", integer: true },
+    { param: "n", control: "points", integer: true },
+    { param: "groups", control: "groups", integer: true }
   ];
   var SHARE_SPEC = null;
-
-  function buildShareSpec() {
-    var spec = {};
-    SHARE_FIELDS.forEach(function (field) {
-      var slider = Controls.byId(field.control);
-      spec[field.param] = {
-        min: Numeric.toFinite(slider.min, 0),
-        max: Numeric.toFinite(slider.max, Infinity),
-        integer: true,
-        fallback: Numeric.toFinite(slider.defaultValue, 0)
-      };
-    });
-    return spec;
-  }
 
   var scatter = null;
   var model = null;
@@ -105,8 +91,7 @@
   function refreshShareLink() {
     var values = shareValues();
     ShareLink.sync(values, SHARE_SPEC);
-    var field = Controls.byId("share-url");
-    if (field) { field.value = ShareLink.currentUrl(values, SHARE_SPEC); }
+    ShareLink.refreshField("share-url", values, SHARE_SPEC);
   }
 
   /** 1 手戻る。種から作り直して 1 手少なく進める。 */
@@ -252,38 +237,6 @@
     return svg;
   }
 
-  /**
-   * 共有欄の配線。
-   * クリップボードは安全な接続（https / localhost）でないと使えないので、
-   * 失敗しても文字列を選択状態にして、手で複写できるようにしておく。
-   */
-  function wireShareField() {
-    var field = Controls.byId("share-url");
-    var button = Controls.byId("share-copy");
-    if (!field || !button) { return; }
-
-    /* 触れたら全選択。手で複写する人の手数を減らす。 */
-    field.addEventListener("focus", function () { field.select(); });
-
-    button.addEventListener("click", function () {
-      field.select();
-      var done = function () {
-        Controls.announce("share-status", t("share.copied"));
-        button.textContent = t("share.copied");
-        window.setTimeout(function () { button.textContent = t("share.copy"); }, 2000);
-      };
-      var failed = function () {
-        /* 選択は済んでいるので、そのまま手で複写できる。 */
-        Controls.announce("share-status", t("share.copyFailed"));
-      };
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(field.value).then(done, failed);
-      } else {
-        failed();
-      }
-    });
-  }
-
   function init() {
     scatter = Scatter.create({
       container: "#plot",
@@ -293,14 +246,14 @@
     /* URL に初期条件があれば入力欄へ反映してから組み立てる。
        値は ShareLink 側で範囲と型を検査済み。 */
     var pairs = Controls.bindPairs(PARAMS, rebuild);
-    SHARE_SPEC = buildShareSpec();
+    SHARE_SPEC = ShareLink.specFromControls(SHARE_FIELDS);
     var shared = ShareLink.read(SHARE_SPEC);
     if (pairs.seed) { pairs.seed.set(shared.seed); }
     if (pairs.clusters) { pairs.clusters.set(shared.k); }
     if (pairs.points) { pairs.points.set(shared.n); }
     if (pairs.groups) { pairs.groups.set(shared.groups); }
 
-    wireShareField();
+    ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 
     Controls.byId("step").addEventListener("click", function () {
       lastInfo = model.step();

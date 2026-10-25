@@ -115,7 +115,16 @@ JsDemo.ShareLink.build(values, SPEC);     // "?seed=7" (defaults are omitted)
 
 **Every value read is checked.** Anyone can edit a URL, so out-of-range, empty and non-numeric values are pulled back to the range or the default by `Numeric.readNumber` before any calculation sees them.
 
-**The range comes from the input elements.** Copying it into the spec lets the two drift, and a shared value then changes silently. `tools/check-controls.js` verifies that each slider and number field agree.
+**The range comes from the input elements.** Copying it into the spec lets the two drift, and a shared value then changes silently. `specFromControls` takes min, max, step and the initial value from the controls. `tools/check-controls.js` verifies that each slider and number field agree.
+
+**Values snap to the control's step.** An angle field with a step of 1 cannot show 37.5, so `?deg=37.5` becomes 38 in `parse` rather than being left to the browser's own rounding — what is displayed and what the URL says then agree. Decimals are rounded to three places on the way into the URL, so `1.2000000000000002` never appears.
+
+Wire the share field with `wireField` and `refreshField`, so both demos behave the same.
+
+```js
+ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
+ShareLink.refreshField("share-url", values, spec);
+```
 
 ## JsDemo.Tables
 
