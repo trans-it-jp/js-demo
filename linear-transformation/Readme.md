@@ -304,5 +304,5 @@ A^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix}\quad(\det(A)\ne 0)
 
 - 行列の計算は [`js/linear-algebra/matrix3.js`](../js/linear-algebra/matrix3.js)、描画は [`js/viz/plane.js`](../js/viz/plane.js) にあります。各フォルダに使い方の説明があります。
 - D3.js v7 を CDN から読み込みます（版は固定）。
-- 再利用条件（ライセンス）は未定です。決まるまで、このリポジトリのコードを再配布・商用利用の可否が確定したものとして扱わないでください。
+- 再利用条件: コードは [MIT License](../LICENSE)、この解説を含む教材本文は [CC BY 4.0](../LICENSE-CONTENT)。出典を示せば改変・再配布できます（商用を含む）。
 - 誤りの指摘は歓迎します。

@@ -306,5 +306,5 @@ A^{-1}=\frac{1}{ad-bc}\begin{bmatrix}d&-b\\-c&a\end{bmatrix}\quad(\det(A)\ne 0)
 
 - The matrix arithmetic lives in [`js/linear-algebra/matrix3.js`](../js/linear-algebra/matrix3.js) and the drawing in [`js/viz/plane.js`](../js/viz/plane.js). Each folder documents how to use it.
 - D3.js v7 is loaded from a CDN, pinned to an exact version.
-- The terms for reuse (the licence) are not decided yet. Until they are, please do not treat redistribution or commercial use of this code as settled either way.
+- Terms of reuse: code under the [MIT License](../LICENSE); the teaching material, these notes included, under [CC BY 4.0](../LICENSE-CONTENT). Adapt and redistribute freely, including commercially, with attribution.
 - Corrections are welcome.

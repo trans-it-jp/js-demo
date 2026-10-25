@@ -136,7 +136,26 @@ What is published here is a draft of the material. These points are outstanding,
 - No check of learning effect has been carried out. No trial with learners has taken place.
 - Testing on target devices is outstanding. Zoom, projection and small screens are handled by design, but have not been verified on real hardware.
 - Shapes can only be drawn with a pointer, not from the keyboard. Every parameter can also be set in a number field.
-- The terms for reuse (the licence) are not decided yet. Until they are, please do not treat redistribution or commercial use of this code as settled either way.
+
+## Licence
+
+| What | Licence |
+| --- | --- |
+| Source code | [MIT License](LICENSE) |
+| Teaching material (questions, explanations, hints, teacher notes, the Readme notes) | [CC BY 4.0](LICENSE-CONTENT) |
+
+**Adapt and redistribute freely, including commercially, as long as you give credit.** Teachers folding this into their own material is the case it was written for.
+
+A suggested credit line:
+
+```
+"JavaScript Learning Demos" by Trans-IT, CC BY 4.0
+https://trans-it-jp.github.io/js-demo/
+```
+
+D3.js is loaded from a CDN and not redistributed here (ISC License).
+
+No claim is made about curriculum alignment, learning outcomes or exam results.
 
 ## Contact
 
