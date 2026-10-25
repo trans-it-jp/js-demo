@@ -71,9 +71,16 @@ scatter.render({
   points: [[x, y], ...],     // 0〜1 の範囲
   assignments: [0, 1, ...],  // クラスタ番号。-1 は未割当
   centroids: [[x, y], ...],
-  showLinks: true            // 点と中心を結ぶ線
+  showLinks: true,           // 点と中心を結ぶ線
+  animate: true              // 前の状態から動かして見せる
 });
 ```
+
+`animate` が真のとき、中心の移動・割当線の先・点の色を 650ms かけて動かす。中心がどこへ寄っていくかを目で追えるようにするため。
+
+形は動かさない。円から四角のように別の形どうしは、途中の姿に意味が無いため即時に差し替える。
+
+`prefers-reduced-motion: reduce` の設定がある場合は、`animate` が真でも動かさない。
 
 クラスタの区別は三つの手掛かりで示す。
 

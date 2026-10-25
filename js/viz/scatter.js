@@ -13,6 +13,19 @@
 
   var VIEW = 640;
   var PADDING = 18;
+  var DURATION = 650;   /* 中心が動く様子を目で追える長さ */
+
+  /* 動きを減らす設定の人には動かさない。CSS の prefers-reduced-motion と揃える。 */
+  function prefersReducedMotion() {
+    return !!(global.matchMedia &&
+              global.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  /** 遷移を使うなら transition を、使わないならそのままの選択を返す */
+  function maybeAnimate(selection, duration) {
+    if (!duration || prefersReducedMotion()) { return selection; }
+    return selection.transition().duration(duration).ease(d3.easeCubicInOut);
+  }
 
   /* 色覚差でも区別しやすい並び（Okabe–Ito をもとに拡張） */
   var COLORS = [
@@ -77,11 +90,13 @@
      * @param {Array<number>} state.assignments  各点のクラスタ番号（-1 は未割当）
      * @param {Array<Array<number>>} state.centroids
      * @param {boolean} [state.showLinks]  点と中心を結ぶ線を描くか
+     * @param {boolean} [state.animate]  前の状態から動かして見せるか
      */
     function render(state) {
       var points = state.points;
       var assignments = state.assignments;
       var centroids = state.centroids;
+      var duration = state.animate === false ? 0 : DURATION;
 
       /* 割当線。どの中心に属しているかを線でも示す。 */
       var links = [];
@@ -92,31 +107,50 @@
           links.push({ p: points[i], c: centroids[c], cluster: c });
         }
       }
-      gLinks.selectAll("line")
+      /* 線は点の側を固定したまま、中心の側だけが動く。
+         どの中心へ引き寄せられたかが見て取れる。 */
+      var linkSelection = gLinks.selectAll("line")
         .data(links)
-        .join("line")
+        .join(
+          function (enter) {
+            return enter.append("line")
+              .attr("x1", function (d) { return x(d.p[0]); })
+              .attr("y1", function (d) { return y(d.p[1]); })
+              .attr("x2", function (d) { return x(d.p[0]); })
+              .attr("y2", function (d) { return y(d.p[1]); })
+              .attr("stroke", function (d) { return colorOf(d.cluster); });
+          },
+          function (update) { return update; },
+          function (exit) { return exit.remove(); }
+        );
+      maybeAnimate(linkSelection, duration)
         .attr("x1", function (d) { return x(d.p[0]); })
         .attr("y1", function (d) { return y(d.p[1]); })
         .attr("x2", function (d) { return x(d.c[0]); })
         .attr("y2", function (d) { return y(d.c[1]); })
         .attr("stroke", function (d) { return colorOf(d.cluster); });
 
-      gPoints.selectAll("path")
+      var pointSelection = gPoints.selectAll("path")
         .data(points.map(function (p, i) { return { p: p, cluster: assignments[i] }; }))
         .join("path")
         .attr("transform", function (d) {
           return "translate(" + x(d.p[0]) + "," + y(d.p[1]) + ")";
         })
+        /* 形は即時に差し替える。円から四角のように、別の形どうしは
+           途中の姿に意味が無いため動かさない。 */
         .attr("d", function (d) {
           return pointSymbol.type(d.cluster < 0 ? d3.symbolCircle : symbolOf(d.cluster))();
-        })
-        .attr("fill", function (d) {
-          return d.cluster < 0 ? "none" : colorOf(d.cluster);
         })
         .attr("stroke", function (d) {
           return d.cluster < 0 ? "var(--ink-muted)" : "none";
         })
         .attr("stroke-width", 1);
+
+      /* 色は動かす。どの点がどのクラスタへ移ったかを追いやすくする。 */
+      maybeAnimate(pointSelection, duration)
+        .attr("fill", function (d) {
+          return d.cluster < 0 ? "none" : colorOf(d.cluster);
+        });
 
       /* 中心は大きい記号＋白い縁取り＋番号。点と見間違えないようにする。 */
       var centroidData = centroids.map(function (c, i) { return { c: c, index: i }; });
@@ -129,8 +163,11 @@
           g.append("text").attr("class", "tag");
           return g;
         })
-        .attr("transform", function (d) {
-          return "translate(" + x(d.c[0]) + "," + y(d.c[1]) + ")";
+        .call(function (selection) {
+          maybeAnimate(selection, duration)
+            .attr("transform", function (d) {
+              return "translate(" + x(d.c[0]) + "," + y(d.c[1]) + ")";
+            });
         });
 
       groups.select("path.halo")

@@ -64,7 +64,8 @@
           <button type="button" id="step" class="is-primary">Next step</button>
           <button type="button" id="step-back">Back one step</button>
           <button type="button" id="run">Run to convergence</button>
-          <button type="button" id="reset">Reset</button>
+          <button type="button" id="restart">Back to start</button>
+          <button type="button" id="new-data">New data</button>
           <button type="button" id="toggle-links" aria-pressed="true">Show assignment links</button>
         </div>
 
@@ -106,7 +107,7 @@
             <div class="control">
               <label class="control__label" for="seed">
                 Random seed
-                <span class="control__note">One seed always gives the same starting state</span>
+                <span class="control__note">One seed always gives the same layout. "New data" picks another</span>
               </label>
               <input id="seed" type="range" min="0" max="9999" step="1" value="42">
               <input id="seed-num" type="number" min="0" max="9999" step="1" value="42">

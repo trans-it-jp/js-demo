@@ -71,9 +71,16 @@ scatter.render({
   points: [[x, y], ...],     // within 0–1
   assignments: [0, 1, ...],  // cluster index; -1 means unassigned
   centroids: [[x, y], ...],
-  showLinks: true            // draw a line from each point to its centroid
+  showLinks: true,           // draw a line from each point to its centroid
+  animate: true              // move from the previous state
 });
 ```
+
+With `animate`, centroid positions, the far end of each link and the point colours move over 650ms, so you can follow where the centroids are drifting.
+
+Shapes do not animate. Morphing a circle into a square has no meaningful in-between, so the marker is swapped instantly.
+
+When `prefers-reduced-motion: reduce` is set, nothing moves even with `animate` true.
 
 Clusters are distinguished three ways at once.
 

@@ -33,6 +33,20 @@
   var showLinks = true;
   var lastInfo = null;
   var stepCount = 0;   /* 初期化から何手進めたか。一手戻るときに使う。 */
+  var seedPair = null;
+  var animate = false; /* 直前の操作を動かして見せるか */
+
+  /**
+   * 新しい種を選ぶ。
+   * デモの中身は種から決まる（同じ種なら同じ結果）が、
+   * 「どの種で始めるか」だけは毎回変えたい。ここだけ真の乱数を使う。
+   */
+  function pickSeed() {
+    var slider = Controls.byId("seed");
+    var max = Numeric.toFinite(slider.max, 9999);
+    var min = Numeric.toFinite(slider.min, 0);
+    return Math.floor(min + Math.random() * (max - min + 1));
+  }
 
   function readParams() {
     return {
@@ -52,7 +66,9 @@
    * 同じ種なら必ず同じ初期状態になるので、途中の状態を保存しておかなくても
    * 「最初から n 手進めた状態」をいつでも作り直せる。一手戻るはこれを使う。
    */
-  function build(steps) {
+  function build(steps, options) {
+    var opts = options || {};
+    animate = opts.animate === true;
     var p = readParams();
     var random = Random.create(p.seed);
     var data = KMeans.makeBlobs({
@@ -78,8 +94,18 @@
     render();
   }
 
-  /** 設定が変わったときは最初の状態へ戻す。 */
+  /** 設定が変わったときは最初の状態へ戻す。図は動かさない。 */
   function rebuild() { build(0); }
+
+  /** 同じ種のまま最初へ戻す */
+  function restart() { build(0); }
+
+  /** 新しい種を選び、別の配置で始める */
+  function newData() {
+    var pair = seedPair;
+    if (pair) { pair.set(pickSeed()); }
+    build(0);
+  }
 
   /** 入力欄の値を URL の名前（短い形）へ置き換える */
   function shareValues() {
@@ -96,7 +122,7 @@
 
   /** 1 手戻る。種から作り直して 1 手少なく進める。 */
   function stepBack() {
-    if (stepCount > 0) { build(stepCount - 1); }
+    if (stepCount > 0) { build(stepCount - 1, { animate: true }); }
   }
 
   function phaseText() {
@@ -109,7 +135,8 @@
       points: model.points,
       assignments: model.assignments,
       centroids: model.centroids,
-      showLinks: showLinks
+      showLinks: showLinks,
+      animate: animate
     });
 
     var inertia = model.inertia();
@@ -247,8 +274,14 @@
        値は ShareLink 側で範囲と型を検査済み。 */
     var pairs = Controls.bindPairs(PARAMS, rebuild);
     SHARE_SPEC = ShareLink.specFromControls(SHARE_FIELDS);
+    seedPair = pairs.seed;
+
+    /* URL に種があればそれを使い、無ければ新しく選ぶ。
+       初めて開いた人には毎回違う配置を見せつつ、
+       共有したリンクには必ず種が載るので同じ状態を再現できる。 */
+    var seedInUrl = /(^|[?&])seed=/.test(window.location.search);
     var shared = ShareLink.read(SHARE_SPEC);
-    if (pairs.seed) { pairs.seed.set(shared.seed); }
+    if (pairs.seed) { pairs.seed.set(seedInUrl ? shared.seed : pickSeed()); }
     if (pairs.clusters) { pairs.clusters.set(shared.k); }
     if (pairs.points) { pairs.points.set(shared.n); }
     if (pairs.groups) { pairs.groups.set(shared.groups); }
@@ -256,22 +289,27 @@
     ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 
     Controls.byId("step").addEventListener("click", function () {
+      animate = true;
       lastInfo = model.step();
       stepCount += 1;
+      refreshShareLink();
       render();
     });
 
     Controls.byId("step-back").addEventListener("click", stepBack);
 
     Controls.byId("run").addEventListener("click", function () {
+      animate = true;
       while (!model.converged && stepCount < 400) {
         lastInfo = model.step();
         stepCount += 1;
       }
+      refreshShareLink();
       render();
     });
 
-    Controls.byId("reset").addEventListener("click", rebuild);
+    Controls.byId("restart").addEventListener("click", restart);
+    Controls.byId("new-data").addEventListener("click", newData);
 
     var linkToggle = Controls.byId("toggle-links");
     linkToggle.setAttribute("aria-pressed", String(showLinks));

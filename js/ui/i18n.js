@@ -40,7 +40,8 @@
       "button.step": "次へ進む",
       "button.stepBack": "一手戻る",
       "button.runToEnd": "収束まで進める",
-      "button.reset": "初期化",
+      "button.restart": "最初へ戻す",
+      "button.newData": "別のデータ",
       "button.stepDone": "収束済み",
 
       "table.clusters": "クラスタの内訳",
@@ -107,7 +108,8 @@
       "button.step": "Next step",
       "button.stepBack": "Back one step",
       "button.runToEnd": "Run to convergence",
-      "button.reset": "Reset",
+      "button.restart": "Back to start",
+      "button.newData": "New data",
       "button.stepDone": "Converged",
 
       "table.clusters": "Cluster breakdown",

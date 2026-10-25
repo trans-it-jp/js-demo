@@ -64,7 +64,8 @@
           <button type="button" id="step" class="is-primary">次へ進む</button>
           <button type="button" id="step-back">一手戻る</button>
           <button type="button" id="run">収束まで進める</button>
-          <button type="button" id="reset">初期化</button>
+          <button type="button" id="restart">最初へ戻す</button>
+          <button type="button" id="new-data">別のデータ</button>
           <button type="button" id="toggle-links" aria-pressed="true">割当線を表示</button>
         </div>
 
@@ -106,7 +107,7 @@
             <div class="control">
               <label class="control__label" for="seed">
                 乱数の種
-                <span class="control__note">同じ種なら必ず同じ初期状態になります</span>
+                <span class="control__note">同じ種なら必ず同じ配置になります。「別のデータ」で選び直します</span>
               </label>
               <input id="seed" type="range" min="0" max="9999" step="1" value="42">
               <input id="seed-num" type="number" min="0" max="9999" step="1" value="42">
