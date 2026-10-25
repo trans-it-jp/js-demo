@@ -130,27 +130,27 @@
         .attr("y2", function (d) { return y(d.c[1]); })
         .attr("stroke", function (d) { return colorOf(d.cluster); });
 
-      var pointSelection = gPoints.selectAll("path")
+      gPoints.selectAll("path")
         .data(points.map(function (p, i) { return { p: p, cluster: assignments[i] }; }))
         .join("path")
         .attr("transform", function (d) {
           return "translate(" + x(d.p[0]) + "," + y(d.p[1]) + ")";
         })
-        /* 形は即時に差し替える。円から四角のように、別の形どうしは
-           途中の姿に意味が無いため動かさない。 */
+        /* 点の見た目は形も色も即時に差し替える。
+           色を時間をかけて変えると、途中でどのクラスタの色でもない中間色を通る。
+           形は瞬時に変わるので、形と色が食い違った姿が見えてしまう。
+           「この点はもうこちらのクラスタ」と言い切り、
+           どこへ移ったかは線の動きで見せる。 */
         .attr("d", function (d) {
           return pointSymbol.type(d.cluster < 0 ? d3.symbolCircle : symbolOf(d.cluster))();
+        })
+        .attr("fill", function (d) {
+          return d.cluster < 0 ? "none" : colorOf(d.cluster);
         })
         .attr("stroke", function (d) {
           return d.cluster < 0 ? "var(--ink-muted)" : "none";
         })
         .attr("stroke-width", 1);
-
-      /* 色は動かす。どの点がどのクラスタへ移ったかを追いやすくする。 */
-      maybeAnimate(pointSelection, duration)
-        .attr("fill", function (d) {
-          return d.cluster < 0 ? "none" : colorOf(d.cluster);
-        });
 
       /* 中心は大きい記号＋白い縁取り＋番号。点と見間違えないようにする。 */
       var centroidData = centroids.map(function (c, i) { return { c: c, index: i }; });

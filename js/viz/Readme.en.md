@@ -76,9 +76,9 @@ scatter.render({
 });
 ```
 
-With `animate`, centroid positions, the far end of each link and the point colours move over 650ms, so you can follow where the centroids are drifting.
+With `animate`, **the centroids and the assignment links** move over 650ms, so you can follow where the centroids drift and which centroid each point was handed to.
 
-Shapes do not animate. Morphing a circle into a square has no meaningful in-between, so the marker is swapped instantly.
+**A point's appearance — colour and shape — changes instantly.** Fading the colour would pass through a shade belonging to no cluster, while the shape snaps, so for a moment the marker would contradict itself. The point commits to its cluster at once; where it moved is told by the link.
 
 When `prefers-reduced-motion: reduce` is set, nothing moves even with `animate` true.
 
