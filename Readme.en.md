@@ -29,7 +29,7 @@ Alongside that:
 - Every demo states its assumed background, its goal and the limits of its model. No claim is made about curriculum alignment or exam results.
 - No information is carried by colour alone. Shape, dashes, numbers and figures carry it too.
 - Every value can be set in a number field, not only with a slider or by dragging.
-- Randomness is seeded. One seed always gives the same starting state.
+- The random source is seedable, and the checks rely on that to reproduce results. On screen, each reset gives a brand new arrangement.
 
 ## Folder layout
 

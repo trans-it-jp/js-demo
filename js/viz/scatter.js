@@ -214,11 +214,10 @@
     return d3.symbol().type(symbolOf(index)).size(size === undefined ? 46 : size)();
   }
 
+  /* symbolOf と VIEW は中だけで使う。外へ出すのは、画面側が凡例で使うものだけ。 */
   JsDemo.Scatter = {
     create: create,
     colorOf: colorOf,
-    symbolOf: symbolOf,
     markerPath: markerPath,
-    VIEW: VIEW
   };
 })(window);

@@ -103,8 +103,9 @@
     };
   }
 
+  /* hashSeed は create() の中で使う。文字列の種を渡せば自動で畳み込まれるので、
+     外から呼ぶ必要はない。 */
   JsDemo.Random = {
-    create: createRandom,
-    hashSeed: hashSeed
+    create: createRandom
   };
 })(typeof window !== "undefined" ? window : globalThis);

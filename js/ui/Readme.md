@@ -30,6 +30,10 @@
 ```js
 JsDemo.I18n.t("phase.assign");    // 日本語ページなら「点を最も近い中心へ割り当てる」
 JsDemo.I18n.language;             // "ja" | "en"
+
+// 画面を作らずに辞書を点検するとき（日英の過不足を調べるなど）
+JsDemo.I18n.setLanguage("en");    // 言語を明示して切り替える
+JsDemo.I18n.detectLanguage();     // <html lang> から読み直す
 ```
 
 **ページに固定で書ける文は HTML 側に置く。** ここに入れるのは状態によって変わる文字列だけ。見出しや説明文まで辞書に入れると、HTML を読んでも何が表示されるか分からなくなる。

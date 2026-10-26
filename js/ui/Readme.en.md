@@ -30,6 +30,10 @@ The language comes from `<html lang>`: anything starting with `en` is English, e
 ```js
 JsDemo.I18n.t("phase.assign");    // on an English page: "Assign each point to its nearest centroid"
 JsDemo.I18n.language;             // "ja" | "en"
+
+// For checking the dictionary without a page (e.g. comparing ja and en coverage)
+JsDemo.I18n.setLanguage("en");    // switch explicitly
+JsDemo.I18n.detectLanguage();     // re-read it from <html lang>
 ```
 
 **Text that can simply be written in the page belongs in the HTML.** Only strings that change with state go here. Moving headings and prose into the dictionary would mean you can no longer tell what a page says by reading it.

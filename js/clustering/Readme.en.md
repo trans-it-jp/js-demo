@@ -110,7 +110,7 @@ This is as far as the demo goes, and the page says so.
 
 - Distance is Euclidean. Mixing axes with different units distorts the result.
 - Roughly round blobs are assumed. Elongated or unevenly dense distributions do not suit it.
-- The result depends on the initial centroids. Changing the seed lets you compare.
+- The result depends on the initial centroids. On screen each reset gives a new arrangement, so you can watch the same `k` land differently.
 - `k` is chosen by a person; it does not follow from the data.
 - Outliers pull centroids towards them.
 

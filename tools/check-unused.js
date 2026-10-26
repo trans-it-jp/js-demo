@@ -9,6 +9,8 @@
  *   - css/site.css の色トークン（--name）が、どこかで var(--name) として使われているか
  *   - css/site.css のクラス（.name）が、HTML か JavaScript に出てくるか
  *   - js/ui/i18n.js の文言の鍵が、画面側から引かれているか
+ *   - ライブラリが外へ出している関数が、ほかから使われているか
+ *     （使っていなくても Readme に載っていれば、再利用のための公開として扱う）
  *
  * なぜ要るか:
  *   作りを変えたときに、理由が消えた設定や文言だけが残ることがある。
@@ -64,7 +66,7 @@ var markup = matching(/\.(html|js)$/)
   .map(read).join("\n");
 
 var problems = [];
-var counted = { tokens: 0, classes: 0, keys: 0 };
+var counted = { tokens: 0, classes: 0, keys: 0, exports: 0 };
 
 /* --- 色などのトークン ---------------------------------------------------- */
 
@@ -131,10 +133,51 @@ Object.keys(keys).forEach(function (key) {
   problems.push("js/ui/i18n.js: 画面から引かれていない鍵 " + key);
 });
 
+/* --- ライブラリが外へ出しているもの -------------------------------------- */
+
+/* `JsDemo.X = { ... }` で外へ出しているのに、ほかの JavaScript からも
+   そのフォルダの Readme からも参照されていないものを報告する。
+   使っていなくても、Readme に載っていれば再利用のための公開として扱う。 */
+var LIBRARIES = [
+  "js/core/numeric.js", "js/core/seeded-random.js",
+  "js/linear-algebra/matrix3.js", "js/clustering/kmeans.js",
+  "js/sorting/sorts.js", "js/viz/plane.js", "js/viz/scatter.js",
+  "js/viz/bars.js", "js/ui/controls.js", "js/ui/tables.js",
+  "js/ui/learning.js", "js/ui/share-link.js", "js/ui/i18n.js"
+];
+
+var docs = matching(/Readme(\.en)?\.md$/).map(read).join("\n");
+
+LIBRARIES.forEach(function (file) {
+  var full = path.join(ROOT, file);
+  if (!fs.existsSync(full)) { return; }
+  var src = read(full);
+  var at = src.lastIndexOf("JsDemo.");
+  var open = src.indexOf("= {", at);
+  if (at < 0 || open < 0) { return; }
+  var block = src.slice(open);
+  var names = [];
+  var exportPattern = /^\s{4}([a-zA-Z][a-zA-Z0-9]*)\s*:/gm;
+  var found;
+  while ((found = exportPattern.exec(block)) !== null) { names.push(found[1]); }
+
+  var others = matching(/\.js$/)
+    .filter(function (f) { return f !== full && f.indexOf(TOOLS) !== 0; })
+    .map(read).join("\n");
+
+  names.forEach(function (name) {
+    counted.exports += 1;
+    if (others.indexOf("." + name) >= 0) { return; }
+    if (docs.indexOf(name) >= 0) { return; }
+    problems.push(file + ": 外から使われず、Readme にも載っていない " + name);
+  });
+});
+
 /* --- 結果 ---------------------------------------------------------------- */
 
 console.log("トークン " + counted.tokens + " / クラス " + counted.classes +
-            " / 文言の鍵 " + counted.keys + " を確認した");
+            " / 文言の鍵 " + counted.keys + " / 公開している関数 " + counted.exports +
+            " を確認した");
 
 if (problems.length === 0) {
   console.log("\nOK 取り残された定義は見つからなかった");
