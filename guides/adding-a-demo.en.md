@@ -24,11 +24,13 @@ en/<demo-name>/
 
 ### a. The page
 
-Copy [`templates/demo.html`](../templates/demo.html) and replace the `{{ }}` parts. The template carries the six stages of the learning flow — question, prediction, operation, comparison, explanation, transfer — as markers. Do not drop a stage.
+Copy [`templates/demo.html`](../templates/demo.html) and replace the `{{ }}` parts. The learning flow has six stages — question, prediction, operation, comparison, explanation, transfer — and the template carries five of them as markers. Do not drop a stage.
+
+**The prediction panel is not in the template** (decided 2026-10-26), because none of the published demos uses one. Add it with `JsDemo.Learning.wirePrediction` in a demo that wants it (see [`js/ui/Readme.en.md`](../js/ui/Readme.en.md)).
 
 The template is **the copy-source for future demos**. The existing k-means and 2D coordinate transform pages were written before it, and the template records their structure; there is no need to rebuild them from it.
 
-Choosing a prediction, progressively revealed hints and switching vocabulary are not in it yet — the template only prompts for them in prose. They are to be built separately.
+Progressive hints (`.hints`) and the vocabulary switch (`.wording`) are built as shared components; the template carries their markers, and the page wires them with `JsDemo.Learning.wireHints` and `wireWording`.
 
 If the depth changes, fix the number of `../..` segments. The English copy takes `lang="en"`, goes under `en/`, and the two link to each other.
 

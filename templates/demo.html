@@ -9,7 +9,11 @@
   使い方は guides/adding-a-demo.md を読む。
   このファイルを目的の場所へ複写し、{{ }} の箇所を置き換える。
   <!-- 1. 問い --> のような印は、学習の流れのどこかを示すもの。
-  組み替えてもよいが、6 つの段階（問い・予想・操作・比較・説明・転移）を落とさない。
+  学習の流れは 6 段階（問い・予想・操作・比較・説明・転移）。
+  このうち**予想の欄はこの雛形に入れていない**（2026-10-26 の決定）。
+  公開中のどの題材でも置いていないため。置きたい題材では
+  js/ui/learning.js の JsDemo.Learning.wirePrediction を使って足す。
+  残る 5 段階は落とさない。
 
   パスは linear-transformation/pages/ など 2 階層の深さを前提にしている。
   置き場所が変わったら ../../ の数を直す。日本語版は lang="ja"、
@@ -71,11 +75,6 @@
         <dt>前提</dt>
         <dd>{{学年ではなく前提概念で書く。}}</dd>
       </div>
-      <!-- 2. 予想 — 動かす前に一つ選ばせる。選ばなくても操作はできる。 -->
-      <div>
-        <dt>動かす前に予想する</dt>
-        <dd>{{具体的な条件を示して予想させる。}}</dd>
-      </div>
     </dl>
 
     <div class="demo">
@@ -98,22 +97,6 @@
       </div>
 
       <aside>
-        <!-- 予想。強制しない。選ばなくても操作できる。
-             data-answer を付けると正誤を返す。正解が一つに決まらない問いでは外す。 -->
-        <section class="panel">
-          <h2 class="panel__title">動かす前に予想する</h2>
-          <fieldset class="predict" id="predict">
-            <legend class="predict__question">{{問い。一つだけ。}}</legend>
-            <div class="predict__choices">
-              <label><input type="radio" name="predict" value="a">{{選択肢1}}</label>
-              <label><input type="radio" name="predict" value="b">{{選択肢2}}</label>
-              <label><input type="radio" name="predict" value="c">{{選択肢3}}</label>
-            </div>
-            <p class="predict__note">選ばなくても操作できます。選ぶと、あとで結果と見比べられます。</p>
-          </fieldset>
-          <p class="predict__result" id="predict-result" role="status" aria-live="polite"></p>
-        </section>
-
         <section class="panel">
           <h2 class="panel__title">条件を変える</h2>
           <div class="controls">
