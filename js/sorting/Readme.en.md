@@ -72,7 +72,7 @@ plan.finished;         // whether it ended (usually stays false)
 
 | type | Meaning | Fields |
 | --- | --- | --- |
-| `compare` | Two things were compared | `cells: [[row, i], ...]` |
+| `compare` | Two things were compared | `cells: [[row, i], ...]`, `count` (comparisons folded into this step) |
 | `read` | A value was read, not compared | `cells: [[row, i]]` |
 | `swap` | Two things changed places | `i`, `j`, `row` (defaults to main) |
 | `set` | A value was written | `row`, `i`, `value` |
@@ -91,6 +91,20 @@ plan.finished;         // whether it ended (usually stays false)
 | `done` | End of the run | — |
 
 Comparisons and swaps are **counted from the steps**. Counting them separately would drift from what actually happened.
+
+### Rounds
+
+Steps are grouped by an `endRound` flag, and **the page advances a round at a time.**
+
+```js
+var at = JsDemo.Sorts.applyRound(state, plan.steps, at);   // advance one round
+JsDemo.Sorts.countRounds(plan.steps);                      // how many rounds there are
+JsDemo.Sorts.replayRounds({ values: values, steps: plan.steps, rounds: 10 });
+```
+
+A round is one "compare, then move" unit. For bogosort it is "check whether it is sorted; if not, shuffle the whole row". Open-ended algorithms mark their own boundaries with `rec.round()`; the rest are grouped by a rule over step types.
+
+**For algorithms that compare, comparisons >= rounds holds by construction.** When a round was a single recorded action, checks and shuffles counted towards it too, so the comparison count came out lower than the round count and read as a bug.
 
 ## Things to watch
 

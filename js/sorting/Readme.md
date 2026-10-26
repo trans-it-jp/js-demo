@@ -71,7 +71,7 @@ plan.finished;         // 終わったか（たいてい false のまま）
 
 | type | 内容 | 持ち物 |
 | --- | --- | --- |
-| `compare` | 2 つを比べた | `cells: [[row, i], ...]` |
+| `compare` | 2 つを比べた | `cells: [[row, i], ...]`、`count`（まとめて比べた回数） |
 | `read` | 値を見ただけ（比較ではない） | `cells: [[row, i]]` |
 | `swap` | 入れ替えた | `i`, `j`, `row`（既定 main） |
 | `set` | 値を書いた | `row`, `i`, `value` |
@@ -90,6 +90,20 @@ plan.finished;         // 終わったか（たいてい false のまま）
 | `done` | 手順の終わり | — |
 
 比べた回数・入れ替えた回数は**手順から数える**。別に数えると実物とずれるため。
+
+### 回（1 周）
+
+手順は `endRound` の印でひとまとまりに区切ってある。**画面はこの「回」を単位に進める。**
+
+```js
+var at = JsDemo.Sorts.applyRound(state, plan.steps, at);   // 1 回ぶん進める
+JsDemo.Sorts.countRounds(plan.steps);                      // 何回ぶんあるか
+JsDemo.Sorts.replayRounds({ values: values, steps: plan.steps, rounds: 10 });
+```
+
+1 回 =「比べて、その結果どう動いたか」のひとまとまり。ボゴソートなら「そろっているか確かめて、違えば全部混ぜ直す」までで 1 回。終わりの分からない手法は `rec.round()` で自分で切れ目を付け、それ以外は手順の種類から規則で決める。
+
+**比較を伴う手法では「比べた回数 >= 回数」が成り立つようにしてある。** 操作ひとつを 1 と数えていたときは、混ぜ直しや判定も回数に入り、比べた回数のほうが小さくなって分かりにくかった。
 
 ## 気をつけること
 
