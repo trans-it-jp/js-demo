@@ -56,7 +56,17 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 
 `maxCount` caps the number of elements — lowest for the ones that do not finish (`bogo` and `bozo` are capped at 7). `limit` caps the number of steps; going past it sets `truncated`.
 
-`unbounded: true` marks the algorithms whose end cannot be known in advance (`bogo`, `bozo`, `miracle`). **It tells the UI not to show a total step count**: revealing which step it ends on would destroy the very property that there is no guarantee it ends.
+`unbounded: true` marks the algorithms whose end cannot be known in advance (`bogo`, `bozo`, `miracle`). These three carry a **`round` function (one pass at a time)** instead of `run`, and `run()` returns with zero steps.
+
+```js
+var plan = JsDemo.Sorts.run({ id: "bogo", values: values, random: random });
+plan.lazy;             // true
+plan.steps.length;     // 0 — nothing has been generated yet
+plan.ensure(10);       // generate until there are 10 steps; true if it got there
+plan.finished;         // whether it ended (usually stays false)
+```
+
+**Nothing is run to completion up front.** Doing so would reveal which step it ends on and destroy the very property that there is no guarantee it ends. Call `ensure(cursor + 1)` before advancing.
 
 ## Step types
 
@@ -90,7 +100,8 @@ Comparisons and swaps are **counted from the steps**. Counting them separately w
 - `sorted` means strictly "this position will not change again". It is not used for a stretch that is merely in order for now, as in insertion sort (there is an invariant test for this).
 - `values()` uses **1 to n, each exactly once**. No value repeats, so stability (whether equal values keep their original order) cannot be demonstrated with this generator.
 - `bogo` and `bozo` need a random source — pass `random` to `run`, or they will throw.
-- Steps are generated up front, so the array grows with the number of elements. Do not call past `maxCount`.
+- Algorithms with a known end generate all their steps up front, so the array grows with the number of elements. Do not call past `maxCount`.
+- Open-ended ones generate only what `ensure()` asks for. Calling it without bound eats memory, so the caller caps it (the page advances at most 4,000 steps at a time).
 
 ## Checks
 

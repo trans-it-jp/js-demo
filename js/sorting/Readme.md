@@ -55,7 +55,17 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 
 `maxCount` は要素数の上限。終わらない手法ほど小さい（`bogo` と `bozo` は 7）。`limit` は手順の上限で、超えると `truncated` が立つ。
 
-`unbounded: true` は「終わりが事前に分からない」手法（`bogo`・`bozo`・`miracle`）。**画面に総手数を出さないための印**で、何手目で終わるかを先に見せると「終わる保証がない」という性質が伝わらなくなる。
+`unbounded: true` は「終わりが事前に分からない」手法（`bogo`・`bozo`・`miracle`）。この 3 つは `run` ではなく **`round`（1 周ぶんを作る関数）** を持ち、`run()` は手順 0 件で返す。
+
+```js
+var plan = JsDemo.Sorts.run({ id: "bogo", values: values, random: random });
+plan.lazy;             // true
+plan.steps.length;     // 0。まだ 1 手も作っていない
+plan.ensure(10);       // 10 手に届くまで作る。届けば true
+plan.finished;         // 終わったか（たいてい false のまま）
+```
+
+**終わるまで先に走らせない。** 走らせてしまうと終わりの手数が分かり、「終わる保証がない」という性質が画面から消える。進める前に `ensure(cursor + 1)` を呼ぶ。
 
 ## 手順の種類
 
@@ -89,7 +99,8 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 - `sorted` は「この位置はもう変わらない」という意味にだけ使う。挿入ソートのように、そろってはいるがあとで動く範囲には付けない（tests に不変条件がある）。
 - `values()` は **1 から n までを 1 回ずつ**使う。同じ値は出てこないので、安定性（同じ値の前後関係が保たれるか）はこの作りでは確かめられない。
 - `bogo` と `bozo` は乱数が要る（`run` に `random` を渡す）。渡さないと落ちる。
-- 手順は先に全部作る。要素数を大きくすると配列も大きくなるので、`maxCount` を超えて呼ばない。
+- 終わりが分かっている手法は手順を先に全部作る。要素数を大きくすると配列も大きくなるので、`maxCount` を超えて呼ばない。
+- 終わりが分からない手法は `ensure()` で求めた分だけ作る。無制限に呼ぶとメモリを食うので、呼び出し側で上限を持つ（画面側は一度に 4000 手まで）。
 
 ## 検証
 
