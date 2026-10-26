@@ -189,7 +189,7 @@
       "sort.aux.digits": "いまの桁で配り直した並び",
       "sort.aux.buckets": "バケツへ配った並び（破線がバケツの境目）",
 
-      "sort.status.progress": "手順",
+      "sort.status.progress": "回数",
       "sort.status.compare": "比べた回数",
       "sort.status.swap": "入れ替えた回数",
       "sort.status.write": "書き込んだ回数",
@@ -260,7 +260,7 @@
 
       "sort.mode.auto": "自動で見る",
       "sort.mode.manual": "1 手ずつ進める",
-      "sort.speed": "1 手あたりの間（ミリ秒）",
+      "sort.speed": "1 回あたりの間（ミリ秒）",
       "sort.count": "要素の数",
 
       "button.play": "再生",
@@ -268,8 +268,8 @@
       "button.replay": "もう一度再生",
       "button.toEnd": "最後まで進める",
 
-      "sort.msg.truncated": "手順が上限に達したため打ち切りました。要素の数を減らすと終わりまで見られます。",
-      "sort.msg.stillRunning": "{steps} 手進めましたが、まだ終わっていません。もう一度押すと続きを進めます。",
+      "sort.msg.truncated": "記録の上限に達したため打ち切りました。要素の数を減らすと終わりまで見られます。",
+      "sort.msg.stillRunning": "{steps} 回進めましたが、まだ終わっていません。もう一度押すと続きを進めます。",
       "sort.msg.capped": "この手法は要素が多いと終わらないため、{max} 個までに制限しました。",
       "sort.msg.lost": "取り除かれて消えた要素があります。結果は並べ替えではありません。",
       "sort.msg.finished": "手順の終わりまで来ました。",
@@ -460,7 +460,7 @@
       "sort.aux.digits": "Redistributed by the current digit",
       "sort.aux.buckets": "Spread into buckets (the dashed lines are the boundaries)",
 
-      "sort.status.progress": "Step",
+      "sort.status.progress": "Rounds",
       "sort.status.compare": "Comparisons",
       "sort.status.swap": "Swaps",
       "sort.status.write": "Writes",
@@ -531,7 +531,7 @@
 
       "sort.mode.auto": "Watch it run",
       "sort.mode.manual": "One step at a time",
-      "sort.speed": "Milliseconds per step",
+      "sort.speed": "Milliseconds per round",
       "sort.count": "Number of elements",
 
       "button.play": "Play",
@@ -540,7 +540,7 @@
       "button.toEnd": "Run to the end",
 
       "sort.msg.truncated": "The step limit was reached, so this run was cut short. Use fewer elements to see it finish.",
-      "sort.msg.stillRunning": "Ran {steps} steps and it still has not finished. Press again to carry on.",
+      "sort.msg.stillRunning": "Ran {steps} rounds and it still has not finished. Press again to carry on.",
       "sort.msg.capped": "This algorithm does not finish with many elements, so it is limited to {max}.",
       "sort.msg.lost": "Some elements were removed and are gone. The result is not a rearrangement.",
       "sort.msg.finished": "This is the end of the run.",

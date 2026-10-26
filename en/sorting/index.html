@@ -109,11 +109,11 @@
             </div>
             <div class="control">
               <label class="control__label" for="speed">
-                Milliseconds per step
-                <span class="control__note">How fast it runs on its own</span>
+                Milliseconds per round
+                <span class="control__note">How fast it runs on its own. A round is one "compare, then move" unit</span>
               </label>
-              <input id="speed" type="range" min="10" max="1200" step="10" value="250">
-              <input id="speed-num" type="number" min="10" max="1200" step="10" value="250">
+              <input id="speed" type="range" min="10" max="1200" step="10" value="400">
+              <input id="speed-num" type="number" min="10" max="1200" step="10" value="400">
             </div>
             <div class="control">
               <label class="control__label" for="columns">
@@ -199,13 +199,14 @@
         <li>The values are <strong>1 to n, each used once</strong>, in random order. No value ever repeats, so you cannot see here whether equal values keep their original order (stability). Every count in counting sort is 1.</li>
         <li>Radix sort distributes by decimal digits. Negative numbers, decimals and text are out of scope.</li>
         <li>Sleep sort is shown as an <strong>order</strong>, not as real elapsed time. Run against a real clock, close values are not guaranteed to come out in order. Elements line up in the second row as they leave, and the result is written back into the first row at the end.</li>
-        <li>Bogosort, bozo sort and miracle sort <strong>generate their steps as you advance, not in advance.</strong> Nothing is run to completion behind the scenes, so there is no total number of steps to speak of. The progress figure simply counts which step you are on, and "Run as far as it goes" advances at most 4,000 steps, which you can repeat.</li>
+        <li>Bogosort, bozo sort and miracle sort <strong>generate their steps as you advance, not in advance.</strong> Nothing is run to completion behind the scenes, so there is no total to speak of. "Run as far as it goes" advances at most 4,000 rounds, which you can repeat.</li>
         <li>Stalin sort and Thanos sort lose elements. <strong>They do not rearrange anything.</strong></li>
         <li>Miracle sort and intelligent design sort do not sort. They are here as jokes.</li>
         <li>Quantum bogosort "discards the universe" as a joke; nothing actually happens.</li>
         <li>Quicksort always takes the rightmost element of the range as its pivot. Other pivot choices are out of scope.</li>
         <li><strong>A green ✓ means strictly "this position will not change again".</strong> It is not used for a stretch that merely happens to be in order and will move later, as in insertion sort — watch the staircase shape for that instead.</li>
-        <li><strong>No algorithm shows a total number of steps.</strong> The progress figure counts the current step only. What is worth comparing between algorithms is the number of comparisons and the number of real changes.</li>
+        <li><strong>No algorithm shows a total number of rounds.</strong> The progress figure counts the current round only. What is worth comparing between algorithms is the number of comparisons and the number of real changes.</li>
+        <li><strong>A round is one "compare, then move" unit.</strong> For bogosort that means "check whether it is sorted, and if not shuffle the whole row" — one round. How many comparisons happened inside a round is counted separately.</li>
         <li>The working row for bucket sort marks the bucket boundaries with dashed lines. <strong>A bucket that received nothing has zero width</strong>, so its lines coincide and cannot be told apart.</li>
         <li>The name origins are short summaries of the commonly given explanations. They have not been checked against scholarly sources one by one.</li>
       </ul>

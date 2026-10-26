@@ -972,6 +972,58 @@
     });
   });
 
+  test("ソート", "手順はすべて、どこかの 1 回ぶんに属する", function () {
+    /* 回数は「1 周」で数える。切れ目の印が付いていない手順が末尾に残ると、
+       進めても回数が増えないまま図だけ動く状態になる。 */
+    Sorts.ALGORITHMS.forEach(function (algorithm) {
+      var out = sortRun(algorithm.id, 12, 83);
+      var steps = out.plan.steps;
+      isTrue(steps.length > 0, algorithm.id + " の手順がある");
+      isTrue(steps[steps.length - 1].endRound === true,
+             algorithm.id + " の最後の手順に切れ目がある");
+      var rounds = Sorts.countRounds(steps);
+      isTrue(rounds > 0, algorithm.id + " に 1 回以上ある");
+      isTrue(rounds <= steps.length, algorithm.id + " の回数は手順以下");
+    });
+  });
+
+  test("ソート", "1 回ぶんには必ず 1 回以上の比較がある（比べる手法）", function () {
+    /* 「1 回進めるのに最低 1 回は比べるはず」という読み方と、画面の数が
+       食い違わないようにする。比べない手法（計数・基数・スリープ等）は除く。 */
+    /* 動かす手が必ず比較のあとに来る手法だけを見る。
+       パンケーキの反転、二分挿入のずらし、ヒープの取り出し、マージの
+       書き写し、クイックの基準の置き直しは、比較を伴わない動きなので除く。
+       計数・基数・バケツ・スリープ・デザインはそもそも比べない。 */
+    ["bubble", "cocktail", "gnome", "comb", "insertion", "shell", "selection",
+     "cycle", "stooge", "stalin", "thanos", "bogo", "bozo", "quantum", "miracle"]
+      .forEach(function (id) {
+        var out = sortRun(id, 10, 91);
+        var rounds = Sorts.countRounds(out.plan.steps);
+        var state = Sorts.replay({ values: out.values, steps: out.plan.steps });
+        isTrue(state.counts.compare >= rounds,
+               id + ": 比較 " + state.counts.compare + " >= 回数 " + rounds);
+      });
+  });
+
+  test("ソート", "1 回ずつ進めた結果は、まとめて畳み込んだ結果と一致する", function () {
+    ["bubble", "merge", "quick", "counting", "sleep"].forEach(function (id) {
+      var out = sortRun(id, 12, 37);
+      var rounds = Sorts.countRounds(out.plan.steps);
+      var stepwise = Sorts.initial(out.values);
+      var at = 0;
+      for (var i = 0; i < rounds; i += 1) {
+        at = Sorts.applyRound(stepwise, out.plan.steps, at);
+      }
+      var whole = Sorts.replayRounds({
+        values: out.values, steps: out.plan.steps, rounds: rounds
+      });
+      equal(stepwise.main.map(function (c) { return c.value; }).join(","),
+            whole.main.map(function (c) { return c.value; }).join(","),
+            id + " の並び");
+      equal(at, whole.at, id + " の位置");
+    });
+  });
+
   test("ソート", "並びは 1 から n までを 1 回ずつ使う", function () {
     var values = Sorts.values({ count: 40, random: Random.create(5) });
     equal(values.length, 40, "要素数");

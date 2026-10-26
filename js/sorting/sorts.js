@@ -61,6 +61,10 @@
       compareAux: function (i, j) {
         return this.add({ type: "compare", cells: [["aux", i], ["aux", j]] });
       },
+      /** ここまでで 1 回ぶん、と印を付ける */
+      round: function () {
+        if (steps.length > 0) { steps[steps.length - 1].endRound = true; }
+      },
       get full() { return steps.length >= cap; },
       get truncated() { return truncated; }
     };
@@ -322,11 +326,21 @@
    */
   function checkSorted(a, rec) {
     var ok = true;
+    var at = 0;
+    var compared = 0;
     for (var i = 0; i + 1 < a.length; i += 1) {
-      rec.compare(i, i + 1);
-      if (rec.full) { return false; }
+      compared += 1;
+      at = i;
       if (a[i] > a[i + 1]) { ok = false; break; }
     }
+    /* 確認そのものは **1 手順** にまとめる。何回比べたかは count で数える。
+       1 周を何回にも分けて数えると、比べた回数より回数のほうが大きくなり、
+       「1 回進めるのに最低 1 回は比べるはずなのに」と食い違って見えるため。 */
+    rec.add({
+      type: "compare",
+      cells: [["main", at], ["main", at + 1]],
+      count: compared
+    });
     rec.add({ type: "check", ok: ok });
     return ok;
   }
@@ -343,11 +357,13 @@
     if (checkSorted(a, rec)) {
       markAllSorted(a, rec);
       rec.add({ type: "note", key: "sort.note.bogoDone" });
+      rec.round();
       return true;
     }
     var mixed = random.shuffle(a);
     for (var i = 0; i < mixed.length; i += 1) { a[i] = mixed[i]; }
     rec.add({ type: "shuffle", values: mixed.slice() });
+    rec.round();
     return false;
   }
 
@@ -394,9 +410,11 @@
     if (checkSorted(a, rec)) {
       markAllSorted(a, rec);
       rec.add({ type: "note", key: "sort.note.miracleDone" });
+      rec.round();
       return true;
     }
     rec.add({ type: "note", key: "sort.note.miracleWait" });
+    rec.round();
     return false;
   }
 
@@ -818,22 +836,31 @@
     for (var i = 0; i < a.length; i += 1) { alive.push(i); }
 
     function aliveSorted() {
+      var ok = true;
+      var at = 0;
+      var compared = 0;
       for (var k = 0; k + 1 < alive.length; k += 1) {
-        rec.compare(alive[k], alive[k + 1]);
-        if (rec.full) { return false; }
-        if (a[alive[k]] > a[alive[k + 1]]) { return false; }
+        compared += 1;
+        at = k;
+        if (a[alive[k]] > a[alive[k + 1]]) { ok = false; break; }
       }
-      return true;
+      if (alive.length > 1) {
+        rec.add({
+          type: "compare",
+          cells: [["main", alive[at]], ["main", alive[at + 1]]],
+          count: compared
+        });
+      }
+      return ok;
     }
 
     while (!rec.full) {
       var ok = aliveSorted();
       rec.add({ type: "check", ok: ok });
       if (ok || alive.length <= 1) {
-        alive.forEach(function (index) {
-          rec.add({ type: "sorted", indices: [index] });
-        });
+        rec.add({ type: "sorted", indices: alive.slice() });
         rec.add({ type: "note", key: "sort.note.thanosDone" });
+        rec.round();
         return;
       }
       /* 半分を無作為に選んで消す。 */
@@ -842,10 +869,13 @@
       var keptSet = {};
       kept.forEach(function (index) { keptSet[index] = true; });
       var next = [];
+      var gone = [];
       alive.forEach(function (index) {
-        if (keptSet[index]) { next.push(index); }
-        else { rec.add({ type: "remove", i: index }); }
+        if (keptSet[index]) { next.push(index); } else { gone.push(index); }
       });
+      /* 半分をまとめて 1 手順で消す。1 周が 1 回になるようにするため。 */
+      rec.add({ type: "remove", indices: gone });
+      rec.round();
       next.sort(function (p, q) { return p - q; });
       alive = next;
     }
@@ -860,6 +890,7 @@
     if (checkSorted(a, rec)) {
       markAllSorted(a, rec);
       rec.add({ type: "note", key: "sort.note.bozoDone" });
+      rec.round();
       return true;
     }
     var i1 = Math.floor(random.next() * a.length);
@@ -868,6 +899,7 @@
       swapInPlace(a, i1, i2);
       rec.add({ type: "swap", i: i1, j: i2 });
     }
+    rec.round();
     return false;
   }
 
@@ -880,19 +912,14 @@
     for (var i = 0; i < mixed.length; i += 1) { a[i] = mixed[i]; }
     rec.add({ type: "shuffle", values: mixed.slice() });
 
-    var ok = true;
-    for (var k = 0; k + 1 < a.length; k += 1) {
-      rec.compare(k, k + 1);
-      if (rec.full) { return; }
-      if (a[k] > a[k + 1]) { ok = false; break; }
-    }
-    rec.add({ type: "check", ok: ok });
+    var ok = checkSorted(a, rec);
     if (ok) {
       markAllSorted(a, rec);
       rec.add({ type: "note", key: "sort.note.quantumKept" });
     } else {
       rec.add({ type: "note", key: "sort.note.quantumDiscard" });
     }
+    rec.round();
   }
 
   /**
@@ -975,6 +1002,57 @@
    * 手順を作る。元の配列は変えない。
    * @returns {{steps:Array, truncated:boolean, finished:boolean, result:Array}}
    */
+  /* 1 回ぶんの切れ目を決める規則。
+     「見る手（比べる・読む）」のあとに「動かす手」が続くなら、それで 1 回。
+     動かす手が続けて並ぶときは、ひとつずつ 1 回と数える。
+     飾りの手（範囲・基準・確定・説明など）はそれ自体では切れ目にしない。 */
+  var LOOK_TYPES = { compare: true, read: true };
+  var ACTION_TYPES = {
+    swap: true, set: true, reverse: true, shuffle: true, remove: true, emit: true
+  };
+
+  /**
+   * 末尾に残った飾りの手順（確定の印や終わりの印）を、最後の 1 回に含める。
+   * ここで新しく 1 回を足すと、比較を 1 度もしない回ができてしまい、
+   * 「1 回進めるのに最低 1 回は比べるはず」という読み方と食い違う。
+   */
+  function closeLastRound(steps) {
+    var last = -1;
+    steps.forEach(function (step, index) {
+      if (step.endRound) { last = index; }
+    });
+    if (last === steps.length - 1) { return; }
+    if (last >= 0) { steps[last].endRound = false; }
+    steps[steps.length - 1].endRound = true;
+  }
+
+  function markRounds(steps) {
+    if (steps.length === 0) { return; }
+    if (steps.some(function (step) { return step.endRound === true; })) {
+      /* 手法が自分で切れ目を決めている場合はそれに従う。 */
+      closeLastRound(steps);
+      return;
+    }
+
+    function nextSignificant(from) {
+      for (var i = from + 1; i < steps.length; i += 1) {
+        var type = steps[i].type;
+        if (LOOK_TYPES[type] || ACTION_TYPES[type]) { return steps[i]; }
+      }
+      return null;
+    }
+
+    steps.forEach(function (step, index) {
+      if (ACTION_TYPES[step.type]) {
+        step.endRound = true;
+      } else if (LOOK_TYPES[step.type]) {
+        var next = nextSignificant(index);
+        step.endRound = !next || LOOK_TYPES[next.type] === true;
+      }
+    });
+    closeLastRound(steps);
+  }
+
   function run(options) {
     var algorithm = get(options.id);
     if (!algorithm) { throw new Error("知らない手法: " + options.id); }
@@ -985,6 +1063,7 @@
     if (!algorithm.round) {
       algorithm.run(work, rec, options.random);
       if (!rec.truncated) { rec.add({ type: "done" }); }
+      markRounds(rec.steps);
       return {
         id: algorithm.id,
         steps: rec.steps,
@@ -1015,7 +1094,10 @@
       ensure: function (count) {
         while (!ended && !rec.full && rec.steps.length < count) {
           ended = algorithm.round(work, rec, options.random) === true;
-          if (ended) { rec.add({ type: "done" }); }
+          if (ended) {
+            rec.add({ type: "done" });
+            rec.round();
+          }
         }
         return rec.steps.length >= count;
       }
@@ -1070,7 +1152,7 @@
    * 時間がかかる。ボゴソートのように手順が数万になる手法で詰まるため、
    * 1 手進めるときはこの関数を使い、戻るときだけ replay() で作り直す。
    */
-  function applyStep(state, step) {
+  function applyStep(state, step, keepMarks) {
     function clearMarks() {
       state.main.forEach(function (c) { c.mark = null; });
       if (state.aux) { state.aux.forEach(function (c) { c.mark = null; }); }
@@ -1078,7 +1160,9 @@
 
     function rowOf(name) { return name === "aux" ? state.aux : state.main; }
 
-    clearMarks();
+    /* 1 回ぶんをまとめて適用するときは、途中で印を消さない。
+       「何と何を比べて、その結果どう動いたか」が 1 回の中で見えるように。 */
+    if (!keepMarks) { clearMarks(); }
     state.cursor += 1;
 
     if (true) {
@@ -1087,8 +1171,10 @@
            計数ソートや基数ソートが「一度も比べない」ことを数で示せるように、
            compare とは別に数える。画面での印は同じでよい。 */
         var isCompare = step.type === "compare";
-        if (isCompare) { state.counts.compare += 1; }
-        else { state.counts.read += 1; }
+        /* count は 1 手順でまとめて比べた回数（そろっているかの確認など）。 */
+        var times = step.count || 1;
+        if (isCompare) { state.counts.compare += times; }
+        else { state.counts.read += times; }
         step.cells.forEach(function (ref) {
           var row = rowOf(ref[0]);
           if (row && row[ref[1]]) {
@@ -1173,11 +1259,14 @@
         }
 
       } else if (step.type === "remove") {
-        state.counts.remove += 1;
-        if (state.main[step.i]) {
-          state.main[step.i].removed = true;
-          state.main[step.i].mark = "compare";
-        }
+        var gone = step.indices || [step.i];
+        gone.forEach(function (index) {
+          if (state.main[index]) {
+            state.counts.remove += 1;
+            state.main[index].removed = true;
+            state.main[index].mark = "compare";
+          }
+        });
 
       } else if (step.type === "shuffle") {
         state.counts.shuffle += 1;
@@ -1234,6 +1323,50 @@
     return state;
   }
 
+  /**
+   * steps[from] から 1 回ぶん進めたときの、次の位置を返す。
+   * 1 回ぶんとは、endRound の印が付いた手順までのひとまとまり。
+   */
+  function endOfRound(steps, from) {
+    for (var i = from; i < steps.length; i += 1) {
+      if (steps[i].endRound) { return i + 1; }
+    }
+    return steps.length;
+  }
+
+  /** 手順の列が何回ぶんあるか */
+  function countRounds(steps) {
+    var rounds = 0;
+    steps.forEach(function (step) { if (step.endRound) { rounds += 1; } });
+    return rounds;
+  }
+
+  /**
+   * from から 1 回ぶん適用して、次の位置を返す。
+   * @returns {number} 次の手順の位置
+   */
+  function applyRound(state, steps, from) {
+    var end = endOfRound(steps, from);
+    for (var i = from; i < end; i += 1) {
+      applyStep(state, steps[i], i > from);
+    }
+    return end;
+  }
+
+  /** 最初から rounds 回ぶん適用した状態を作る */
+  function replayRounds(options) {
+    var state = initial(options.values);
+    var at = 0;
+    var done = 0;
+    while (at < options.steps.length && done < options.rounds) {
+      at = applyRound(state, options.steps, at);
+      done += 1;
+    }
+    state.at = at;
+    state.rounds = done;
+    return state;
+  }
+
   /** 並びがそろっているか（取り除かれた要素は飛ばす） */
   function isSorted(list) {
     for (var i = 0; i + 1 < list.length; i += 1) {
@@ -1263,6 +1396,10 @@
     get: get,
     values: values,
     run: run,
+    endOfRound: endOfRound,
+    countRounds: countRounds,
+    applyRound: applyRound,
+    replayRounds: replayRounds,
     initial: initial,
     applyStep: applyStep,
     replay: replay,

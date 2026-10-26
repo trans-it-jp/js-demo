@@ -151,6 +151,7 @@
         }),
         state: Sorts.initial(values),
         cursor: 0,
+        rounds: 0,
         bars: null,
         meta: null,
         counters: null
@@ -224,6 +225,24 @@
   function trackAtEnd(track) { return track.cursor >= track.plan.steps.length; }
 
   /**
+   * この手法の次の 1 回ぶんを用意する。
+   * 終わりが分からない手法は、1 回ぶんの手順がそろうまで作る。
+   * @returns {boolean} 進める 1 回ぶんがあるか
+   */
+  function ensureRound(track) {
+    var steps = track.plan.steps;
+    while (true) {
+      for (var i = track.cursor; i < steps.length; i += 1) {
+        if (steps[i].endRound) { return true; }
+      }
+      if (!track.plan.ensure(steps.length + 1)) {
+        /* これ以上は作れない。半端な手順が残っていれば、それで 1 回とする。 */
+        return track.cursor < steps.length;
+      }
+    }
+  }
+
+  /**
    * まだ進められるか。
    * 終わりが分からない手法は手順を作り置きしていないので、
    * 「いまある手順を使い切った」ことと「終わった」ことは別。
@@ -250,7 +269,7 @@
    * 手法どうしを比べる材料になるのは比べた回数と動かした回数のほう。
    */
   function progressText(track) {
-    return String(track.cursor);
+    return String(track.rounds);
   }
 
   function allAtEnd() {
@@ -269,12 +288,12 @@
   function forward() {
     var moved = false;
     tracks.forEach(function (track) {
-      /* 終わりが分からない手法は、ここで次の 1 手を作る。
-         先に作っておくと終わりの手数が分かってしまうため。 */
-      track.plan.ensure(track.cursor + 1);
+      /* 終わりが分からない手法は、ここで次の 1 回ぶんを作る。
+         先に作っておくと終わりの回数が分かってしまうため。 */
+      ensureRound(track);
       if (trackAtEnd(track)) { return; }
-      Sorts.applyStep(track.state, track.plan.steps[track.cursor]);
-      track.cursor += 1;
+      track.cursor = Sorts.applyRound(track.state, track.plan.steps, track.cursor);
+      track.rounds += 1;
       moved = true;
     });
     if (moved) { groupCursor += 1; }
@@ -288,11 +307,12 @@
   function seekTo(target) {
     groupCursor = Math.max(0, Math.round(target));
     tracks.forEach(function (track) {
-      var to = Numeric.clamp(groupCursor, 0, track.plan.steps.length);
-      track.state = Sorts.replay({
-        values: values, steps: track.plan.steps, upTo: to
+      var state = Sorts.replayRounds({
+        values: values, steps: track.plan.steps, rounds: groupCursor
       });
-      track.cursor = to;
+      track.state = state;
+      track.cursor = state.at;
+      track.rounds = state.rounds;
     });
   }
 
