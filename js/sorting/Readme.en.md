@@ -66,7 +66,7 @@ plan.ensure(10);       // generate until there are 10 steps; true if it got ther
 plan.finished;         // whether it ended (usually stays false)
 ```
 
-**Nothing is run to completion up front.** Doing so would reveal which step it ends on and destroy the very property that there is no guarantee it ends. Call `ensure(cursor + 1)` before advancing.
+**Nothing is run to completion up front.** Doing so would reveal how many rounds it takes and destroy the very property that there is no guarantee it ends. Call `ensure(cursor + 1)` before advancing.
 
 ## Step types
 
@@ -113,7 +113,7 @@ A round is one "compare, then move" unit. For bogosort it is "check whether it i
 - `removed` and `departed` are different things. Stalin and Thanos **destroy** (`removed`); sleep sort **moves** elements to the output (`departed`). Do not render them the same way.
 - `sorted` means strictly "this position will not change again". It is not used for a stretch that is merely in order for now, as in insertion sort (there is an invariant test for this).
 - `values()` uses **1 to n, each exactly once**. No value repeats, so stability (whether equal values keep their original order) cannot be demonstrated with this generator.
-- `bogo` and `bozo` need a random source — pass `random` to `run`, or they will throw.
+- `bogo`, `bozo`, `thanos` and `quantum` need a random source — pass `random` to `run`, or they will throw.
 - Algorithms with a known end generate all their steps up front, so the array grows with the number of elements. Do not call past `maxCount`.
 - Open-ended ones generate only what `ensure()` asks for. Calling it without bound eats memory, so the caller caps it (the page advances at most 4,000 steps at a time).
 

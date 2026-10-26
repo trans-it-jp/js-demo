@@ -78,6 +78,8 @@
   --s-7: 3rem;
   --s-8: 4.5rem;
 
+  --track-columns: 2; /* ソートの図を横に並べる数。画面から変えられる */
+
   --measure: 34rem;   /* 本文の読みやすい行長（およそ 40 字） */
   --page:    72rem;   /* ページ全体の最大幅 */
   --radius:  2px;     /* 角は落としすぎない */
@@ -481,7 +483,10 @@ input[type="number"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* --- 9. 学習の仕掛け（予想・ヒント・語彙） -------------------------------- */
+/* --- 9. 学習の仕掛け（予想・ヒント・語彙） --------------------------------
+   予想の欄は、公開中のどの題材でも置いていない（2026-10-26 の決定）。
+   共通部品（JsDemo.Learning.wirePrediction）は残してあるので、
+   置く題材が出たときにそのまま使えるよう、ここの体裁も残している。 */
 
 /* 予想。選ばなくても操作できるので、行き止まりに見せない。 */
 .predict {
@@ -896,15 +901,6 @@ td {
 }
 
 /* 凡例の色見本。印の文字も並べる。 */
-.legend__group {
-  margin-top: var(--s-2);
-  color: var(--ink-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  list-style: none;
-}
-.legend__group:first-child { margin-top: 0; }
-
 .legend__mark {
   display: inline-block;
   min-width: 1.1em;

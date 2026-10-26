@@ -185,7 +185,7 @@
       <details class="fold">
         <summary>For teachers</summary>
         <div class="fold__body">
-          <p>The easy misreading: that one step takes the same time everywhere. The algorithms advance one step together, but a step means different work in each one — a single comparison, a single write, or shuffling the whole row. <strong>This is not a race.</strong> What it does compare honestly is counts.</p>
+          <p>The easy misreading: that one round takes the same time everywhere. The algorithms advance one round together, but a round means different work in each one — comparing a pair and swapping it, or reshuffling the whole row. <strong>This is not a race.</strong> What it does compare honestly is counts.</p>
           <p>An algorithm that finishes stops there, and only the others carry on. Watch both which one finished first and how many steps each needed.</p>
           <p>A short task (5–10 minutes): select bubble sort and quicksort, vary the number of elements and record the comparison counts. Tabulate how each count grows with n, and discuss.</p>
           <p>On the joke algorithms: Stalin sort and Thanos sort <strong>destroy elements</strong>. Bogosort may never finish. Miracle sort moves nothing at all. Intelligent design sort marks everything settled while the row is plainly not sorted. Use them to ask what makes a sort correct in the first place.</p>
@@ -194,7 +194,7 @@
 
       <h3>Where this stops</h3>
       <ul>
-        <li><strong>It is not a speed comparison.</strong> Everything advances one step at a time, and a step is not the same amount of work in each algorithm. Nothing here is a measurement of real running time.</li>
+        <li><strong>It is not a speed comparison.</strong> Everything advances one round at a time, and a round is not the same amount of work in each algorithm. Nothing here is a measurement of real running time.</li>
         <li>There is a single step count for the whole group. <strong>An algorithm that finishes stops there and its count stops rising;</strong> the ones still going always share the same count.</li>
         <li>The values are <strong>1 to n, each used once</strong>, in random order. No value ever repeats, so you cannot see here whether equal values keep their original order (stability). Every count in counting sort is 1.</li>
         <li>Radix sort distributes by decimal digits. Negative numbers, decimals and text are out of scope.</li>

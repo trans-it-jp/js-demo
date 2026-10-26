@@ -349,7 +349,7 @@
    * ボゴソートの 1 周。そろっているか見て、違えば全部混ぜる。それだけ。
    * 期待される混ぜる回数は要素数の階乗ほど。要素数を増やすと終わらない。
    *
-   * **1 周ずつ返す。** 終わるまで先に走らせてしまうと、終わりの手数が
+   * **1 周ずつ返す。** 終わるまで先に走らせてしまうと、終わりまでの回数が
    * 分かってしまい、「終わる保証がない」という性質が画面から消える。
    * @returns {boolean} 終わったか
    */
@@ -970,7 +970,7 @@
 
     /* 冗談。終わらないものは要素数を低く抑える。 */
     { id: "stalin",    group: "joke", maxCount: 64, run: stalin },
-    { id: "thanos",    group: "joke", maxCount: 64, needsRandom: true, run: thanos },
+    { id: "thanos",    group: "joke", maxCount: 64, run: thanos },
     /* unbounded: 終わりが事前に分からない手法。
        run ではなく round を持ち、**1 周ずつ作る**。終わるまで先に走らせないので、
        総手数が分からないまま見ていられる（代表者の指摘、2026-10-26）。
@@ -978,9 +978,9 @@
        待たされない。以前 7 個・50 個に制限していたのは、手順を先に全部
        作っていたときの名残（代表者の指摘、2026-10-26）。
        limit は作り置きの上限で、終わりの保証ではない。 */
-    { id: "bogo",      group: "joke", maxCount: 64, limit: 50000, needsRandom: true, unbounded: true, round: bogoRound },
-    { id: "bozo",      group: "joke", maxCount: 64, limit: 50000, needsRandom: true, unbounded: true, round: bozoRound },
-    { id: "quantum",   group: "joke", maxCount: 64, needsRandom: true, run: quantum },
+    { id: "bogo",      group: "joke", maxCount: 64, limit: 50000, unbounded: true, round: bogoRound },
+    { id: "bozo",      group: "joke", maxCount: 64, limit: 50000, unbounded: true, round: bozoRound },
+    { id: "quantum",   group: "joke", maxCount: 64, run: quantum },
     { id: "sleep",     group: "joke", maxCount: 64, aux: true, run: sleep },
     { id: "miracle",   group: "joke", maxCount: 64, limit: 50000, unbounded: true, round: miracleRound },
     { id: "design",    group: "joke", maxCount: 64, run: design }
@@ -1403,7 +1403,6 @@
     get: get,
     values: values,
     run: run,
-    endOfRound: endOfRound,
     countRounds: countRounds,
     applyRound: applyRound,
     replayRounds: replayRounds,

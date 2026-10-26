@@ -104,6 +104,7 @@ node tools/check-links.js      # broken links and Japanese/English pairing
 node tools/check-contrast.js   # colour contrast ratios
 node tools/check-controls.js   # slider and number field ranges agree
 node tools/check-transitions.js # no colour is animated
+node tools/check-unused.js     # no definition is left behind unused
 python -m http.server 8000     # check display and interaction in a real browser
 ```
 

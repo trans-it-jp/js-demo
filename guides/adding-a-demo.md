@@ -104,6 +104,7 @@ node tools/check-links.js      # リンク切れと日英の対応
 node tools/check-contrast.js   # 色のコントラスト比
 node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
 node tools/check-transitions.js # 色をアニメーションさせていないか
+node tools/check-unused.js     # 使われなくなった定義が残っていないか
 python -m http.server 8000     # 実ブラウザで表示・操作を確認
 ```
 

@@ -769,10 +769,10 @@
           out.state.main.map(function (c) { return c.value; }).join(","),
           "並び");
     equal(stepwise.counts.compare, out.state.counts.compare, "比較の数");
-    equal(stepwise.cursor, out.plan.steps.length, "進めた手数");
+    equal(stepwise.cursor, out.plan.steps.length, "進めた手順の数");
   });
 
-  test("ソート", "途中の状態は、何手目から作っても同じになる", function () {
+  test("ソート", "途中の状態は、どこから作っても同じになる", function () {
     var out = sortRun("merge", 16, 31);
     var half = Math.floor(out.plan.steps.length / 2);
     var once = Sorts.replay({ values: out.values, steps: out.plan.steps, upTo: half });

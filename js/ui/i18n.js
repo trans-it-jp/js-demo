@@ -19,7 +19,6 @@
       "phase.next": "次に起きること",
 
       "status.iteration": "反復",
-      "status.phase": "いまの段階",
       "status.changed": "割当が変わった点",
       "status.maxShift": "中心の最大移動量",
       "status.inertia": "距離の2乗和",
@@ -31,8 +30,6 @@
       "status.points": "点の数",
       "status.clusters": "クラスタ数 k",
 
-      "share.title": "授業で共有する",
-      "share.help": "このリンクを開くと、いまの条件（種・クラスタ数・点の数・塊の数）で同じ初期状態から始まります。個人情報は含まれません。",
       "share.copy": "リンクをコピー",
       "share.copied": "コピーしました",
       "share.copyFailed": "自動でコピーできませんでした。選択してあるので、そのまま複写してください",
@@ -43,9 +40,6 @@
       "hint.more": "次のヒント",
       "hint.allShown": "ヒントはここまで",
       "button.step": "次へ進む",
-      "button.stepBack": "一手戻る",
-      "button.runToEnd": "収束まで進める",
-      "button.reset": "初期化",
       "button.stepDone": "収束済み",
 
       "table.clusters": "クラスタの内訳",
@@ -69,22 +63,8 @@
       "figure.plane": "座標平面。元のグリッドと変換後のグリッド、基底ベクトル、図形を表示している。",
       "figure.scatter": "散布図。点はクラスタごとに色と形を変え、中心は番号付きの大きな記号で示している。",
 
-      "legend.original": "元の図形（破線）",
-      "legend.transformed": "変換後の図形（実線）",
-      "legend.basisX": "基底 e₁ の像",
-      "legend.basisY": "基底 e₂ の像",
-      "legend.pivot": "回転の中心",
-      "legend.unassigned": "未割当の点",
       "legend.centroid": "クラスタの中心（番号付き）",
 
-      "tool.draw": "描画",
-      "tool.none": "なし",
-      "tool.line": "線（2点）",
-      "tool.circle": "円（中心→外周）",
-      "tool.rect": "四角形（対角2点）",
-      "tool.free": "自由曲線（ドラッグ）",
-      "tool.clear": "消す",
-      "tool.hint": "図の上をクリックまたはドラッグすると図形を描けます。描いた図形も同じ行列で変換されます。",
 
       /* --- ソート --- */
       "figure.bars": "棒グラフ。棒の高さが値で、左から順に並んでいる。棒の下の印は、比較・交換・書込・基準・確定・取り除きを表す。",
@@ -161,7 +141,6 @@
       "sort.note.bogoDone": "偶然そろった",
       "sort.note.sleepWait": "それぞれが自分の値の長さだけ待つ",
       "sort.note.miracleWait": "そろっていない。何もしないで待つ",
-      "sort.note.miracleGiveUp": "待っても並びは変わらなかった（打ち切り）",
       "sort.note.miracleDone": "最初からそろっていた",
       "sort.note.shellGap": "間隔を縮めて、また挿入ソートをする",
       "sort.note.countingRange": "値の範囲を知っていないと使えない。比較は 0 回",
@@ -259,10 +238,6 @@
       "sort.status.sortedNo": "そろっていない",
       "sort.status.kept": "残っている要素",
 
-      "sort.mode.auto": "自動で見る",
-      "sort.mode.manual": "1 手ずつ進める",
-      "sort.speed": "1 回あたりの間（ミリ秒）",
-      "sort.count": "要素の数",
 
       "button.play": "再生",
       "button.pause": "一時停止",
@@ -271,14 +246,10 @@
 
       "sort.msg.truncated": "記録の上限に達したため打ち切りました。要素の数を減らすと終わりまで見られます。",
       "sort.msg.stillRunning": "{steps} 回進めましたが、まだ終わっていません。もう一度押すと続きを進めます。",
-      "sort.msg.capped": "この手法は要素が多いと終わらないため、{max} 個までに制限しました。",
       "sort.msg.lost": "取り除かれて消えた要素があります。結果は並べ替えではありません。",
-      "sort.msg.finished": "手順の終わりまで来ました。",
       "sort.msg.pickOne": "手法を 1 つ以上選んでください。",
       "sort.msg.tooMany": "同時に動かせるのは {max} 種までです。選び直してください。",
       "sort.msg.countLimited": "選んだ手法のうち上限が最も小さいものに合わせて、要素数を {max} 個にしました。",
-      "sort.race.fairness": "同時に 1 手ずつ進めています。手法によって 1 手の重さが違うので、これは速さの比較ではありません。比べられるのは「比べた回数」「入れ替えた回数」です。",
-      "sort.race.selected": "選んだ手法",
       "sort.race.table": "手法ごとの数え上げ",
       "sort.race.algorithm": "手法",
       "sort.race.done": "終わり"
@@ -291,7 +262,6 @@
       "phase.next": "What happens next",
 
       "status.iteration": "Iteration",
-      "status.phase": "Current step",
       "status.changed": "Points that changed cluster",
       "status.maxShift": "Largest centroid move",
       "status.inertia": "Sum of squared distances",
@@ -303,8 +273,6 @@
       "status.points": "Number of points",
       "status.clusters": "Clusters k",
 
-      "share.title": "Share with a class",
-      "share.help": "Opening this link starts from the same initial state: the seed, the number of clusters, points and blobs. It contains no personal data.",
       "share.copy": "Copy the link",
       "share.copied": "Copied",
       "share.copyFailed": "Could not copy automatically. The text is selected, so copy it by hand",
@@ -315,9 +283,6 @@
       "hint.more": "Next hint",
       "hint.allShown": "No more hints",
       "button.step": "Next step",
-      "button.stepBack": "Back one step",
-      "button.runToEnd": "Run to convergence",
-      "button.reset": "Reset",
       "button.stepDone": "Converged",
 
       "table.clusters": "Cluster breakdown",
@@ -341,22 +306,8 @@
       "figure.plane": "Coordinate plane showing the original grid, the transformed grid, the basis vectors and the shape.",
       "figure.scatter": "Scatter plot. Points use a different colour and marker per cluster; centroids are larger numbered markers.",
 
-      "legend.original": "Original shape (dashed)",
-      "legend.transformed": "Transformed shape (solid)",
-      "legend.basisX": "Image of basis e₁",
-      "legend.basisY": "Image of basis e₂",
-      "legend.pivot": "Centre of rotation",
-      "legend.unassigned": "Unassigned point",
       "legend.centroid": "Cluster centroid (numbered)",
 
-      "tool.draw": "Draw",
-      "tool.none": "Off",
-      "tool.line": "Line (2 clicks)",
-      "tool.circle": "Circle (centre, then edge)",
-      "tool.rect": "Rectangle (2 opposite corners)",
-      "tool.free": "Freehand (drag)",
-      "tool.clear": "Clear",
-      "tool.hint": "Click or drag on the figure to draw. Anything you draw is transformed by the same matrix.",
 
       /* --- Sorting --- */
       "figure.bars": "Bar chart. Each bar's height is its value, read left to right. The marks under the bars show comparing, swapping, writing, the pivot, settled positions and removals.",
@@ -433,7 +384,6 @@
       "sort.note.bogoDone": "It came out sorted by chance",
       "sort.note.sleepWait": "Each one waits as long as its own value",
       "sort.note.miracleWait": "Not sorted. Do nothing and wait",
-      "sort.note.miracleGiveUp": "Waiting changed nothing (stopped)",
       "sort.note.miracleDone": "It was already sorted",
       "sort.note.shellGap": "Shrink the gap and insertion-sort again",
       "sort.note.countingRange": "Useless unless you know the range of the values. Zero comparisons",
@@ -531,10 +481,6 @@
       "sort.status.sortedNo": "not in order",
       "sort.status.kept": "Elements still present",
 
-      "sort.mode.auto": "Watch it run",
-      "sort.mode.manual": "One step at a time",
-      "sort.speed": "Milliseconds per round",
-      "sort.count": "Number of elements",
 
       "button.play": "Play",
       "button.pause": "Pause",
@@ -543,14 +489,10 @@
 
       "sort.msg.truncated": "The step limit was reached, so this run was cut short. Use fewer elements to see it finish.",
       "sort.msg.stillRunning": "Ran {steps} rounds and it still has not finished. Press again to carry on.",
-      "sort.msg.capped": "This algorithm does not finish with many elements, so it is limited to {max}.",
       "sort.msg.lost": "Some elements were removed and are gone. The result is not a rearrangement.",
-      "sort.msg.finished": "This is the end of the run.",
       "sort.msg.pickOne": "Pick at least one algorithm.",
       "sort.msg.tooMany": "At most {max} can run at once. Please choose fewer.",
       "sort.msg.countLimited": "The number of elements was set to {max} to match the lowest limit among the algorithms you picked.",
-      "sort.race.fairness": "They advance one step at a time together. A step means different work in each algorithm, so this is not a race for speed. What can be compared is the number of comparisons and swaps.",
-      "sort.race.selected": "Chosen algorithms",
       "sort.race.table": "Counts, algorithm by algorithm",
       "sort.race.algorithm": "Algorithm",
       "sort.race.done": "done"

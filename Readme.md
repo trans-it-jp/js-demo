@@ -100,6 +100,7 @@ node tools/check-links.js      # リンク切れと日英ページの対応
 node tools/check-contrast.js   # 色のコントラスト比（文字 4.5:1、部品・図 3:1）
 node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
 node tools/check-transitions.js # 色をアニメーションさせていないか
+node tools/check-unused.js     # 使われなくなった定義が残っていないか
 ```
 
 同じ検証はブラウザでも開ける（[tests/index.html](tests/index.html)）。
