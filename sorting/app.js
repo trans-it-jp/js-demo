@@ -43,6 +43,7 @@
   var SHARE_SPEC = null;
 
   var tracks = [];          /* 動かしている手法ごとの状態 */
+  var groupCursor = 0;      /* 全体で何回進めたか。終わった手法はここで止まる。 */
   var values = [];          /* 全部に配る並び */
   var requestedCount = 10;  /* 利用者が指定した数。手法の上限で切る前の値。
                                入力欄の既定値と揃える（ShareLink がそこから読む） */
@@ -157,6 +158,7 @@
     });
 
     tracks.forEach(function (track) { track.counters = deriveCounters(track); });
+    groupCursor = 0;
 
     buildTrackElements();
     showNotices({ over: over, limited: requestedCount > limit, limit: limit });
@@ -256,11 +258,14 @@
     return !tracks.some(canAdvance);
   }
 
-  function anyStarted() {
-    return tracks.some(function (track) { return track.cursor > 0; });
-  }
+  function anyStarted() { return groupCursor > 0; }
 
-  /** 1 手進める。状態は書き換えるだけで作り直さない（手順が多いと重くなるため）。 */
+  /**
+   * 全体を 1 回ぶん進める。
+   * **まだ終わっていない手法だけが 1 手進む。** 終わった手法はそこで止まり、
+   * 回数も増えない。動いている手法どうしは常に同じ回数になる。
+   * 状態は書き換えるだけで作り直さない（手順が多いと重くなるため）。
+   */
   function forward() {
     var moved = false;
     tracks.forEach(function (track) {
@@ -272,13 +277,18 @@
       track.cursor += 1;
       moved = true;
     });
+    if (moved) { groupCursor += 1; }
     return moved;
   }
 
-  /** 戻るときは最初から畳み込んで作り直す。 */
-  function seekBack(target) {
+  /**
+   * 全体の回数を target に合わせる（戻るときに使う）。
+   * 各手法は、自分の手順が尽きていればそこで止まったままにする。
+   */
+  function seekTo(target) {
+    groupCursor = Math.max(0, Math.round(target));
     tracks.forEach(function (track) {
-      var to = Numeric.clamp(target(track), 0, track.plan.steps.length);
+      var to = Numeric.clamp(groupCursor, 0, track.plan.steps.length);
       track.state = Sorts.replay({
         values: values, steps: track.plan.steps, upTo: to
       });
@@ -291,8 +301,8 @@
   }
 
   function stepBack() {
-    if (!anyStarted()) { return; }
-    seekBack(function (track) { return track.cursor - 1; });
+    if (groupCursor === 0) { return; }
+    seekTo(groupCursor - 1);
     render({ animate: true });
   }
 
@@ -301,27 +311,18 @@
 
   function toEnd() {
     stop();
-    var unfinished = false;
-    tracks.forEach(function (track) {
-      var budget = RUN_BUDGET;
-      while (budget > 0) {
-        track.plan.ensure(track.cursor + 1);
-        if (trackAtEnd(track)) { break; }
-        Sorts.applyStep(track.state, track.plan.steps[track.cursor]);
-        track.cursor += 1;
-        budget -= 1;
-      }
-      if (canAdvance(track)) { unfinished = true; }
-    });
+    var budget = RUN_BUDGET;
+    /* 全体を 1 回ずつ進める。回数をそろえたまま最後まで行く。 */
+    while (budget > 0 && forward()) { budget -= 1; }
     render({ animate: false });
-    if (unfinished) {
+    if (tracks.some(canAdvance)) {
       Controls.byId("notice").textContent =
         t("sort.msg.stillRunning", { steps: RUN_BUDGET });
     }
   }
 
   function restart() {
-    seekBack(function () { return 0; });
+    seekTo(0);
   }
 
   /* --- 自動再生 -------------------------------------------------------- */
