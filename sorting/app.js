@@ -41,7 +41,8 @@
 
   var tracks = [];          /* 動かしている手法ごとの状態 */
   var values = [];          /* 全部に配る並び */
-  var requestedCount = 24;  /* 利用者が指定した数。手法の上限で切る前の値 */
+  var requestedCount = 10;  /* 利用者が指定した数。手法の上限で切る前の値。
+                               入力欄の既定値と揃える（ShareLink がそこから読む） */
   var mode = "auto";
   var timer = null;
   var hints = null;
