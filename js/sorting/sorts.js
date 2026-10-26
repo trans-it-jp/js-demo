@@ -127,7 +127,10 @@
    * 次の要素を、そろっている列の正しい場所まで隣と入れ替えながら運ぶ。
    */
   function insertion(a, rec) {
-    if (a.length > 0) { rec.add({ type: "sorted", indices: [0] }); }
+    /* ここでは確定（sorted）の印を付けない。
+       左の並びは「そろってはいる」が、あとから小さい値が来れば**また動く**。
+       確定の印を付けると「この位置はもう変わらない」という意味が崩れる。
+       そろっている様子は、棒が階段状になることで見える。 */
     for (var i = 1; i < a.length; i += 1) {
       var j = i;
       while (j > 0) {
@@ -138,8 +141,8 @@
         j -= 1;
         if (rec.full) { return; }
       }
-      rec.add({ type: "sorted", indices: [i] });
     }
+    markAllSorted(a, rec);
   }
 
   /**
@@ -540,7 +543,7 @@
    * 比較と移動を別に数えると、この手法の意味が見える。
    */
   function binaryInsertion(a, rec) {
-    if (a.length > 0) { rec.add({ type: "sorted", indices: [0] }); }
+    /* 挿入ソートと同じ理由で、途中では確定の印を付けない。 */
     for (var i = 1; i < a.length; i += 1) {
       var lo = 0;
       var hi = i - 1;
@@ -555,8 +558,8 @@
         rec.add({ type: "swap", i: j - 1, j: j });
         if (rec.full) { return; }
       }
-      rec.add({ type: "sorted", indices: [i] });
     }
+    markAllSorted(a, rec);
   }
 
   /* --- 選択の仲間 ------------------------------------------------------- */
@@ -939,11 +942,14 @@
     /* 冗談。終わらないものは要素数を低く抑える。 */
     { id: "stalin",    group: "joke", maxCount: 64, run: stalin },
     { id: "thanos",    group: "joke", maxCount: 64, needsRandom: true, run: thanos },
-    { id: "bogo",      group: "joke", maxCount: 7,  limit: 60000, needsRandom: true, run: bogo },
-    { id: "bozo",      group: "joke", maxCount: 7,  limit: 60000, needsRandom: true, run: bozo },
+    /* unbounded: 終わりが事前に分からない手法。画面に総手数を出さない。
+       何手で終わるかを先に見せると、「終わる保証がない」という性質そのものが
+       伝わらなくなるため（代表者の指摘、2026-10-26）。 */
+    { id: "bogo",      group: "joke", maxCount: 7,  limit: 60000, needsRandom: true, unbounded: true, run: bogo },
+    { id: "bozo",      group: "joke", maxCount: 7,  limit: 60000, needsRandom: true, unbounded: true, run: bozo },
     { id: "quantum",   group: "joke", maxCount: 64, needsRandom: true, run: quantum },
     { id: "sleep",     group: "joke", maxCount: 64, run: sleep },
-    { id: "miracle",   group: "joke", maxCount: 64, run: miracle },
+    { id: "miracle",   group: "joke", maxCount: 64, unbounded: true, run: miracle },
     { id: "design",    group: "joke", maxCount: 64, run: design }
   ];
 
@@ -985,7 +991,13 @@
   /* --- 手順を状態へ畳み込む -------------------------------------------- */
 
   function cell(id, value) {
-    return { id: id, value: value, sorted: false, removed: false, mark: null };
+    return {
+      id: id, value: value,
+      sorted: false,
+      removed: false,    /* 取り除かれて消えた（スターリン・サノス） */
+      departed: false,   /* 出ていって別の行にいる（スリープ）。消えてはいない */
+      mark: null
+    };
   }
 
   /**
@@ -1040,11 +1052,14 @@
         /* read は「値を見た」だけで、2 つを比べてはいない。
            計数ソートや基数ソートが「一度も比べない」ことを数で示せるように、
            compare とは別に数える。画面での印は同じでよい。 */
-        if (step.type === "compare") { state.counts.compare += 1; }
+        var isCompare = step.type === "compare";
+        if (isCompare) { state.counts.compare += 1; }
         else { state.counts.read += 1; }
         step.cells.forEach(function (ref) {
           var row = rowOf(ref[0]);
-          if (row && row[ref[1]]) { row[ref[1]].mark = "compare"; }
+          if (row && row[ref[1]]) {
+            row[ref[1]].mark = isCompare ? "compare" : "read";
+          }
         });
 
       } else if (step.type === "swap") {
@@ -1103,10 +1118,12 @@
         state.auxLabel = null;
 
       } else if (step.type === "emit") {
-        /* 出ていった要素は控えの行へ移す。元の位置は空けておく。 */
+        /* 出ていった要素は控えの行へ移す。元の位置は空けておく。
+           取り除かれた（removed）とは別に扱う。スリープソートは要素を
+           消しているのではなく、出力へ移しているだけなので。 */
         var moved = state.main[step.i];
-        if (moved && !moved.removed) {
-          moved.removed = true;
+        if (moved && !moved.departed) {
+          moved.departed = true;
           if (!state.aux) { state.aux = []; state.auxLabel = { kind: "output" }; }
           var copy = cell("out" + moved.id, moved.value);
           copy.sorted = true;
@@ -1123,9 +1140,14 @@
 
       } else if (step.type === "shuffle") {
         state.counts.shuffle += 1;
-        /* 混ぜた結果は値の列として渡される。位置と値を貼り替える。 */
+        /* 混ぜた結果は値の列として渡される。位置と値を貼り替える。
+           **全部の棒に印を付ける。** 2 つだけ光っていると、直前の比較と
+           見分けがつかず、全体が動いたことが伝わらないため。 */
         step.values.forEach(function (value, index) {
-          if (state.main[index]) { state.main[index].value = value; }
+          if (state.main[index]) {
+            state.main[index].value = value;
+            state.main[index].mark = "shuffle";
+          }
         });
 
       } else if (step.type === "pivot") {
@@ -1182,7 +1204,9 @@
   /** 状態から、画面に残っている値の列を取り出す */
   function visibleValues(state) {
     var out = [];
-    state.main.forEach(function (c) { if (!c.removed) { out.push(c.value); } });
+    state.main.forEach(function (c) {
+      if (!c.removed && !c.departed) { out.push(c.value); }
+    });
     if (state.auxLabel && state.auxLabel.kind === "output" && state.aux) {
       state.aux.forEach(function (c) { out.push(c.value); });
     }

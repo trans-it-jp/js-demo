@@ -80,7 +80,7 @@
 
         <p class="notice" id="notice"></p>
 
-        <p class="plot__caption">Bar height is the value. The marks under the bars mean: ▲ being compared, ⇄ swapped, ▼ written, P pivot, ✓ settled, ✕ removed. If you cannot tell the colours apart, these marks and the table below carry the same information.</p>
+        <p class="plot__caption"><strong>There are two colour families. Blue means "only looked at" (◇ read, ▲ compared) — nothing changed. Vermilion means "actually moved" (⇄ swapped, ↺ reshuffled as a whole, ▼ written).</strong> Besides those, a purple P is the pivot, a green ✓ means the position is settled, a grey → means it left the row (not destroyed) and ✕ means it was removed. Bar height is the value. If you cannot tell the colours apart, these marks and the table below carry the same information.</p>
 
         <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
 
@@ -126,6 +126,7 @@
               <label class="control__label" for="count">
                 Number of elements
                 <span class="control__note">The limit differs by algorithm; the ones that never finish are held to a small number</span>
+                <span class="control__note" id="count-limit"></span>
               </label>
               <input id="count" type="range" min="4" max="64" step="1" value="24">
               <input id="count-num" type="number" min="4" max="64" step="1" value="24">
@@ -154,6 +155,7 @@
 
         <section class="panel">
           <h2 class="panel__title">Legend</h2>
+          <p class="share__help"><strong>Blue = only looked at. Vermilion = actually moved.</strong> That keeps the count of comparisons separate from the count of real changes.</p>
           <ul class="legend" id="legend"></ul>
         </section>
       </aside>
@@ -207,6 +209,10 @@
         <li>Miracle sort and intelligent design sort do not sort. They are here as jokes.</li>
         <li>Quantum bogosort "discards the universe" as a joke; nothing actually happens.</li>
         <li>Quicksort always takes the rightmost element of the range as its pivot. Other pivot choices are out of scope.</li>
+        <li><strong>A green ✓ means strictly "this position will not change again".</strong> It is not used for a stretch that merely happens to be in order and will move later, as in insertion sort — watch the staircase shape for that instead.</li>
+        <li>For bogosort, bozo sort and miracle sort the <strong>total number of steps is deliberately not shown.</strong> Revealing up front which step it ends on would destroy the very property that there is no guarantee it ends at all. The steps are generated in advance internally, but not displayed.</li>
+        <li>The working row for bucket sort does not draw lines between the buckets; the elements simply sit in the order they were poured in.</li>
+        <li>The name origins are short summaries of the commonly given explanations. They have not been checked against scholarly sources one by one.</li>
       </ul>
 
       <h3>Known gaps</h3>

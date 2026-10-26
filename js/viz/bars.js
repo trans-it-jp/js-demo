@@ -29,24 +29,34 @@
   var GAP_RATIO = 0.18;       /* 棒の間の空き（棒幅に対する比） */
   var LABEL_MAX = 28;         /* これより多いと値の文字は出さない */
 
+  /* 色は 2 系統だけ。見ただけの手は青、中身を動かした手は朱。
+     どの種類の手かは MARKS の印で分ける。
+     「比べただけで何も変わっていない」のか「実際に動いた」のかを、
+     色で一目で分けられるようにするため。 */
   var FILL = {
     idle: "var(--bar)",
-    compare: "var(--bar-compare)",
-    swap: "var(--bar-swap)",
-    write: "var(--bar-write)",
+    read: "var(--bar-look)",
+    compare: "var(--bar-look)",
+    swap: "var(--bar-change)",
+    shuffle: "var(--bar-change)",
+    write: "var(--bar-change)",
     pivot: "var(--bar-pivot)",
     sorted: "var(--bar-sorted)",
+    departed: "var(--bar-removed)",
     removed: "var(--bar-removed)"
   };
 
   /* 印は文字で出す。読み上げには使わない（aria-hidden）。 */
   var MARKS = {
-    compare: "▲",   /* ▲ 比べている */
-    swap: "⇄",      /* ⇄ 入れ替えた */
-    write: "▼",     /* ▼ 書き込んだ */
-    pivot: "P",          /* 基準 */
-    sorted: "✓",    /* ✓ 確定 */
-    removed: "✕"    /* ✕ 取り除いた */
+    read: "◇",      /* 値を見ただけ。比べてはいない */
+    compare: "▲",   /* 2 つを比べている */
+    swap: "⇄",      /* 入れ替えた */
+    shuffle: "↺",   /* 全部まとめて混ぜ直した */
+    write: "▼",     /* 書き込んだ */
+    pivot: "P",     /* 基準 */
+    sorted: "✓",    /* 位置が確定した */
+    departed: "→",  /* 出ていった。消えてはいない */
+    removed: "✕"    /* 取り除かれて消えた */
   };
 
   function prefersReducedMotion() {
@@ -62,11 +72,16 @@
   /** 棒の状態（色と印をどれにするか）を 1 つに決める。優先順位はこの順。 */
   function statusOf(cell, pivotId) {
     if (cell.removed) { return "removed"; }
+    if (cell.departed) { return "departed"; }
+    if (cell.mark === "shuffle") { return "shuffle"; }
     if (cell.mark === "swap") { return "swap"; }
     if (cell.mark === "write") { return "write"; }
     if (cell.mark === "compare") { return "compare"; }
-    if (pivotId && cell.id === pivotId) { return "pivot"; }
+    if (cell.mark === "read") { return "read"; }
+    /* 確定を基準より先に見る。基準の要素は置き場所が決まった時点で確定するので、
+       そのあとも P のままだと「まだ作業中」に見えてしまう。 */
     if (cell.sorted) { return "sorted"; }
+    if (pivotId && cell.id === pivotId) { return "pivot"; }
     return "idle";
   }
 
@@ -173,12 +188,16 @@
       all
         .attr("fill", function (d) {
           var status = statusOf(d, settings.pivotId);
+          /* 斜線は「消えた」ものだけ。出ていったものは薄い地に枠だけにする。 */
           return status === "removed" ? "url(#bars-hatch)" : FILL[status];
         })
         .attr("stroke", function (d) {
           var status = statusOf(d, settings.pivotId);
-          if (status === "removed") { return "var(--bar-removed-edge)"; }
-          if (status === "compare" || status === "swap" || status === "write") {
+          if (status === "removed" || status === "departed") {
+            return "var(--bar-removed-edge)";
+          }
+          if (status === "compare" || status === "read" ||
+              status === "swap" || status === "shuffle" || status === "write") {
             return "var(--ink)";
           }
           return "none";
@@ -222,8 +241,18 @@
 
       var maxValue = 1;
       cells.forEach(function (c) { maxValue = Math.max(maxValue, c.value); });
+
+      /* 控えの行の高さの基準。
+         値を並べる行（控え・出力・桁・バケツ）は主の行と同じ基準にそろえる。
+         度数の行だけは意味が違う（高さが個数）ので、その行の中の最大で割る。
+         同じ基準にすると、個数 1 の棒が主の行の最大に対して潰れて見えない。 */
+      var auxMax = maxValue;
       if (hasAux) {
-        state.aux.forEach(function (c) { maxValue = Math.max(maxValue, c.value); });
+        var auxPeak = 1;
+        state.aux.forEach(function (c) { auxPeak = Math.max(auxPeak, c.value); });
+        auxMax = (state.auxLabel && state.auxLabel.kind === "counts")
+          ? auxPeak
+          : Math.max(maxValue, auxPeak);
       }
 
       var geo = drawRow(gMain, gMarks, cells, {
@@ -259,7 +288,7 @@
         auxTitle.text(opts.auxLabel || "");
         drawRow(gAux, gAuxMarks, state.aux, {
           top: AUX_TOP, bottom: AUX_BOTTOM, markY: AUX_MARK_Y,
-          slots: Math.max(cells.length, state.aux.length), maxValue: maxValue
+          slots: Math.max(cells.length, state.aux.length), maxValue: auxMax
         }, { duration: duration, pivotId: null });
       } else {
         auxBaseline.attr("opacity", 0);

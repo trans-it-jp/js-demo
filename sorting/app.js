@@ -30,6 +30,9 @@
   /* 同時に動かせる数。これ以上並べると 1 つ 1 つが小さくなって読めない。 */
   var MAX_TRACKS = 6;
 
+  /* 要素数の上限。入力欄の max と揃える。 */
+  var COUNT_MAX = 64;
+
   /* URL へ載せるのは数値だけ。手法の組み合わせは 2 進の桁で表す
      （1 番目の手法が 1、2 番目が 2、3 番目が 4 …の合計）。自由入力は受け取らない。
      要素数の範囲は入力欄から読む。書き写すと画面と食い違ったときに
@@ -66,11 +69,24 @@
 
   /** 選んだ手法の中でいちばん小さい上限。終わらない手法に合わせる。 */
   function allowedCount(ids) {
-    var max = 64;
+    var max = COUNT_MAX;
     ids.forEach(function (id) {
       max = Math.min(max, Sorts.get(id).maxCount);
     });
     return max;
+  }
+
+  /** 上限を決めている手法。理由を画面に書くために使う。 */
+  function limitingId(ids) {
+    var chosen = ids[0];
+    var max = COUNT_MAX;
+    ids.forEach(function (id) {
+      if (Sorts.get(id).maxCount < max) {
+        max = Sorts.get(id).maxCount;
+        chosen = id;
+      }
+    });
+    return chosen;
   }
 
   function speed() {
@@ -100,8 +116,23 @@
 
     var limit = allowedCount(ids);
     var count = Math.min(requestedCount, limit);
-    Controls.byId("count").value = count;
-    Controls.byId("count-num").value = count;
+
+    /* 入力欄の上限も選択に合わせる。上限より大きい値を入れても黙って
+       戻されるだけだと「指定できない」ように見えるため、動かせる範囲を
+       入力欄そのもので示し、理由を添える。 */
+    var slider = Controls.byId("count");
+    var number = Controls.byId("count-num");
+    slider.max = limit;
+    number.max = limit;
+    slider.value = count;
+    number.value = count;
+
+    var limitNote = Controls.byId("count-limit");
+    if (limitNote) {
+      limitNote.textContent = limit < COUNT_MAX
+        ? t("sort.count.limit", { max: limit, name: t("sort.name." + limitingId(ids)) })
+        : t("sort.count.range");
+    }
 
     if (opts.fresh || values.length !== count) { values = newValues(count); }
 
@@ -142,6 +173,12 @@
       title.textContent = t("sort.name." + track.id);
       section.appendChild(title);
 
+      /* 名前の由来。何をする手法かが名前と結びつくと覚えやすい。 */
+      var origin = document.createElement("p");
+      origin.className = "track__origin";
+      origin.textContent = t("sort.origin." + track.id);
+      section.appendChild(origin);
+
       var plot = document.createElement("div");
       plot.className = "plot track__plot";
       section.appendChild(plot);
@@ -163,6 +200,25 @@
   /* --- 進める・戻る ---------------------------------------------------- */
 
   function trackAtEnd(track) { return track.cursor >= track.plan.steps.length; }
+
+  /** 終わりが事前に分からない手法か */
+  function isUnbounded(track) {
+    return Sorts.get(track.id).unbounded === true;
+  }
+
+  /**
+   * 進み具合の表し方。
+   * 終わりが分からない手法では分母を出さない。何手で終わるかを先に見せると、
+   * 「終わる保証がない」という性質そのものが伝わらないため。
+   */
+  function progressText(track) {
+    if (!isUnbounded(track)) {
+      return track.cursor + " / " + track.plan.steps.length;
+    }
+    return trackAtEnd(track)
+      ? String(track.cursor)
+      : t("sort.status.progressOpen", { n: track.cursor });
+  }
 
   function allAtEnd() {
     if (tracks.length === 0) { return true; }
@@ -297,7 +353,7 @@
       renderTrackMeta(track);
       track.bars.setAriaLabel(
         t("sort.name." + track.id) + " — " + t("figure.bars") + " " +
-        t("sort.status.progress") + ": " + track.cursor + "/" + track.plan.steps.length
+        t("sort.status.progress") + ": " + progressText(track)
       );
     });
 
@@ -314,8 +370,7 @@
   function metaRows(track) {
     var counts = track.state.counts;
     var rows = [
-      { label: t("sort.status.progress"),
-        value: track.cursor + " / " + track.plan.steps.length },
+      { label: t("sort.status.progress"), value: progressText(track) },
       { label: t("sort.status.compare"), value: String(counts.compare) },
       { label: t("sort.status.swap"), value: String(counts.swap) }
     ];
@@ -367,7 +422,7 @@
       var list = visibleOf(track);
       return [
         t("sort.name." + track.id),
-        track.cursor + " / " + track.plan.steps.length,
+        progressText(track),
         String(track.state.counts.compare),
         String(track.state.counts.swap + track.state.counts.reverse),
         Sorts.isSorted(list)
@@ -431,7 +486,12 @@
 
     Controls.byId("step").disabled = !manual || empty || allAtEnd();
     Controls.byId("step-back").disabled = !manual || empty || !anyStarted();
-    Controls.byId("to-end").disabled = empty || allAtEnd();
+    var toEnd = Controls.byId("to-end");
+    toEnd.disabled = empty || allAtEnd();
+    /* 終わりが分からない手法を選んでいるときは「最後まで」と言わない。
+       終わりがあることを前提にした言い方になってしまうため。 */
+    var anyUnbounded = tracks.some(isUnbounded);
+    toEnd.textContent = anyUnbounded ? t("button.toLimit") : t("button.toEnd");
   }
 
   /** 何が起きたかを読み上げへ伝える。図を見ていなくても追えるようにする。 */
@@ -506,10 +566,15 @@
         var text = document.createElement("span");
         var title = document.createElement("strong");
         title.textContent = t("sort.name." + a.id);
+        /* 計算量を名前の隣に出す。どれが重いかを選ぶ前に見られるようにする。 */
+        var cost = document.createElement("span");
+        cost.className = "picker__cost";
+        cost.textContent = t("sort.cost." + a.id);
         var desc = document.createElement("span");
         desc.className = "picker__note";
         desc.textContent = t("sort.desc." + a.id);
         text.appendChild(title);
+        text.appendChild(cost);
         text.appendChild(desc);
 
         label.appendChild(input);
@@ -526,7 +591,8 @@
     var list = Controls.byId("legend");
     if (!list) { return; }
     list.textContent = "";
-    ["idle", "compare", "swap", "write", "pivot", "sorted", "removed"]
+    ["idle", "read", "compare", "swap", "shuffle", "write", "pivot",
+     "sorted", "departed", "removed"]
       .forEach(function (status) {
         var li = document.createElement("li");
 

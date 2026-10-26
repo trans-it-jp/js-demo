@@ -841,6 +841,47 @@
     });
   });
 
+  test("ソート", "確定の印が付いた要素は、そのあと位置が動かない", function () {
+    /* ✓ は「この位置はもう変わらない」という意味で使っている。
+       途中でそろっているだけの範囲に付けると意味が崩れるので、全手法で見る。
+       挿入ソートでこれが崩れていたため、不変条件として残す。 */
+    Sorts.ALGORITHMS.forEach(function (algorithm) {
+      var out = sortRun(algorithm.id, 14, 29);
+      var state = Sorts.initial(out.values);
+      var fixed = {};   /* 確定した要素の id → そのときの位置 */
+
+      out.plan.steps.forEach(function (step, index) {
+        Sorts.applyStep(state, step);
+        state.main.forEach(function (cell, position) {
+          if (!cell.sorted) { return; }
+          if (fixed[cell.id] === undefined) {
+            fixed[cell.id] = position;
+          } else if (fixed[cell.id] !== position) {
+            fail(algorithm.id + ": 確定した要素が " + (index + 1) + " 手目で " +
+                 fixed[cell.id] + " から " + position + " へ動いた");
+          }
+        });
+      });
+    });
+  });
+
+  test("ソート", "終わりが分からない手法に印が付いている", function () {
+    ["bogo", "bozo", "miracle"].forEach(function (id) {
+      isTrue(Sorts.get(id).unbounded === true, id + " は unbounded");
+    });
+    ["bubble", "quick", "merge", "counting"].forEach(function (id) {
+      isTrue(Sorts.get(id).unbounded !== true, id + " は unbounded ではない");
+    });
+  });
+
+  test("ソート", "スリープソートは要素を消さずに出力へ移す", function () {
+    var out = sortRun("sleep", 12, 17);
+    equal(out.state.counts.remove, 0, "取り除いた数");
+    equal(Sorts.visibleValues(out.state).length, out.n, "見えている要素の数");
+    var departed = out.state.main.filter(function (c) { return c.departed; });
+    equal(departed.length, out.n, "出ていった要素の数");
+  });
+
   test("ソート", "並びは 1 から n までを 1 回ずつ使う", function () {
     var values = Sorts.values({ count: 40, random: Random.create(5) });
     equal(values.length, 40, "要素数");

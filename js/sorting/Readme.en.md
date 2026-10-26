@@ -56,18 +56,21 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 
 `maxCount` caps the number of elements — lowest for the ones that do not finish (`bogo` and `bozo` are capped at 7). `limit` caps the number of steps; going past it sets `truncated`.
 
+`unbounded: true` marks the algorithms whose end cannot be known in advance (`bogo`, `bozo`, `miracle`). **It tells the UI not to show a total step count**: revealing which step it ends on would destroy the very property that there is no guarantee it ends.
+
 ## Step types
 
 | type | Meaning | Fields |
 | --- | --- | --- |
 | `compare` | Two things were compared | `cells: [[row, i], ...]` |
+| `read` | A value was read, not compared | `cells: [[row, i]]` |
 | `swap` | Two things changed places | `i`, `j`, `row` (defaults to main) |
 | `set` | A value was written | `row`, `i`, `value` |
 | `reverse` | A range was flipped | `lo`, `hi` |
 | `aux` | A working copy was laid out | `lo`, `hi`, `values` |
 | `auxInit` | An empty working row was made | `size`, `kind` |
 | `auxClear` | The working row was put away | — |
-| `emit` | Something left for the output | `i` |
+| `emit` | Something left for the output (not destroyed) | `i` |
 | `remove` | Something was removed | `i` |
 | `shuffle` | The whole row was reshuffled | `values` |
 | `pivot` | A pivot was chosen | `i` |
@@ -82,7 +85,9 @@ Comparisons and swaps are **counted from the steps**. Counting them separately w
 ## Things to watch
 
 - **The joke algorithms do not finish correctly.** `miracle` and `design` do not rearrange anything; `quantum` almost always ends "not sorted"; `stalin` and `thanos` destroy elements, so `plan.result.length` is shorter than the input.
-- `JsDemo.Sorts.visibleValues(state)` returns the row with removed elements left out. Check it with `isSorted()`.
+- `JsDemo.Sorts.visibleValues(state)` drops both the destroyed (`removed`) and the departed (`departed`) cells from the main row and appends the output row when there is one. Check it with `isSorted()`.
+- `removed` and `departed` are different things. Stalin and Thanos **destroy** (`removed`); sleep sort **moves** elements to the output (`departed`). Do not render them the same way.
+- `sorted` means strictly "this position will not change again". It is not used for a stretch that is merely in order for now, as in insertion sort (there is an invariant test for this).
 - `values()` uses **1 to n, each exactly once**. No value repeats, so stability (whether equal values keep their original order) cannot be demonstrated with this generator.
 - `bogo` and `bozo` need a random source — pass `random` to `run`, or they will throw.
 - Steps are generated up front, so the array grows with the number of elements. Do not call past `maxCount`.

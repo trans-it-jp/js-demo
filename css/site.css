@@ -46,12 +46,14 @@
   --plot-shape:     #2f3540;
   --plot-shape-alt: #009e73;
 
-  /* ソートの棒グラフ。状態ごとの色。印（▲⇄▼P✓✕）と値を併記するので、
-     色だけで状態を伝えない。いずれも白地の上で 3:1 以上（点検あり）。 */
+  /* ソートの棒グラフ。
+     色は 2 系統に分ける。**見ただけの手**（比較・読み）は青、
+     **中身を動かした手**（交換・書き込み・混ぜ直し）は朱。
+     手の種類は印（◇▲⇄↺▼P✓→✕）でも示すので、色だけに頼らない。
+     いずれも白地の上で 3:1 以上（点検あり）。 */
   --bar:              #525252;
-  --bar-compare:      #bf8400;
-  --bar-swap:         #d55e00;
-  --bar-write:        #0072b2;
+  --bar-look:         #0072b2;   /* 見ただけ。中身は変わっていない */
+  --bar-change:       #d55e00;   /* 実際に動かした */
   --bar-pivot:        #7b3294;
   --bar-sorted:       #009e73;
   --bar-removed:      #ece9e4;   /* 取り除いた棒の地。斜線と枠を重ねる */
@@ -818,6 +820,11 @@ td {
   font-size: 1rem;
   line-height: 1.4;
 }
+.track__origin {
+  margin: 0 0 var(--s-3);
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
 .track__plot { margin: 0; }
 .track__meta {
   margin-top: var(--s-3);
@@ -825,6 +832,15 @@ td {
 }
 
 /* 凡例の色見本。印の文字も並べる。 */
+.legend__group {
+  margin-top: var(--s-2);
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  list-style: none;
+}
+.legend__group:first-child { margin-top: 0; }
+
 .legend__mark {
   display: inline-block;
   min-width: 1.1em;

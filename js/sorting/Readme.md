@@ -55,18 +55,21 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 
 `maxCount` は要素数の上限。終わらない手法ほど小さい（`bogo` と `bozo` は 7）。`limit` は手順の上限で、超えると `truncated` が立つ。
 
+`unbounded: true` は「終わりが事前に分からない」手法（`bogo`・`bozo`・`miracle`）。**画面に総手数を出さないための印**で、何手目で終わるかを先に見せると「終わる保証がない」という性質が伝わらなくなる。
+
 ## 手順の種類
 
 | type | 内容 | 持ち物 |
 | --- | --- | --- |
-| `compare` | 比べた | `cells: [[row, i], ...]` |
+| `compare` | 2 つを比べた | `cells: [[row, i], ...]` |
+| `read` | 値を見ただけ（比較ではない） | `cells: [[row, i]]` |
 | `swap` | 入れ替えた | `i`, `j`, `row`（既定 main） |
 | `set` | 値を書いた | `row`, `i`, `value` |
 | `reverse` | 範囲をひっくり返した | `lo`, `hi` |
 | `aux` | 控えを並べた | `lo`, `hi`, `values` |
 | `auxInit` | 控えを空で用意した | `size`, `kind` |
 | `auxClear` | 控えを片付けた | — |
-| `emit` | 出力へ送った | `i` |
+| `emit` | 出力へ送った（消したのではない） | `i` |
 | `remove` | 取り除いた | `i` |
 | `shuffle` | 混ぜ直した | `values` |
 | `pivot` | 基準を決めた | `i` |
@@ -81,7 +84,9 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 ## 気をつけること
 
 - **冗談の手法は正しく終わらない。** `miracle` と `design` は並べ替えない。`quantum` はたいてい「そろっていない」で終わる。`stalin` と `thanos` は要素が消えるので、`plan.result.length` が元より短くなる。
-- `JsDemo.Sorts.visibleValues(state)` は、取り除かれたものを除いた並びを返す。`isSorted()` と組み合わせて確かめる。
+- `JsDemo.Sorts.visibleValues(state)` は、取り除かれたもの（`removed`）と出ていったもの（`departed`）を主の行から除き、出力の行があればそれを足した並びを返す。`isSorted()` と組み合わせて確かめる。
+- `removed` と `departed` は別物。スターリン・サノスは**消す**（`removed`）、スリープソートは出力へ**移す**（`departed`）。同じ印にしない。
+- `sorted` は「この位置はもう変わらない」という意味にだけ使う。挿入ソートのように、そろってはいるがあとで動く範囲には付けない（tests に不変条件がある）。
 - `values()` は **1 から n までを 1 回ずつ**使う。同じ値は出てこないので、安定性（同じ値の前後関係が保たれるか）はこの作りでは確かめられない。
 - `bogo` と `bozo` は乱数が要る（`run` に `random` を渡す）。渡さないと落ちる。
 - 手順は先に全部作る。要素数を大きくすると配列も大きくなるので、`maxCount` を超えて呼ばない。
