@@ -196,11 +196,23 @@
       title.textContent = t("sort.name." + track.id);
       section.appendChild(title);
 
-      /* 名前の由来。何をする手法かが名前と結びつくと覚えやすい。 */
+      /* 何をする手法かの一言と、名前の由来。
+         やることが分かったうえで由来を読むと、名前と動きが結びつく。
+         2 つで 1 つの枠に入れて、図の縦位置が段数で変わらないようにする。 */
+      var note = document.createElement("div");
+      note.className = "track__note";
+
+      var what = document.createElement("p");
+      what.className = "track__what";
+      what.textContent = t("sort.desc." + track.id);
+      note.appendChild(what);
+
       var origin = document.createElement("p");
       origin.className = "track__origin";
       origin.textContent = t("sort.origin." + track.id);
-      section.appendChild(origin);
+      note.appendChild(origin);
+
+      section.appendChild(note);
 
       var plot = document.createElement("div");
       plot.className = "plot track__plot";

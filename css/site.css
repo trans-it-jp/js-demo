@@ -850,7 +850,7 @@ td {
 }
 
 /* 説明を出さないとき。由来の行をたたむ。 */
-.tracks.is-bare .track__origin { display: none; }
+.tracks.is-bare .track__note { display: none; }
 
 .track {
   min-width: 0;
@@ -870,12 +870,23 @@ td {
   line-height: 1.4;
   min-height: 1.4em;          /* subgrid が無いときの保険 */
 }
-.track__origin {
+/* 一言説明と名前の由来。2 つで 1 つの枠にして、段数が変わっても
+   図の縦位置が動かないようにする。 */
+.track__note {
   margin: 0 0 var(--s-3);
+  min-height: 6.2em;          /* それぞれ 2 行ぶん。subgrid が無いときの保険 */
+}
+.track__what {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.track__origin {
+  margin: var(--s-1) 0 0;
   color: var(--ink-muted);
   font-size: 0.8125rem;
   line-height: 1.6;
-  min-height: 3.2em;          /* 2 行ぶん。同上 */
 }
 .track__plot { margin: 0; align-self: start; }
 .track__meta {
