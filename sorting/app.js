@@ -688,6 +688,28 @@
     var list = Controls.byId("legend");
     if (!list) { return; }
     list.textContent = "";
+
+    /* いま見ている範囲の帯。棒の状態ではないので先に出す。
+       クイック・マージ・ストゥージで、どこを並べ替えているかを示す。 */
+    var rangeItem = document.createElement("li");
+    var rangeSwatch = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    rangeSwatch.setAttribute("width", "14");
+    rangeSwatch.setAttribute("height", "14");
+    rangeSwatch.setAttribute("aria-hidden", "true");
+    var rangeRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    rangeRect.setAttribute("width", "14");
+    rangeRect.setAttribute("height", "14");
+    rangeRect.setAttribute("fill", "var(--accent-wash)");
+    rangeRect.setAttribute("stroke", "var(--accent)");
+    rangeSwatch.appendChild(rangeRect);
+    var rangeMark = document.createElement("span");
+    rangeMark.className = "legend__mark";
+    var rangeText = document.createElement("span");
+    rangeText.textContent = t("sort.state.range");
+    rangeItem.appendChild(rangeSwatch);
+    rangeItem.appendChild(rangeMark);
+    rangeItem.appendChild(rangeText);
+    list.appendChild(rangeItem);
     ["idle", "read", "compare", "swap", "shuffle", "write", "pivot",
      "sorted", "departed", "removed"]
       .forEach(function (status) {

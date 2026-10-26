@@ -73,15 +73,17 @@
   function statusOf(cell, pivotId) {
     if (cell.removed) { return "removed"; }
     if (cell.departed) { return "departed"; }
+    /* 基準は比較の印より先に見る。
+       クイックソートは**毎回その基準と比べる**ので、比較の印を優先すると
+       基準にいつも比較の印が付き、P が一度も出なくなる。
+       基準は位置が決まるまで役割が続くので、そのあいだ P を出す。 */
+    if (pivotId && cell.id === pivotId) { return "pivot"; }
     if (cell.mark === "shuffle") { return "shuffle"; }
     if (cell.mark === "swap") { return "swap"; }
     if (cell.mark === "write") { return "write"; }
     if (cell.mark === "compare") { return "compare"; }
     if (cell.mark === "read") { return "read"; }
-    /* 確定を基準より先に見る。基準の要素は置き場所が決まった時点で確定するので、
-       そのあとも P のままだと「まだ作業中」に見えてしまう。 */
     if (cell.sorted) { return "sorted"; }
-    if (pivotId && cell.id === pivotId) { return "pivot"; }
     return "idle";
   }
 

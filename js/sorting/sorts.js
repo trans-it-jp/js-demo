@@ -1288,7 +1288,11 @@
 
       } else if (step.type === "sorted") {
         step.indices.forEach(function (i) {
-          if (state.main[i]) { state.main[i].sorted = true; }
+          if (!state.main[i]) { return; }
+          state.main[i].sorted = true;
+          /* 置き場所が決まった時点で基準の役割は終わる。
+             そのままだと確定したあとも P が出続ける。 */
+          if (state.pivotId === state.main[i].id) { state.pivotId = null; }
         });
 
       } else if (step.type === "check") {

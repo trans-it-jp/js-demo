@@ -173,6 +173,7 @@
       "sort.note.designClaim": "この並びは、そうなるべくしてこうなっている",
 
       "sort.state.idle": "まだ確定していない",
+      "sort.state.range": "いま見ている範囲（この中だけを並べ替えている）",
       "sort.state.read": "値を見ただけ（比較ではない）",
       "sort.state.shuffle": "まとめて混ぜ直した",
       "sort.state.departed": "出ていった（消えてはいない）",
@@ -444,6 +445,7 @@
       "sort.note.designClaim": "This order is the one it was meant to have",
 
       "sort.state.idle": "Not settled yet",
+      "sort.state.range": "The range being worked on (only this part is being sorted)",
       "sort.state.read": "Read, not compared",
       "sort.state.shuffle": "Shuffled as a whole",
       "sort.state.departed": "Left the row, not destroyed",
