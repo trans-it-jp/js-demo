@@ -21,7 +21,8 @@
  *   remove   要素を取り除いた           { i }                （スターリンソート）
  *   shuffle  全体を混ぜ直した           { values }           （ボゴソート）
  *   reverse  ある範囲をひっくり返した     { lo, hi }           （パンケーキソート）
- *   auxInit  控えの行を空で用意した       { size, kind }       （計数・基数・バケツ）
+ *   auxInit  控えの行を空で用意した       { size, kind, bounds }（計数・基数・バケツ）
+ *                bounds はバケツの境目の位置。区切りを描くために渡す。
  *   pivot    基準の要素を決めた         { i }
  *   range    いま見ている範囲           { lo, hi }
  *   sorted   位置が確定した             { indices }
@@ -759,7 +760,9 @@
       total += counts[c];
     }
 
-    rec.add({ type: "auxInit", size: n, kind: "buckets" });
+    /* 境目（各バケツの先頭の位置）も渡す。どこで区切られているかが
+       見えないと、ただ値が並んでいるのと区別が付かないため。 */
+    rec.add({ type: "auxInit", size: n, kind: "buckets", bounds: starts.slice() });
     var filled = starts.slice();
     var aux = [];
     for (var z = 0; z < n; z += 1) { aux.push(0); }
@@ -1096,7 +1099,10 @@
         for (var c = 0; c < step.size; c += 1) {
           state.aux.push(cell("aux" + state.auxSerial + "-" + c, 0));
         }
-        state.auxLabel = { kind: step.kind || "buffer" };
+        state.auxLabel = {
+          kind: step.kind || "buffer",
+          bounds: step.bounds ? step.bounds.slice() : null
+        };
 
       } else if (step.type === "set") {
         state.counts.write += 1;

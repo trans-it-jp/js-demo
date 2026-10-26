@@ -68,7 +68,7 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 | `set` | A value was written | `row`, `i`, `value` |
 | `reverse` | A range was flipped | `lo`, `hi` |
 | `aux` | A working copy was laid out | `lo`, `hi`, `values` |
-| `auxInit` | An empty working row was made | `size`, `kind` |
+| `auxInit` | An empty working row was made | `size`, `kind`, `bounds` (divider positions) |
 | `auxClear` | The working row was put away | — |
 | `emit` | Something left for the output (not destroyed) | `i` |
 | `remove` | Something was removed | `i` |

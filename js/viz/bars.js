@@ -149,6 +149,8 @@
       .attr("y1", AUX_BOTTOM + 0.5).attr("y2", AUX_BOTTOM + 0.5)
       .attr("stroke", "var(--plot-axis)").attr("stroke-width", 1)
       .attr("opacity", 0);
+    /* バケツの境目。棒の手前に描く。棒どうしの隙間に落ちるので重ならない。 */
+    var gAuxBounds = svg.append("g");
     var gAux = svg.append("g");
     var gAuxMarks = svg.append("g")
       .attr("text-anchor", "middle")
@@ -286,16 +288,45 @@
       if (hasAux) {
         auxBaseline.attr("opacity", 1);
         auxTitle.text(opts.auxLabel || "");
-        drawRow(gAux, gAuxMarks, state.aux, {
+        var auxGeo = drawRow(gAux, gAuxMarks, state.aux, {
           top: AUX_TOP, bottom: AUX_BOTTOM, markY: AUX_MARK_Y,
           slots: Math.max(cells.length, state.aux.length), maxValue: auxMax
         }, { duration: duration, pivotId: null });
+        drawBounds(state, auxGeo);
       } else {
         auxBaseline.attr("opacity", 0);
         auxTitle.text("");
         gAux.selectAll("rect").remove();
         gAuxMarks.selectAll("text").remove();
+        gAuxBounds.selectAll("line").remove();
       }
+    }
+
+    /**
+     * 控えの行の区切りを描く（いまはバケットソートのバケツの境目）。
+     * 空のバケツは幅が 0 になるため線が重なる。同じ位置は 1 本にまとめる。
+     */
+    function drawBounds(state, geometry) {
+      var label = state.auxLabel;
+      var raw = (label && label.bounds) ? label.bounds : [];
+      var positions = [];
+      raw.forEach(function (at) {
+        if (at > 0 && at < state.aux.length && positions.indexOf(at) < 0) {
+          positions.push(at);
+        }
+      });
+
+      var lines = gAuxBounds.selectAll("line").data(positions);
+      lines.exit().remove();
+      lines.enter().append("line")
+        .merge(lines)
+        .attr("x1", function (at) { return PAD_X + at * geometry.step; })
+        .attr("x2", function (at) { return PAD_X + at * geometry.step; })
+        .attr("y1", AUX_TOP - 10)
+        .attr("y2", AUX_BOTTOM + 6)
+        .attr("stroke", "var(--ink-muted)")
+        .attr("stroke-width", 1)
+        .attr("stroke-dasharray", "3 3");
     }
 
     function setAriaLabel(text) { svg.attr("aria-label", text); }

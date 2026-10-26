@@ -44,7 +44,6 @@
   var requestedCount = 24;  /* 利用者が指定した数。手法の上限で切る前の値 */
   var mode = "auto";
   var timer = null;
-  var prediction = null;
   var hints = null;
 
   /* --- 選ばれているもの ------------------------------------------------ */
@@ -361,7 +360,6 @@
     renderValueTable();
     updateButtons();
     announce();
-    revealPrediction();
   }
 
   function visibleOf(track) { return Sorts.visibleValues(track.state); }
@@ -513,15 +511,6 @@
     Controls.announce("live", parts.join(" // "));
   }
 
-  /** 手順の終わりまで来たときだけ、予想との答え合わせを出す。 */
-  function revealPrediction() {
-    if (!prediction || !allAtEnd() || !anyStarted()) { return; }
-    prediction.reveal(tracks.map(function (track) {
-      return t("sort.name." + track.id) + " " +
-        t("sort.status.compare") + " " + track.state.counts.compare;
-    }).join(" / "));
-  }
-
   /* --- 手法の一覧（分類ごとに折りたたむ） ------------------------------ */
 
   function renderPicker() {
@@ -668,7 +657,6 @@
     Controls.byId("step-back").addEventListener("click", stepBack);
     Controls.byId("to-end").addEventListener("click", toEnd);
     Controls.byId("reset").addEventListener("click", function () {
-      if (prediction) { prediction.reset(); }
       if (hints) { hints.reset(); }
       build({ fresh: true });
     });
@@ -677,7 +665,8 @@
       field: "share-url", button: "share-copy", status: "share-status"
     });
 
-    prediction = Learning.wirePrediction({ field: "predict", result: "predict-result" });
+    /* この画面では予想の欄を置かない（代表者の指示、2026-10-26）。
+       学習設計の 6 段階のうち「予想」が抜ける形になる。 */
     hints = Learning.wireHints("hints");
     Learning.wireWording({ controls: "wording" });
 

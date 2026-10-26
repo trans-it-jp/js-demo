@@ -806,6 +806,15 @@ td {
   font-size: 0.75rem;
 }
 
+/* 計算量。名前の次の行に、等幅で出す。 */
+.picker__cost {
+  display: block;
+  margin-top: 0.15em;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
 /* 手法ごとの枠。選んだ数だけ横に並べ、1 つのときは幅いっぱいにする。 */
 .tracks {
   display: grid;

@@ -67,7 +67,7 @@ JsDemo.Sorts.applyStep(state, plan.steps[state.cursor]);
 | `set` | 値を書いた | `row`, `i`, `value` |
 | `reverse` | 範囲をひっくり返した | `lo`, `hi` |
 | `aux` | 控えを並べた | `lo`, `hi`, `values` |
-| `auxInit` | 控えを空で用意した | `size`, `kind` |
+| `auxInit` | 控えを空で用意した | `size`, `kind`, `bounds`（区切りの位置） |
 | `auxClear` | 控えを片付けた | — |
 | `emit` | 出力へ送った（消したのではない） | `i` |
 | `remove` | 取り除いた | `i` |

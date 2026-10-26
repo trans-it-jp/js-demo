@@ -187,7 +187,7 @@
       "sort.aux.output": "出ていった順（これが結果）",
       "sort.aux.counts": "値ごとの個数（位置が値、高さが個数）",
       "sort.aux.digits": "いまの桁で配り直した並び",
-      "sort.aux.buckets": "バケツへ配った並び（区切りはバケツの境目）",
+      "sort.aux.buckets": "バケツへ配った並び（破線がバケツの境目）",
 
       "sort.status.progress": "手順",
       "sort.status.compare": "比べた回数",
@@ -458,7 +458,7 @@
       "sort.aux.output": "The order they left in — this is the result",
       "sort.aux.counts": "How many of each value (position is the value, height is the count)",
       "sort.aux.digits": "Redistributed by the current digit",
-      "sort.aux.buckets": "Spread into buckets (the steps are the bucket boundaries)",
+      "sort.aux.buckets": "Spread into buckets (the dashed lines are the boundaries)",
 
       "sort.status.progress": "Step",
       "sort.status.compare": "Comparisons",

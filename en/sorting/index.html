@@ -53,10 +53,6 @@
         <dt>What you need first</dt>
         <dd>Being able to say which of two values is larger, and having met the idea of repetition. Written for lower secondary upwards.</dd>
       </div>
-      <div>
-        <dt>Predict before you run it</dt>
-        <dd>Give bubble sort and quicksort the same row. Which one makes more comparisons?</dd>
-      </div>
     </dl>
 
     <div class="demo">
@@ -100,26 +96,6 @@
 
       <aside>
         <section class="panel">
-          <h2 class="panel__title">Predict before you run it</h2>
-          <fieldset class="predict" id="predict">
-            <legend class="predict__question">Give bubble sort and quicksort the same row. Which one makes more comparisons?</legend>
-            <div class="predict__choices">
-              <label><input type="radio" name="predict" value="a">Bubble sort makes more</label>
-              <label><input type="radio" name="predict" value="b">Quicksort makes more</label>
-              <label><input type="radio" name="predict" value="c">About the same</label>
-            </div>
-            <p class="predict__note">You can use everything without choosing. If you do choose, you can hold it against the result afterwards.</p>
-          </fieldset>
-          <p class="predict__result" id="predict-result" role="status" aria-live="polite"></p>
-        </section>
-
-        <section class="panel">
-          <h2 class="panel__title">Choose the algorithms</h2>
-          <p class="share__help">Pick as many as you like (up to 6 run at once). Every one you pick gets <strong>the same row</strong>.</p>
-          <div class="picker" id="picker"></div>
-        </section>
-
-        <section class="panel">
           <h2 class="panel__title">Change the conditions</h2>
           <div class="controls">
             <div class="control">
@@ -140,6 +116,12 @@
               <input id="speed-num" type="number" min="10" max="1200" step="10" value="180">
             </div>
           </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Choose the algorithms</h2>
+          <p class="share__help">Pick as many as you like (up to 6 run at once). Every one you pick gets <strong>the same row</strong>.</p>
+          <div class="picker" id="picker"></div>
         </section>
 
         <section class="panel">
@@ -211,7 +193,7 @@
         <li>Quicksort always takes the rightmost element of the range as its pivot. Other pivot choices are out of scope.</li>
         <li><strong>A green ✓ means strictly "this position will not change again".</strong> It is not used for a stretch that merely happens to be in order and will move later, as in insertion sort — watch the staircase shape for that instead.</li>
         <li>For bogosort, bozo sort and miracle sort the <strong>total number of steps is deliberately not shown.</strong> Revealing up front which step it ends on would destroy the very property that there is no guarantee it ends at all. The steps are generated in advance internally, but not displayed.</li>
-        <li>The working row for bucket sort does not draw lines between the buckets; the elements simply sit in the order they were poured in.</li>
+        <li>The working row for bucket sort marks the bucket boundaries with dashed lines. <strong>A bucket that received nothing has zero width</strong>, so its lines coincide and cannot be told apart.</li>
         <li>The name origins are short summaries of the commonly given explanations. They have not been checked against scholarly sources one by one.</li>
       </ul>
 
