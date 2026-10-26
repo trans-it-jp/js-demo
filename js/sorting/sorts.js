@@ -974,9 +974,12 @@
     /* unbounded: 終わりが事前に分からない手法。
        run ではなく round を持ち、**1 周ずつ作る**。終わるまで先に走らせないので、
        総手数が分からないまま見ていられる（代表者の指摘、2026-10-26）。
+       **要素数を制限する理由は無い。** 1 周ずつしか作らないので、終わらなくても
+       待たされない。以前 7 個・50 個に制限していたのは、手順を先に全部
+       作っていたときの名残（代表者の指摘、2026-10-26）。
        limit は作り置きの上限で、終わりの保証ではない。 */
-    { id: "bogo",      group: "joke", maxCount: 50, limit: 50000, needsRandom: true, unbounded: true, round: bogoRound },
-    { id: "bozo",      group: "joke", maxCount: 50, limit: 50000, needsRandom: true, unbounded: true, round: bozoRound },
+    { id: "bogo",      group: "joke", maxCount: 64, limit: 50000, needsRandom: true, unbounded: true, round: bogoRound },
+    { id: "bozo",      group: "joke", maxCount: 64, limit: 50000, needsRandom: true, unbounded: true, round: bozoRound },
     { id: "quantum",   group: "joke", maxCount: 64, needsRandom: true, run: quantum },
     { id: "sleep",     group: "joke", maxCount: 64, aux: true, run: sleep },
     { id: "miracle",   group: "joke", maxCount: 64, limit: 50000, unbounded: true, round: miracleRound },

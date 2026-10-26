@@ -870,16 +870,19 @@
     });
   });
 
-  test("ソート", "ボゴソートは要素を 50 個まで扱える", function () {
-    equal(Sorts.get("bogo").maxCount, 50, "ボゴソートの上限");
-    equal(Sorts.get("bozo").maxCount, 50, "ボゾソートの上限");
-    var values = Sorts.values({ count: 50, random: Random.create(7) });
+  test("ソート", "終わりが分からない手法に要素数の制限を付けない", function () {
+    /* 1 周ずつしか作らないので、終わらなくても待たされない。
+       制限していたのは手順を先に全部作っていたときの名残。 */
+    ["bogo", "bozo", "miracle"].forEach(function (id) {
+      equal(Sorts.get(id).maxCount, 64, id + " の上限");
+    });
+    var values = Sorts.values({ count: 64, random: Random.create(7) });
     var plan = Sorts.run({ id: "bogo", values: values, random: Random.create(8) });
     plan.ensure(400);
     var state = Sorts.replay({ values: values, steps: plan.steps });
     equal(multiset(Sorts.visibleValues(state)), multiset(values), "値の集まり");
     isTrue(state.counts.shuffle > 0, "混ぜ直している");
-    isTrue(!plan.finished, "50 個では終わっていない");
+    isTrue(!plan.finished, "64 個では終わっていない");
   });
 
   test("ソート", "要素数の上限を超えない範囲で手順が打ち切られない", function () {
