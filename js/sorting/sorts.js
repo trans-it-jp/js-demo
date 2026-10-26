@@ -315,33 +315,40 @@
   }
 
   /**
-   * ボゴソート。そろっているか見て、そろっていなければ全部混ぜる。それだけ。
-   * 期待される混ぜる回数は要素数の階乗ほど。要素数を増やすと終わらない。
+   * そろっているか確かめる 1 周。
+   * **最初に順番が逆のところを見つけた時点で打ち切る。** 本物の実装と同じで、
+   * だから画面では 2 本だけ光ることが多い。
+   * @returns {boolean} そろっていたか
    */
-  function bogo(a, rec, random) {
-    function sortedFrom() {
-      for (var i = 0; i + 1 < a.length; i += 1) {
-        rec.compare(i, i + 1);
-        if (rec.full) { return false; }
-        if (a[i] > a[i + 1]) { return false; }
-      }
+  function checkSorted(a, rec) {
+    var ok = true;
+    for (var i = 0; i + 1 < a.length; i += 1) {
+      rec.compare(i, i + 1);
+      if (rec.full) { return false; }
+      if (a[i] > a[i + 1]) { ok = false; break; }
+    }
+    rec.add({ type: "check", ok: ok });
+    return ok;
+  }
+
+  /**
+   * ボゴソートの 1 周。そろっているか見て、違えば全部混ぜる。それだけ。
+   * 期待される混ぜる回数は要素数の階乗ほど。要素数を増やすと終わらない。
+   *
+   * **1 周ずつ返す。** 終わるまで先に走らせてしまうと、終わりの手数が
+   * 分かってしまい、「終わる保証がない」という性質が画面から消える。
+   * @returns {boolean} 終わったか
+   */
+  function bogoRound(a, rec, random) {
+    if (checkSorted(a, rec)) {
+      markAllSorted(a, rec);
+      rec.add({ type: "note", key: "sort.note.bogoDone" });
       return true;
     }
-
-    var tries = 0;
-    while (!rec.full) {
-      var ok = sortedFrom();
-      rec.add({ type: "check", ok: ok });
-      if (ok) {
-        markAllSorted(a, rec);
-        rec.add({ type: "note", key: "sort.note.bogoDone" });
-        return;
-      }
-      var mixed = random.shuffle(a);
-      for (var i = 0; i < mixed.length; i += 1) { a[i] = mixed[i]; }
-      tries += 1;
-      rec.add({ type: "shuffle", values: mixed.slice() });
-    }
+    var mixed = random.shuffle(a);
+    for (var i = 0; i < mixed.length; i += 1) { a[i] = mixed[i]; }
+    rec.add({ type: "shuffle", values: mixed.slice() });
+    return false;
   }
 
   /**
@@ -367,29 +374,20 @@
   }
 
   /**
-   * ミラクルソート。そろっているか見る。そろっていなければ、何もしないで待つ。
+   * ミラクルソートの 1 周。そろっているか見て、違えば何もしないで待つ。
    * 宇宙線か奇跡で並びが直るのを期待する。要素は一つも動かない。
+   * **打ち切らない。** 待ち続けるのがこの手法そのものなので、
+   * 止めるかどうかは見ている人が決める。
+   * @returns {boolean} 終わったか
    */
-  function miracle(a, rec) {
-    var passes = 0;
-    var MAX_PASSES = 12;
-    while (passes < MAX_PASSES && !rec.full) {
-      var ok = true;
-      for (var i = 0; i + 1 < a.length; i += 1) {
-        rec.compare(i, i + 1);
-        if (rec.full) { return; }
-        if (a[i] > a[i + 1]) { ok = false; break; }
-      }
-      rec.add({ type: "check", ok: ok });
-      if (ok) {
-        markAllSorted(a, rec);
-        rec.add({ type: "note", key: "sort.note.miracleDone" });
-        return;
-      }
-      passes += 1;
-      rec.add({ type: "note", key: "sort.note.miracleWait" });
+  function miracleRound(a, rec) {
+    if (checkSorted(a, rec)) {
+      markAllSorted(a, rec);
+      rec.add({ type: "note", key: "sort.note.miracleDone" });
+      return true;
     }
-    rec.add({ type: "note", key: "sort.note.miracleGiveUp" });
+    rec.add({ type: "note", key: "sort.note.miracleWait" });
+    return false;
   }
 
   function markAllSorted(a, rec) {
@@ -844,34 +842,23 @@
   }
 
   /**
-   * ボゾソート。無作為に 2 か所選んで入れ替え、そろったか見る。
+   * ボゾソートの 1 周。無作為に 2 か所選んで入れ替え、そろったか見る。
    * ボゴソートと同じくらい終わらないが、1 手の動きは小さい。
+   * @returns {boolean} 終わったか
    */
-  function bozo(a, rec, random) {
-    function sortedNow() {
-      for (var i = 0; i + 1 < a.length; i += 1) {
-        rec.compare(i, i + 1);
-        if (rec.full) { return false; }
-        if (a[i] > a[i + 1]) { return false; }
-      }
+  function bozoRound(a, rec, random) {
+    if (checkSorted(a, rec)) {
+      markAllSorted(a, rec);
+      rec.add({ type: "note", key: "sort.note.bozoDone" });
       return true;
     }
-
-    while (!rec.full) {
-      var ok = sortedNow();
-      rec.add({ type: "check", ok: ok });
-      if (ok) {
-        markAllSorted(a, rec);
-        rec.add({ type: "note", key: "sort.note.bozoDone" });
-        return;
-      }
-      var i1 = Math.floor(random.next() * a.length);
-      var i2 = Math.floor(random.next() * a.length);
-      if (i1 !== i2) {
-        swapInPlace(a, i1, i2);
-        rec.add({ type: "swap", i: i1, j: i2 });
-      }
+    var i1 = Math.floor(random.next() * a.length);
+    var i2 = Math.floor(random.next() * a.length);
+    if (i1 !== i2) {
+      swapInPlace(a, i1, i2);
+      rec.add({ type: "swap", i: i1, j: i2 });
     }
+    return false;
   }
 
   /**
@@ -945,14 +932,15 @@
     /* 冗談。終わらないものは要素数を低く抑える。 */
     { id: "stalin",    group: "joke", maxCount: 64, run: stalin },
     { id: "thanos",    group: "joke", maxCount: 64, needsRandom: true, run: thanos },
-    /* unbounded: 終わりが事前に分からない手法。画面に総手数を出さない。
-       何手で終わるかを先に見せると、「終わる保証がない」という性質そのものが
-       伝わらなくなるため（代表者の指摘、2026-10-26）。 */
-    { id: "bogo",      group: "joke", maxCount: 7,  limit: 60000, needsRandom: true, unbounded: true, run: bogo },
-    { id: "bozo",      group: "joke", maxCount: 7,  limit: 60000, needsRandom: true, unbounded: true, run: bozo },
+    /* unbounded: 終わりが事前に分からない手法。
+       run ではなく round を持ち、**1 周ずつ作る**。終わるまで先に走らせないので、
+       総手数が分からないまま見ていられる（代表者の指摘、2026-10-26）。
+       limit は作り置きの上限で、終わりの保証ではない。 */
+    { id: "bogo",      group: "joke", maxCount: 50, limit: 50000, needsRandom: true, unbounded: true, round: bogoRound },
+    { id: "bozo",      group: "joke", maxCount: 50, limit: 50000, needsRandom: true, unbounded: true, round: bozoRound },
     { id: "quantum",   group: "joke", maxCount: 64, needsRandom: true, run: quantum },
     { id: "sleep",     group: "joke", maxCount: 64, run: sleep },
-    { id: "miracle",   group: "joke", maxCount: 64, unbounded: true, run: miracle },
+    { id: "miracle",   group: "joke", maxCount: 64, limit: 50000, unbounded: true, round: miracleRound },
     { id: "design",    group: "joke", maxCount: 64, run: design }
   ];
 
@@ -980,14 +968,45 @@
     if (!algorithm) { throw new Error("知らない手法: " + options.id); }
     var work = options.values.slice();
     var rec = recorder(algorithm.limit);
-    algorithm.run(work, rec, options.random);
-    if (!rec.truncated) { rec.add({ type: "done" }); }
+
+    /* 終わりが分かっている手法は、最初に全部作ってしまってよい。 */
+    if (!algorithm.round) {
+      algorithm.run(work, rec, options.random);
+      if (!rec.truncated) { rec.add({ type: "done" }); }
+      return {
+        id: algorithm.id,
+        steps: rec.steps,
+        truncated: rec.truncated,
+        finished: !rec.truncated,
+        lazy: false,
+        result: work,
+        /** 作り置きはしないので、すでにある分だけ答える */
+        ensure: function (count) { return rec.steps.length >= count; }
+      };
+    }
+
+    /* 終わりが分からない手法は、**必要になった分だけ作る**。
+       終わるまで先に走らせると、終わりの手数が分かってしまい、
+       要素数も小さく抑えるしかなくなる。 */
+    var ended = false;
     return {
       id: algorithm.id,
       steps: rec.steps,
-      truncated: rec.truncated,
-      finished: !rec.truncated,
-      result: work
+      lazy: true,
+      get truncated() { return rec.truncated; },
+      get finished() { return ended; },
+      get result() { return work.slice(); },
+      /**
+       * 手順が count 手に届くまで作る。
+       * @returns {boolean} 届いたか（終わった・打ち切ったときは false）
+       */
+      ensure: function (count) {
+        while (!ended && !rec.full && rec.steps.length < count) {
+          ended = algorithm.round(work, rec, options.random) === true;
+          if (ended) { rec.add({ type: "done" }); }
+        }
+        return rec.steps.length >= count;
+      }
     };
   }
 

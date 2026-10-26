@@ -199,7 +199,6 @@
       "sort.status.reverse": "ひっくり返した回数",
       "sort.status.read": "値を見た回数（比較ではない）",
       "sort.count.range": "4〜64 個",
-      "sort.status.progressOpen": "{n}（終わりは何手目か分からない）",
       "button.toLimit": "行けるところまで進める",
 
       "sort.origin.bubble": "小さい値が泡のように上がっていく様子から。",
@@ -270,6 +269,7 @@
       "button.toEnd": "最後まで進める",
 
       "sort.msg.truncated": "手順が上限に達したため打ち切りました。要素の数を減らすと終わりまで見られます。",
+      "sort.msg.stillRunning": "{steps} 手進めましたが、まだ終わっていません。もう一度押すと続きを進めます。",
       "sort.msg.capped": "この手法は要素が多いと終わらないため、{max} 個までに制限しました。",
       "sort.msg.lost": "取り除かれて消えた要素があります。結果は並べ替えではありません。",
       "sort.msg.finished": "手順の終わりまで来ました。",
@@ -470,7 +470,6 @@
       "sort.status.reverse": "Flips",
       "sort.status.read": "Reads (not comparisons)",
       "sort.count.range": "4 to 64",
-      "sort.status.progressOpen": "{n} (no telling how long)",
       "button.toLimit": "Run as far as it goes",
 
       "sort.origin.bubble": "Small values rise through the row like bubbles.",
@@ -541,6 +540,7 @@
       "button.toEnd": "Run to the end",
 
       "sort.msg.truncated": "The step limit was reached, so this run was cut short. Use fewer elements to see it finish.",
+      "sort.msg.stillRunning": "Ran {steps} steps and it still has not finished. Press again to carry on.",
       "sort.msg.capped": "This algorithm does not finish with many elements, so it is limited to {max}.",
       "sort.msg.lost": "Some elements were removed and are gone. The result is not a rearrangement.",
       "sort.msg.finished": "This is the end of the run.",

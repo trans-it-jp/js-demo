@@ -816,28 +816,48 @@ td {
 }
 
 /* 手法ごとの枠。選んだ数だけ横に並べ、1 つのときは幅いっぱいにする。 */
+/* 題名・由来・図・数値の 4 段。**手法ごとに説明の長さが違っても、
+   図の縦位置がそろうようにする。** subgrid が使える環境では親の行に
+   そろえ、使えない環境では題名と由来に高さを確保して近い見え方にする。 */
 .tracks {
   display: grid;
-  gap: var(--s-5);
+  column-gap: var(--s-5);
+  row-gap: 0;
   grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  grid-template-rows: auto auto auto auto;
 }
 .tracks.is-single { grid-template-columns: 1fr; }
 
-.track { min-width: 0; }
+.track {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+}
+@supports (grid-template-rows: subgrid) {
+  .track {
+    grid-row: span 4;
+    grid-template-rows: subgrid;
+  }
+}
+
 .track__title {
   margin: 0 0 var(--s-2);
   font-size: 1rem;
   line-height: 1.4;
+  min-height: 1.4em;          /* subgrid が無いときの保険 */
 }
 .track__origin {
   margin: 0 0 var(--s-3);
   color: var(--ink-muted);
   font-size: 0.8125rem;
+  line-height: 1.6;
+  min-height: 3.2em;          /* 2 行ぶん。同上 */
 }
-.track__plot { margin: 0; }
+.track__plot { margin: 0; align-self: start; }
 .track__meta {
-  margin-top: var(--s-3);
+  margin: var(--s-3) 0 var(--s-6);
   font-size: 0.8125rem;
+  align-self: start;
 }
 
 /* 凡例の色見本。印の文字も並べる。 */

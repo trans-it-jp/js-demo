@@ -200,6 +200,16 @@
 
   function trackAtEnd(track) { return track.cursor >= track.plan.steps.length; }
 
+  /**
+   * まだ進められるか。
+   * 終わりが分からない手法は手順を作り置きしていないので、
+   * 「いまある手順を使い切った」ことと「終わった」ことは別。
+   */
+  function canAdvance(track) {
+    if (!trackAtEnd(track)) { return true; }
+    return track.plan.lazy && !track.plan.finished && !track.plan.truncated;
+  }
+
   /** 終わりが事前に分からない手法か */
   function isUnbounded(track) {
     return Sorts.get(track.id).unbounded === true;
@@ -210,18 +220,19 @@
    * 終わりが分からない手法では分母を出さない。何手で終わるかを先に見せると、
    * 「終わる保証がない」という性質そのものが伝わらないため。
    */
+  /**
+   * 進み具合は「いま何手目か」だけを出す。
+   * 終わりまでの手数は出さない（代表者の指示、2026-10-26）。
+   * 終わりが分からない手法ではそもそも存在せず、分かる手法でも、
+   * 手法どうしを比べる材料になるのは比べた回数と動かした回数のほう。
+   */
   function progressText(track) {
-    if (!isUnbounded(track)) {
-      return track.cursor + " / " + track.plan.steps.length;
-    }
-    return trackAtEnd(track)
-      ? String(track.cursor)
-      : t("sort.status.progressOpen", { n: track.cursor });
+    return String(track.cursor);
   }
 
   function allAtEnd() {
     if (tracks.length === 0) { return true; }
-    return tracks.every(trackAtEnd);
+    return !tracks.some(canAdvance);
   }
 
   function anyStarted() {
@@ -232,6 +243,9 @@
   function forward() {
     var moved = false;
     tracks.forEach(function (track) {
+      /* 終わりが分からない手法は、ここで次の 1 手を作る。
+         先に作っておくと終わりの手数が分かってしまうため。 */
+      track.plan.ensure(track.cursor + 1);
       if (trackAtEnd(track)) { return; }
       Sorts.applyStep(track.state, track.plan.steps[track.cursor]);
       track.cursor += 1;
@@ -261,15 +275,28 @@
     render({ animate: true });
   }
 
+  /* 一度に進める上限。終わらない手法があるので、無制限には進めない。 */
+  var RUN_BUDGET = 4000;
+
   function toEnd() {
     stop();
+    var unfinished = false;
     tracks.forEach(function (track) {
-      while (!trackAtEnd(track)) {
+      var budget = RUN_BUDGET;
+      while (budget > 0) {
+        track.plan.ensure(track.cursor + 1);
+        if (trackAtEnd(track)) { break; }
         Sorts.applyStep(track.state, track.plan.steps[track.cursor]);
         track.cursor += 1;
+        budget -= 1;
       }
+      if (canAdvance(track)) { unfinished = true; }
     });
     render({ animate: false });
+    if (unfinished) {
+      Controls.byId("notice").textContent =
+        t("sort.msg.stillRunning", { steps: RUN_BUDGET });
+    }
   }
 
   function restart() {
@@ -465,6 +492,8 @@
     var truncated = tracks.some(function (track) { return track.plan.truncated; });
     if (truncated) { messages.push(t("sort.msg.truncated")); }
     var lossy = tracks.some(function (track) {
+      /* 終わりが分からない手法は手順がまだ無いので、手法の性質で見る。 */
+      if (track.plan.lazy) { return false; }
       return track.plan.result.length !== values.length ||
         track.plan.steps.some(function (step) { return step.type === "remove"; });
     });

@@ -694,15 +694,21 @@
     selection: "sorted", heap: "sorted", cycle: "sorted", merge: "sorted",
     quick: "sorted", stooge: "sorted", counting: "sorted", radix: "sorted",
     bucket: "sorted", sleep: "sorted",
-    stalin: "lossy", thanos: "lossy", bogo: "sorted", bozo: "sorted",
+    stalin: "lossy", thanos: "lossy",
+    /* 終わりが分からない手法。そろうことを期待しない。 */
+    bogo: "openEnded", bozo: "openEnded",
     quantum: "unchangedOrSorted", miracle: "untouched", design: "untouched"
   };
+
+  /* 終わりが分からない手法は手順を作り置きしないので、見る分だけ作る。 */
+  var LAZY_BUDGET = 300;
 
   function sortRun(id, count, seed) {
     var algorithm = Sorts.get(id);
     var n = Math.min(count, algorithm.maxCount);
     var values = Sorts.values({ count: n, random: Random.create(seed) });
     var plan = Sorts.run({ id: id, values: values, random: Random.create(seed + 1) });
+    if (plan.lazy) { plan.ensure(LAZY_BUDGET); }
     var state = Sorts.replay({ values: values, steps: plan.steps });
     return { values: values, plan: plan, state: state, n: n };
   }
@@ -715,9 +721,16 @@
       var visible = Sorts.visibleValues(out.state);
       var expect = SORT_EXPECT[algorithm.id];
 
-      isTrue(out.plan.finished, algorithm.id + " が上限で打ち切られていない");
+      if (!out.plan.lazy) {
+        isTrue(out.plan.finished, algorithm.id + " が上限で打ち切られていない");
+      }
 
-      if (expect === "sorted") {
+      if (expect === "openEnded") {
+        /* 終わるかどうかは分からない。確かめるのは「値を失っていない」こと。 */
+        equal(visible.length, out.n, algorithm.id + " の要素数");
+        equal(multiset(visible), multiset(out.values), algorithm.id + " が値を変えていない");
+        isTrue(out.plan.steps.length > 0, algorithm.id + " の手順が作られている");
+      } else if (expect === "sorted") {
         isTrue(Sorts.isSorted(visible), algorithm.id + " の結果がそろっている");
         equal(visible.length, out.n, algorithm.id + " の要素数");
         equal(multiset(visible), multiset(out.values), algorithm.id + " が値を変えていない");
@@ -830,8 +843,43 @@
     var values = Sorts.values({ count: 6, random: Random.create(77) });
     var first = Sorts.run({ id: "bogo", values: values, random: Random.create(99) });
     var second = Sorts.run({ id: "bogo", values: values, random: Random.create(99) });
+    first.ensure(120);
+    second.ensure(120);
     equal(first.steps.length, second.steps.length, "手順の数");
     equal(first.result.join(","), second.result.join(","), "結果");
+  });
+
+  test("ソート", "終わりが分からない手法は、作る前に走らせない", function () {
+    /* 画面に出す前に最後まで走らせてしまうと、終わりの手数が分かってしまい、
+       「終わる保証がない」という性質が画面から消える。
+       run() の時点で手順が 0 件であることを確かめる。 */
+    ["bogo", "bozo", "miracle"].forEach(function (id) {
+      var n = Sorts.get(id).maxCount;
+      var values = Sorts.values({ count: n, random: Random.create(404) });
+      var plan = Sorts.run({ id: id, values: values, random: Random.create(405) });
+      isTrue(plan.lazy === true, id + " は作り置きしない");
+      equal(plan.steps.length, 0, id + " の run() 直後の手順の数");
+      equal(plan.finished, false, id + " は終わっていない");
+
+      /* 求めた分だけ増える。求めなければ増えない。 */
+      plan.ensure(10);
+      isTrue(plan.steps.length >= 10, id + " が 10 手ぶん作られた");
+      var held = plan.steps.length;
+      plan.ensure(5);
+      equal(plan.steps.length, held, id + " は求めた分より多く作らない");
+    });
+  });
+
+  test("ソート", "ボゴソートは要素を 50 個まで扱える", function () {
+    equal(Sorts.get("bogo").maxCount, 50, "ボゴソートの上限");
+    equal(Sorts.get("bozo").maxCount, 50, "ボゾソートの上限");
+    var values = Sorts.values({ count: 50, random: Random.create(7) });
+    var plan = Sorts.run({ id: "bogo", values: values, random: Random.create(8) });
+    plan.ensure(400);
+    var state = Sorts.replay({ values: values, steps: plan.steps });
+    equal(multiset(Sorts.visibleValues(state)), multiset(values), "値の集まり");
+    isTrue(state.counts.shuffle > 0, "混ぜ直している");
+    isTrue(!plan.finished, "50 個では終わっていない");
   });
 
   test("ソート", "要素数の上限を超えない範囲で手順が打ち切られない", function () {
