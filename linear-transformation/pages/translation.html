@@ -130,6 +130,14 @@
         <li><strong>転移</strong>：点 [x, y, 1] に行列を掛ける計算を手で書き、tx が足し算として効くことを確かめてください。</li>
       </ul>
 
+      <details class="fold">
+        <summary>教える方へ</summary>
+        <div class="fold__body">
+          <p>起きやすい誤解: 平行移動も 2×2 の行列で書けると考えること。2×2 では原点が必ず原点のままなので、ずらすことができません。3 行目を足して [x, y, 1] にするのはそのためです。</p>
+          <p>短い課題案（5〜10 分）: tx だけを動かし、基底ベクトル e₁ と e₂ が**動かない**ことを確かめる。動かないのに図形は動く理由を説明させる。</p>
+        </div>
+      </details>
+
       <h3>この画面の範囲</h3>
       <ul>
         <li>扱うのはアフィン変換までです。行列の 3 行目は常に [0, 0, 1] で、射影変換は含みません。</li>
@@ -143,7 +151,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
       <dl class="page-meta__list">
-        <dt>版</dt><dd>2026-10-26</dd>
+        <dt>版</dt><dd>2026-10-27</dd>
         <dt>公開日</dt><dd>2026-10-25</dd>
         <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
         <dt>再利用条件</dt><dd>コードは <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>、教材本文は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>。出典を示せば改変・再配布できます（商用を含む）</dd>

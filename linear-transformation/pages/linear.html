@@ -146,6 +146,14 @@
         <li><strong>転移</strong>：行列式が負になる設定を自分で 1 つ作り、図のどこで見分けられるか説明してください。</li>
       </ul>
 
+      <details class="fold">
+        <summary>教える方へ</summary>
+        <div class="fold__body">
+          <p>起きやすい誤解: 行列の列は、点の座標そのものだと受け取ること。列は**基底ベクトルの行き先**で、1 列目が e₁ の像、2 列目が e₂ の像です。</p>
+          <p>短い課題案（5〜10 分）: sx と sy を 1 のままにして shear だけを動かし、表の列と図の矢印がどう連動するかを 2 人で言い合う。</p>
+        </div>
+      </details>
+
       <h3>この画面の範囲</h3>
       <ul>
         <li>扱うのはアフィン変換までです。行列の 3 行目は常に [0, 0, 1] で、射影変換は含みません。</li>
@@ -159,7 +167,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
       <dl class="page-meta__list">
-        <dt>版</dt><dd>2026-10-26</dd>
+        <dt>版</dt><dd>2026-10-27</dd>
         <dt>公開日</dt><dd>2026-10-25</dd>
         <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
         <dt>再利用条件</dt><dd>コードは <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>、教材本文は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>。出典を示せば改変・再配布できます（商用を含む）</dd>

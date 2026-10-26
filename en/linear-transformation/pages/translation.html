@@ -130,6 +130,14 @@
         <li><strong>Transfer</strong>: multiply the matrix by [x, y, 1] on paper and confirm that tx enters as an addition.</li>
       </ul>
 
+      <details class="fold">
+        <summary>For teachers</summary>
+        <div class="fold__body">
+          <p>The easy misreading: Thinking a translation can be written as a 2×2 matrix. A 2×2 matrix always leaves the origin where it is, so it cannot shift anything. That is why a third row is added and points become [x, y, 1].</p>
+          <p>A short task (5–10 minutes): Move only tx and check that the basis vectors e₁ and e₂ <strong>do not move</strong>. Ask why the shape moves even though they do not.</p>
+        </div>
+      </details>
+
       <h3>What this page covers</h3>
       <ul>
         <li>Affine transforms only. The third row of the matrix is always [0, 0, 1]; projective transforms are not included.</li>
@@ -143,7 +151,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
       <dl class="page-meta__list">
-        <dt>Version</dt><dd>2026-10-26</dd>
+        <dt>Version</dt><dd>2026-10-27</dd>
         <dt>Published</dt><dd>2026-10-25</dd>
         <dt>Source and dependencies</dt><dd>Written in-house. Drawing uses D3.js v7.9.0 (CDN, pinned version)</dd>
         <dt>Terms of reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching material under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Adapt and redistribute freely, including commercially, with attribution</dd>
