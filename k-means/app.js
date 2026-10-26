@@ -39,7 +39,6 @@
   var stepCount = 0;   /* 初期化から何手進めたか。一手戻るときに使う。 */
 
   var animate = false; /* 直前の操作を動かして見せるか */
-  var prediction = null;
   var hints = null;
 
   /**
@@ -98,8 +97,7 @@
   /** 初期化。点も中心の初期位置も、すべて選び直す。 */
   function reset() {
     seed = pickSeed();
-    /* 別のデータになるので、予想と開いたヒントも元へ戻す。 */
-    if (prediction) { prediction.reset(); }
+    /* 別のデータになるので、開いたヒントは元へ戻す。 */
     if (hints) { hints.reset(); }
     build(0);
   }
@@ -171,17 +169,6 @@
     runButton.disabled = model.converged;
     backButton.disabled = stepCount === 0;
     stepButton.textContent = model.converged ? t("button.stepDone") : t("button.step");
-
-    /* 収束して結果が出たときだけ、予想との答え合わせを出す。
-       予想していない人には何も出さない。 */
-    if (prediction && model.converged) {
-      prediction.reveal(
-        t("table.clusters") + " " +
-        model.clusterSizes().map(function (n, i) {
-          return (i + 1) + ":" + n;
-        }).join(" ")
-      );
-    }
 
     var message = phaseText();
     if (lastInfo && lastInfo.emptyClusters.length > 0) {
@@ -290,8 +277,9 @@
 
     ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 
-    /* 予想は選ばなくても操作できる。選んだ人にだけ答え合わせを返す。 */
-    prediction = Learning.wirePrediction({ field: "predict", result: "predict-result" });
+    /* この画面では予想の欄を置かない（代表者の指示、2026-10-26）。
+       共通部品（JsDemo.Learning.wirePrediction）は残してあり、
+       予想を置く題材ではそのまま使える。 */
     hints = Learning.wireHints("hints");
     Learning.wireWording({ controls: "wording" });
 
