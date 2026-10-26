@@ -32,6 +32,22 @@ en/<題材名>/
 
 段階的に開くヒント（`.hints`）と語彙の切り替え（`.wording`）は共通部品として実装済み。雛形にも印が入っているので、`JsDemo.Learning.wireHints` と `wireWording` を画面側から呼ぶ。
 
+**授業で共有する欄**（`#share-url`）は雛形に入っている。画面側で次の 3 つを呼ぶ。
+
+```js
+var spec = JsDemo.ShareLink.specFromControls([
+  { param: "k", control: "clusters", integer: true }   // 短い名前 ← 入力欄の id
+]);
+JsDemo.ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
+JsDemo.ShareLink.sync(values, spec);   // 条件が変わるたび
+```
+
+守ること:
+
+- **URL に載せるのは数値だけ。** 自由入力を受け取らないので、個人情報が混ざらない。
+- **範囲は入力欄から読む**（`specFromControls`）。`min`/`max` を書き写すと、画面と食い違ったときに共有した値が黙って別の値へ変わる。実際にそれが起きたので点検（`tools/check-controls.js`）を常設した。
+- 仕様に無いパラメータは捨てる。
+
 深さが変わったら `../../` の数を直す。英語版は `lang="en"` にして `en/` 以下へ置き、互いの言語リンクを張る。
 
 ### b. 計算

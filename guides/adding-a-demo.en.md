@@ -32,6 +32,22 @@ The template is **the copy-source for future demos**. The existing k-means and 2
 
 Progressive hints (`.hints`) and the vocabulary switch (`.wording`) are built as shared components; the template carries their markers, and the page wires them with `JsDemo.Learning.wireHints` and `wireWording`.
 
+**The share panel** (`#share-url`) is in the template. The page wires it with three calls.
+
+```js
+var spec = JsDemo.ShareLink.specFromControls([
+  { param: "k", control: "clusters", integer: true }   // short name ← the input's id
+]);
+JsDemo.ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
+JsDemo.ShareLink.sync(values, spec);   // whenever the conditions change
+```
+
+Rules:
+
+- **Only numbers go in the URL.** Nothing free-form is accepted, so no personal data can get in.
+- **Read the ranges from the controls** (`specFromControls`). Copying `min`/`max` by hand means that when the two drift apart, a shared value silently becomes a different one. That happened, which is why `tools/check-controls.js` is now a standing check.
+- Drop any parameter that is not in the spec.
+
 If the depth changes, fix the number of `../..` segments. The English copy takes `lang="en"`, goes under `en/`, and the two link to each other.
 
 ### b. The calculation
