@@ -101,21 +101,6 @@
       .attr("width", VIEW_W).attr("height", VIEW_H_AUX)
       .attr("fill", "var(--plot-bg)");
 
-    /* 取り除いた棒に重ねる斜線。色の薄さだけに頼らないため。 */
-    var defs = svg.append("defs");
-    var hatch = defs.append("pattern")
-      .attr("id", "bars-hatch")
-      .attr("width", 6).attr("height", 6)
-      .attr("patternUnits", "userSpaceOnUse")
-      .attr("patternTransform", "rotate(45)");
-    hatch.append("rect")
-      .attr("width", 6).attr("height", 6)
-      .attr("fill", "var(--bar-removed)");
-    hatch.append("line")
-      .attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 6)
-      .attr("stroke", "var(--bar-removed-edge)")
-      .attr("stroke-width", 1.5);
-
     /* いま見ている範囲の下敷き（クイック・マージで使う） */
     var gRange = svg.append("g");
     var rangeRect = gRange.append("rect")
@@ -189,12 +174,13 @@
       /* 色は遷移させない。即時に設定する（冒頭の注意を参照）。 */
       all
         .attr("fill", function (d) {
-          var status = statusOf(d, settings.pivotId);
-          /* 斜線は「消えた」ものだけ。出ていったものは薄い地に枠だけにする。 */
-          return status === "removed" ? "url(#bars-hatch)" : FILL[status];
+          return FILL[statusOf(d, settings.pivotId)];
         })
         .attr("stroke", function (d) {
           var status = statusOf(d, settings.pivotId);
+          /* 消えたもの・出ていったものは、薄い地に薄い枠だけ。
+             「一応見えるが、もう居ない」という見え方にする。
+             何が起きたかは棒の下の印（✕ / →）と表で読める。 */
           if (status === "removed" || status === "departed") {
             return "var(--bar-removed-edge)";
           }
@@ -222,7 +208,11 @@
         .attr("y", geometry.markY)
         .attr("fill", function (d) {
           var status = statusOf(d, settings.pivotId);
-          return status === "idle" ? "var(--ink-muted)" : FILL[status];
+          /* 棒そのものは薄くするが、印は読める濃さを保つ。 */
+          if (status === "idle" || status === "removed" || status === "departed") {
+            return "var(--ink-muted)";
+          }
+          return FILL[status];
         })
         .text(function (d) {
           var status = statusOf(d, settings.pivotId);
@@ -238,8 +228,12 @@
       var cells = state.main;
       var hasAux = !!(state.aux && state.aux.length > 0);
 
+      /* 控えの行を使う手法では、**最初から 2 段ぶんの高さを取る**。
+         途中で段が増えるたびに図の高さが変わると、その下にある図の位置が
+         ずれて読みにくい（代表者の指摘、2026-10-26）。 */
+      var tall = hasAux || opts.reserveAux === true;
       svg.attr("viewBox", "0 0 " + VIEW_W + " " +
-               (hasAux ? VIEW_H_AUX : VIEW_H_PLAIN));
+               (tall ? VIEW_H_AUX : VIEW_H_PLAIN));
 
       var maxValue = 1;
       cells.forEach(function (c) { maxValue = Math.max(maxValue, c.value); });

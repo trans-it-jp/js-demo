@@ -33,6 +33,9 @@
   /* 要素数の上限。入力欄の max と揃える。 */
   var COUNT_MAX = 64;
 
+  /* 図を横に何列並べるかの既定値。入力欄の初期値と揃える。 */
+  var COLUMNS_DEFAULT = 2;
+
   /* URL へ載せるのは数値だけ。手法の組み合わせは 2 進の桁で表す
      （1 番目の手法が 1、2 番目が 2、3 番目が 4 …の合計）。自由入力は受け取らない。
      要素数の範囲は入力欄から読む。書き写すと画面と食い違ったときに
@@ -148,9 +151,12 @@
         state: Sorts.initial(values),
         cursor: 0,
         bars: null,
-        meta: null
+        meta: null,
+        counters: null
       };
     });
+
+    tracks.forEach(function (track) { track.counters = deriveCounters(track); });
 
     buildTrackElements();
     showNotices({ over: over, limited: requestedCount > limit, limit: limit });
@@ -159,10 +165,24 @@
   }
 
   /** 手法ごとの枠（見出し・図・数値）を作り直す */
+  /** 列数と説明の表示を #tracks の見た目へ反映する */
+  function applyLayout() {
+    var host = Controls.byId("tracks");
+    var columns = Numeric.readNumber(Controls.byId("columns").value,
+                                     { min: 1, max: 4, integer: true });
+    host.style.setProperty("--track-columns", columns);
+
+    var notes = Controls.byId("show-notes");
+    var bare = notes ? !notes.checked : false;
+    host.className = "tracks" +
+      (tracks.length === 1 ? " is-single" : "") +
+      (bare ? " is-bare" : "");
+  }
+
   function buildTrackElements() {
     var host = Controls.byId("tracks");
     host.textContent = "";
-    host.className = "tracks" + (tracks.length === 1 ? " is-single" : "");
+    applyLayout();
 
     tracks.forEach(function (track) {
       var section = document.createElement("section");
@@ -375,6 +395,9 @@
       track.bars.render(track.state, {
         animate: opts.animate !== false,
         duration: duration,
+        /* 控えの行を使う手法は、使っていない間も 2 段ぶんの高さを取る。
+           段が増えるたびに図の高さが変わると下の図がずれるため。 */
+        reserveAux: Sorts.get(track.id).aux === true,
         auxLabel: label ? t("sort.aux." + label.kind) : ""
       });
       renderTrackMeta(track);
@@ -392,7 +415,35 @@
 
   function visibleOf(track) { return Sorts.visibleValues(track.state); }
 
-  /** その手法で意味のある数え上げだけを並べる */
+  /* 数え上げのうち、手法ごとに出すもの。
+     **手順が進んでも行数を変えない。** 行が増えると数値欄の高さが変わり、
+     その下に並ぶ図の位置がずれるため（代表者の指摘、2026-10-26）。
+     どれを出すかは、その手法が実際に使う手順の種類から一度だけ決める。 */
+  var COUNTER_BY_STEP = [
+    ["read", "read", "sort.status.read"],
+    ["set", "write", "sort.status.write"],
+    ["reverse", "reverse", "sort.status.reverse"],
+    ["remove", "remove", "sort.status.remove"],
+    ["shuffle", "shuffle", "sort.status.shuffle"],
+    ["check", "check", "sort.status.check"]
+  ];
+
+  function deriveCounters(track) {
+    /* 終わりが分からない手法は手順をまだ作っていないので、
+       種類を見るぶんだけ先に作る（終わりまでは作らない）。 */
+    if (track.plan.lazy) { track.plan.ensure(12); }
+
+    var seen = {};
+    track.plan.steps.forEach(function (step) { seen[step.type] = true; });
+
+    var keys = [];
+    COUNTER_BY_STEP.forEach(function (entry) {
+      if (seen[entry[0]]) { keys.push([entry[1], entry[2]]); }
+    });
+    return { keys: keys, lossy: seen.remove === true };
+  }
+
+  /** その手法で意味のある数え上げを並べる。行数は常に同じ。 */
   function metaRows(track) {
     var counts = track.state.counts;
     var rows = [
@@ -400,17 +451,12 @@
       { label: t("sort.status.compare"), value: String(counts.compare) },
       { label: t("sort.status.swap"), value: String(counts.swap) }
     ];
-    [["read", "sort.status.read"],
-     ["write", "sort.status.write"], ["reverse", "sort.status.reverse"],
-     ["remove", "sort.status.remove"], ["shuffle", "sort.status.shuffle"],
-     ["check", "sort.status.check"]].forEach(function (pair) {
-      if (counts[pair[0]] > 0) {
-        rows.push({ label: t(pair[1]), value: String(counts[pair[0]]) });
-      }
+    track.counters.keys.forEach(function (pair) {
+      rows.push({ label: t(pair[1]), value: String(counts[pair[0]]) });
     });
 
     var list = visibleOf(track);
-    if (list.length !== values.length) {
+    if (track.counters.lossy) {
       rows.push({
         label: t("sort.status.kept"),
         value: list.length + " / " + values.length
@@ -421,9 +467,8 @@
       value: Sorts.isSorted(list)
         ? t("sort.status.sortedYes") : t("sort.status.sortedNo")
     });
-    if (track.state.note) {
-      rows.push({ label: "—", value: t(track.state.note) });
-    }
+    /* 説明の行は、出す内容が無くても場所を空けておく。 */
+    rows.push({ label: "—", value: track.state.note ? t(track.state.note) : "—" });
     return rows;
   }
 
@@ -675,6 +720,10 @@
       /* 再生中に速さを変えたら、新しい間隔で動かし直す。 */
       if (playing()) { stop(); play(); }
     });
+    Controls.bindPair("columns", applyLayout);
+
+    var notes = Controls.byId("show-notes");
+    if (notes) { notes.addEventListener("change", applyLayout); }
 
     Controls.bindModeButtons("modes", mode, function (next) {
       mode = next;

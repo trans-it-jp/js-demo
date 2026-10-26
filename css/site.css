@@ -56,8 +56,10 @@
   --bar-change:       #d55e00;   /* 実際に動かした */
   --bar-pivot:        #7b3294;
   --bar-sorted:       #009e73;
-  --bar-removed:      #ece9e4;   /* 取り除いた棒の地。斜線と枠を重ねる */
-  --bar-removed-edge: #94908a;
+  /* 取り除かれた棒・出ていった棒。**一応見えるが、もう居ない**という濃さ。
+     何が起きたかは棒の下の印（✕ / →）と表が伝えるので、ここは薄くてよい。 */
+  --bar-removed:      #f5f3ef;
+  --bar-removed-edge: #ddd7cd;
 
   /* 字 */
   --font-sans: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN",
@@ -815,6 +817,20 @@ td {
   font-size: 0.75rem;
 }
 
+/* チェックボックスの行。 */
+.check {
+  margin: var(--s-3) 0 0;
+  font-size: 0.875rem;
+}
+.check label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-2);
+  align-items: baseline;
+  cursor: pointer;
+}
+.check input { margin: 0; accent-color: var(--accent); }
+
 /* 手法ごとの枠。選んだ数だけ横に並べ、1 つのときは幅いっぱいにする。 */
 /* 題名・由来・図・数値の 4 段。**手法ごとに説明の長さが違っても、
    図の縦位置がそろうようにする。** subgrid が使える環境では親の行に
@@ -823,10 +839,18 @@ td {
   display: grid;
   column-gap: var(--s-5);
   row-gap: 0;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  /* 列数は画面から指定する（--track-columns）。狭い画面では 1 列に落とす。 */
+  grid-template-columns: repeat(var(--track-columns, 2), minmax(0, 1fr));
   grid-template-rows: auto auto auto auto;
 }
 .tracks.is-single { grid-template-columns: 1fr; }
+
+@media (max-width: 52rem) {
+  .tracks { grid-template-columns: 1fr; }
+}
+
+/* 説明を出さないとき。由来の行をたたむ。 */
+.tracks.is-bare .track__origin { display: none; }
 
 .track {
   min-width: 0;

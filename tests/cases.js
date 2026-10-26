@@ -922,12 +922,54 @@
     });
   });
 
-  test("ソート", "スリープソートは要素を消さずに出力へ移す", function () {
+  test("ソート", "スリープソートは要素を消さず、結果を 1 段目へ戻す", function () {
     var out = sortRun("sleep", 12, 17);
     equal(out.state.counts.remove, 0, "取り除いた数");
-    equal(Sorts.visibleValues(out.state).length, out.n, "見えている要素の数");
-    var departed = out.state.main.filter(function (c) { return c.departed; });
-    equal(departed.length, out.n, "出ていった要素の数");
+
+    /* 途中では 2 段目へ出ていっている。 */
+    var lastEmit = -1;
+    out.plan.steps.forEach(function (step, index) {
+      if (step.type === "emit") { lastEmit = index; }
+    });
+    isTrue(lastEmit >= 0, "出ていく手順がある");
+    var mid = Sorts.replay({
+      values: out.values, steps: out.plan.steps, upTo: lastEmit + 1
+    });
+    equal(mid.main.filter(function (c) { return c.departed; }).length, out.n,
+          "全部が出ていった時点の数");
+    isTrue(mid.aux !== null && mid.aux.length === out.n, "2 段目に並んでいる");
+
+    /* 最後は 1 段目に結果がある。2 段目は片付いている。 */
+    var expected = out.values.slice().sort(function (p, q) { return p - q; });
+    equal(out.state.main.map(function (c) { return c.value; }).join(","),
+          expected.join(","), "1 段目の並び");
+    equal(out.state.main.filter(function (c) { return c.departed; }).length, 0,
+          "1 段目に出ていったままの要素は無い");
+    isTrue(out.state.aux === null, "2 段目は片付いている");
+  });
+
+  test("ソート", "控えの行を使う手法に印が付いている", function () {
+    /* 図の高さを最初から 2 段ぶん取るために使う印。
+       実際に控えを使うのに印が無いと、途中で図の高さが変わって下がずれる。 */
+    ["merge", "counting", "radix", "bucket", "sleep"].forEach(function (id) {
+      isTrue(Sorts.get(id).aux === true, id + " に aux の印がある");
+      var out = sortRun(id, 16, 71);
+      var used = out.plan.steps.some(function (step) {
+        /* emit も控えの行を作る（スリープソートの出力）。 */
+        return step.type === "aux" || step.type === "auxInit" ||
+               step.type === "emit";
+      });
+      isTrue(used, id + " は実際に控えの行を使う");
+    });
+    ["bubble", "quick", "heap", "stalin"].forEach(function (id) {
+      isTrue(Sorts.get(id).aux !== true, id + " に aux の印は無い");
+      var out = sortRun(id, 16, 71);
+      var used = out.plan.steps.some(function (step) {
+        return step.type === "aux" || step.type === "auxInit" ||
+               step.type === "emit";
+      });
+      isTrue(!used, id + " は控えの行を使わない");
+    });
   });
 
   test("ソート", "並びは 1 から n までを 1 回ずつ使う", function () {

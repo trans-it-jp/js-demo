@@ -76,7 +76,7 @@
 
         <p class="notice" id="notice"></p>
 
-        <p class="plot__caption"><strong>There are two colour families. Blue means "only looked at" (◇ read, ▲ compared) — nothing changed. Vermilion means "actually moved" (⇄ swapped, ↺ reshuffled as a whole, ▼ written).</strong> Besides those, a purple P is the pivot, a green ✓ means the position is settled, a grey → means it left the row (not destroyed) and ✕ means it was removed. Bar height is the value. If you cannot tell the colours apart, these marks and the table below carry the same information.</p>
+        <p class="plot__caption"><strong>There are two colour families. Blue means "only looked at" (◇ read, ▲ compared) — nothing changed. Vermilion means "actually moved" (⇄ swapped, ↺ reshuffled as a whole, ▼ written).</strong> Besides those, a purple P is the pivot, a green ✓ means the position is settled, ✕ means it was removed and → means it left the row. Removed and departed bars are drawn faintly, so you can still see <strong>that they were there and are not any more</strong>. Bar height is the value. If you cannot tell the colours apart, these marks and the table below carry the same information.</p>
 
         <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
 
@@ -115,7 +115,18 @@
               <input id="speed" type="range" min="10" max="1200" step="10" value="180">
               <input id="speed-num" type="number" min="10" max="1200" step="10" value="180">
             </div>
+            <div class="control">
+              <label class="control__label" for="columns">
+                Charts per row
+                <span class="control__note">Drops to a single column on a narrow screen</span>
+              </label>
+              <input id="columns" type="range" min="1" max="4" step="1" value="2">
+              <input id="columns-num" type="number" min="1" max="4" step="1" value="2">
+            </div>
           </div>
+          <p class="check">
+            <label><input type="checkbox" id="show-notes" checked>Show the note on each algorithm (where its name comes from)</label>
+          </p>
         </section>
 
         <section class="panel">
@@ -185,7 +196,7 @@
         <li><strong>It is not a speed comparison.</strong> Everything advances one step at a time, and a step is not the same amount of work in each algorithm. Nothing here is a measurement of real running time.</li>
         <li>The values are <strong>1 to n, each used once</strong>, in random order. No value ever repeats, so you cannot see here whether equal values keep their original order (stability). Every count in counting sort is 1.</li>
         <li>Radix sort distributes by decimal digits. Negative numbers, decimals and text are out of scope.</li>
-        <li>Sleep sort is shown as an <strong>order</strong>, not as real elapsed time. Run against a real clock, close values are not guaranteed to come out in order.</li>
+        <li>Sleep sort is shown as an <strong>order</strong>, not as real elapsed time. Run against a real clock, close values are not guaranteed to come out in order. Elements line up in the second row as they leave, and the result is written back into the first row at the end.</li>
         <li>Bogosort, bozo sort and miracle sort <strong>generate their steps as you advance, not in advance.</strong> Nothing is run to completion behind the scenes, so there is no total number of steps to speak of. The progress figure simply counts which step you are on, and "Run as far as it goes" advances at most 4,000 steps, which you can repeat.</li>
         <li>Stalin sort and Thanos sort lose elements. <strong>They do not rearrange anything.</strong></li>
         <li>Miracle sort and intelligent design sort do not sort. They are here as jokes.</li>

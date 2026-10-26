@@ -371,6 +371,16 @@
       if (rec.full) { return; }
       rec.add({ type: "emit", i: item.index });
     });
+
+    /* 出ていった順がそのまま結果。最後に 1 段目へ書き戻す。
+       結果が 2 段目にあるままだと、どこを読めばよいのか分かりにくいため。 */
+    order.forEach(function (item, position) {
+      if (rec.full) { return; }
+      a[position] = item.value;
+      rec.add({ type: "set", row: "main", i: position, value: item.value });
+      rec.add({ type: "sorted", indices: [position] });
+    });
+    rec.add({ type: "auxClear" });
   }
 
   /**
@@ -920,14 +930,16 @@
     { id: "cycle",     group: "select",   maxCount: 48, run: cycle },
 
     /* 分割統治 */
-    { id: "merge",     group: "divide",   maxCount: 64, run: merge },
+    { id: "merge",     group: "divide",   maxCount: 64, aux: true, run: merge },
     { id: "quick",     group: "divide",   maxCount: 64, run: quick },
     { id: "stooge",    group: "divide",   maxCount: 32, run: stooge },
 
     /* 比べない */
-    { id: "counting",  group: "distribute", maxCount: 48, run: counting },
-    { id: "radix",     group: "distribute", maxCount: 64, run: radix },
-    { id: "bucket",    group: "distribute", maxCount: 64, run: bucket },
+    /* aux: 控えの行（2 段目）を使う手法。図の高さを最初から 2 段ぶん取り、
+       途中で段が増えても下の図がずれないようにするための印。 */
+    { id: "counting",  group: "distribute", maxCount: 48, aux: true, run: counting },
+    { id: "radix",     group: "distribute", maxCount: 64, aux: true, run: radix },
+    { id: "bucket",    group: "distribute", maxCount: 64, aux: true, run: bucket },
 
     /* 冗談。終わらないものは要素数を低く抑える。 */
     { id: "stalin",    group: "joke", maxCount: 64, run: stalin },
@@ -939,7 +951,7 @@
     { id: "bogo",      group: "joke", maxCount: 50, limit: 50000, needsRandom: true, unbounded: true, round: bogoRound },
     { id: "bozo",      group: "joke", maxCount: 50, limit: 50000, needsRandom: true, unbounded: true, round: bozoRound },
     { id: "quantum",   group: "joke", maxCount: 64, needsRandom: true, run: quantum },
-    { id: "sleep",     group: "joke", maxCount: 64, run: sleep },
+    { id: "sleep",     group: "joke", maxCount: 64, aux: true, run: sleep },
     { id: "miracle",   group: "joke", maxCount: 64, limit: 50000, unbounded: true, round: miracleRound },
     { id: "design",    group: "joke", maxCount: 64, run: design }
   ];
@@ -1129,6 +1141,10 @@
         if (target && target[step.i]) {
           target[step.i].value = step.value;
           target[step.i].mark = "write";
+          /* その場所へ値を書いたのだから、もう「出ていった」場所ではない。
+             スリープソートが結果を 1 段目へ戻すときに使う。 */
+          target[step.i].departed = false;
+          target[step.i].removed = false;
         }
 
       } else if (step.type === "aux") {

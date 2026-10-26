@@ -81,8 +81,10 @@ var checks = [
   ["bar-change", "plot-bg", "ソートの棒（動かした）", 3],
   ["bar-pivot", "plot-bg", "ソートの棒（基準）", 3],
   ["bar-sorted", "plot-bg", "ソートの棒（確定）", 3],
-  ["bar-removed-edge", "plot-bg", "取り除いた棒の枠", 3],
-  ["ink-soft", "plot-bg", "図に添える数値", 4.5]
+  ["ink-soft", "plot-bg", "図に添える数値", 4.5],
+  /* 取り除かれた棒は意図的に薄くしている（もう居ないことを示すため）。
+     何が起きたかは棒の下の印と表が伝えるので、印の濃さの方を見る。 */
+  ["ink-muted", "plot-bg", "棒の下の印", 4.5]
 ];
 
 var failures = [];
