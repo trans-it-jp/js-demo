@@ -46,6 +46,17 @@
   --plot-shape:     #2f3540;
   --plot-shape-alt: #009e73;
 
+  /* ソートの棒グラフ。状態ごとの色。印（▲⇄▼P✓✕）と値を併記するので、
+     色だけで状態を伝えない。いずれも白地の上で 3:1 以上（点検あり）。 */
+  --bar:              #525252;
+  --bar-compare:      #bf8400;
+  --bar-swap:         #d55e00;
+  --bar-write:        #0072b2;
+  --bar-pivot:        #7b3294;
+  --bar-sorted:       #009e73;
+  --bar-removed:      #ece9e4;   /* 取り除いた棒の地。斜線と枠を重ねる */
+  --bar-removed-edge: #94908a;
+
   /* 字 */
   --font-sans: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN",
                "Hiragino Sans", "Yu Gothic Medium", "Yu Gothic",
@@ -745,7 +756,94 @@ td {
   .site-foot__meta { text-align: left; }
 }
 
-/* --- 16. 補助 ------------------------------------------------------------- */
+/* --- 16. 手法の選択（ソート） --------------------------------------------- */
+
+.picker { display: grid; gap: var(--s-2); }
+
+/* 分類ごとに折りたたむ。details を使うので JavaScript が動かなくても開ける。 */
+.picker__group {
+  padding: var(--s-2) var(--s-3);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.picker__group[open] { border-color: var(--rule-strong); }
+.picker__summary {
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.picker__summary::marker { color: var(--ink-muted); }
+.picker__summaryName { margin-right: var(--s-2); }
+.picker__list {
+  display: grid;
+  gap: var(--s-1);
+  margin-top: var(--s-2);
+}
+.picker__item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--s-2);
+  align-items: baseline;
+  padding: 0.3em 0.45em;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.picker__item:hover { background: var(--surface-sunk); }
+.picker__item input { margin: 0; accent-color: var(--accent); }
+.picker__item:has(input:checked) {
+  background: var(--accent-wash);
+  border-color: var(--accent);
+}
+.picker__item input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.picker__note {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+}
+
+/* 手法ごとの枠。選んだ数だけ横に並べ、1 つのときは幅いっぱいにする。 */
+.tracks {
+  display: grid;
+  gap: var(--s-5);
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+}
+.tracks.is-single { grid-template-columns: 1fr; }
+
+.track { min-width: 0; }
+.track__title {
+  margin: 0 0 var(--s-2);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.track__plot { margin: 0; }
+.track__meta {
+  margin-top: var(--s-3);
+  font-size: 0.8125rem;
+}
+
+/* 凡例の色見本。印の文字も並べる。 */
+.legend__mark {
+  display: inline-block;
+  min-width: 1.1em;
+  font-family: var(--font-mono);
+  text-align: center;
+}
+
+/* 打ち切りや上限の知らせ。色だけでなく枠と文で示す。 */
+.notice {
+  margin-top: var(--s-3);
+  padding: var(--s-3);
+  background: var(--accent-wash);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+.notice:empty { display: none; }
+
+/* --- 17. 補助 ------------------------------------------------------------- */
 
 .visually-hidden {
   position: absolute;

@@ -70,6 +70,10 @@ files.forEach(function (file) {
   var starter = /(maybeAnimate\s*\([^)]*\)|\.transition\s*\([^)]*\)(?:\s*\.duration\([^)]*\))?(?:\s*\.ease\([^)]*\))?)/g;
   var match;
   while ((match = starter.exec(text)) !== null) {
+    /* `function maybeAnimate(selection, duration)` のような**定義**は呼び出しでは
+       ないので飛ばす。定義を連鎖の始まりと見なすと、関数本体を越えて先の
+       コードまで読んでしまい、関係のない .attr("fill") を拾ってしまう。 */
+    if (/function\s+$/.test(text.slice(0, match.index))) { continue; }
     chains += 1;
     /* その位置から文の終わりまでを 1 つの連鎖とみなす。
        関数本体の中にも ; があるので、括弧の深さが 0 のところで切る。

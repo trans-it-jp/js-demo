@@ -75,7 +75,15 @@ var checks = [
   ["series-7", "plot-bg", "系列 7", 3],
   ["series-8", "plot-bg", "系列 8", 3],
   ["series-9", "plot-bg", "系列 9", 3],
-  ["series-10", "plot-bg", "系列 10", 3]
+  ["series-10", "plot-bg", "系列 10", 3],
+  ["bar", "plot-bg", "ソートの棒（通常）", 3],
+  ["bar-compare", "plot-bg", "ソートの棒（比較中）", 3],
+  ["bar-swap", "plot-bg", "ソートの棒（交換）", 3],
+  ["bar-write", "plot-bg", "ソートの棒（書込）", 3],
+  ["bar-pivot", "plot-bg", "ソートの棒（基準）", 3],
+  ["bar-sorted", "plot-bg", "ソートの棒（確定）", 3],
+  ["bar-removed-edge", "plot-bg", "取り除いた棒の枠", 3],
+  ["ink-soft", "plot-bg", "図に添える数値", 4.5]
 ];
 
 var failures = [];

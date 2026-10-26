@@ -1,0 +1,289 @@
+/*!
+ * js-demo / viz — bars.js
+ * ソートの様子を棒グラフで描く。必要: d3 v7
+ *
+ * 見分け方は色だけに頼らない。棒の下に印（比較・交換・書込・基準・確定）を出し、
+ * 値そのものも並べる。色を区別できない条件でも、どの要素に何が起きたか追える。
+ *
+ * 動かすのは**位置と高さだけ**。色は遷移させずに即時設定する。
+ *   d3 は CSS 変数（var(--bar)）を色として補間できず、var(--bar-1.5) のような
+ *   未定義の値を作ってしまう。以前それで図形が描かれない不具合を出したため、
+ *   色に関わる属性は必ず遷移の外で設定する（tools/check-transitions.js が点検する）。
+ */
+(function (global) {
+  "use strict";
+
+  var JsDemo = global.JsDemo || (global.JsDemo = {});
+
+  var VIEW_W = 720;
+  var MAIN_TOP = 16;
+  var MAIN_BOTTOM = 232;      /* 主の行の棒の足もと */
+  var MARK_Y = 250;           /* 印の行 */
+  var LABEL_Y = 272;          /* 値の行 */
+  var AUX_TOP = 312;
+  var AUX_BOTTOM = 404;
+  var AUX_MARK_Y = 420;
+  var VIEW_H_PLAIN = 288;
+  var VIEW_H_AUX = 432;
+  var PAD_X = 12;
+  var GAP_RATIO = 0.18;       /* 棒の間の空き（棒幅に対する比） */
+  var LABEL_MAX = 28;         /* これより多いと値の文字は出さない */
+
+  var FILL = {
+    idle: "var(--bar)",
+    compare: "var(--bar-compare)",
+    swap: "var(--bar-swap)",
+    write: "var(--bar-write)",
+    pivot: "var(--bar-pivot)",
+    sorted: "var(--bar-sorted)",
+    removed: "var(--bar-removed)"
+  };
+
+  /* 印は文字で出す。読み上げには使わない（aria-hidden）。 */
+  var MARKS = {
+    compare: "▲",   /* ▲ 比べている */
+    swap: "⇄",      /* ⇄ 入れ替えた */
+    write: "▼",     /* ▼ 書き込んだ */
+    pivot: "P",          /* 基準 */
+    sorted: "✓",    /* ✓ 確定 */
+    removed: "✕"    /* ✕ 取り除いた */
+  };
+
+  function prefersReducedMotion() {
+    return !!(global.matchMedia &&
+              global.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  function maybeAnimate(selection, duration) {
+    if (!duration || prefersReducedMotion()) { return selection; }
+    return selection.transition().duration(duration).ease(d3.easeCubicOut);
+  }
+
+  /** 棒の状態（色と印をどれにするか）を 1 つに決める。優先順位はこの順。 */
+  function statusOf(cell, pivotId) {
+    if (cell.removed) { return "removed"; }
+    if (cell.mark === "swap") { return "swap"; }
+    if (cell.mark === "write") { return "write"; }
+    if (cell.mark === "compare") { return "compare"; }
+    if (pivotId && cell.id === pivotId) { return "pivot"; }
+    if (cell.sorted) { return "sorted"; }
+    return "idle";
+  }
+
+  function create(options) {
+    var container = typeof options.container === "string"
+      ? document.querySelector(options.container)
+      : options.container;
+    var labels = options.labels || {};
+
+    var svg = d3.select(container).append("svg")
+      .attr("viewBox", "0 0 " + VIEW_W + " " + VIEW_H_PLAIN)
+      .attr("role", "img")
+      .attr("aria-label", labels.figure || "棒グラフ");
+
+    var background = svg.append("rect")
+      .attr("x", 0).attr("y", 0)
+      .attr("width", VIEW_W).attr("height", VIEW_H_AUX)
+      .attr("fill", "var(--plot-bg)");
+
+    /* 取り除いた棒に重ねる斜線。色の薄さだけに頼らないため。 */
+    var defs = svg.append("defs");
+    var hatch = defs.append("pattern")
+      .attr("id", "bars-hatch")
+      .attr("width", 6).attr("height", 6)
+      .attr("patternUnits", "userSpaceOnUse")
+      .attr("patternTransform", "rotate(45)");
+    hatch.append("rect")
+      .attr("width", 6).attr("height", 6)
+      .attr("fill", "var(--bar-removed)");
+    hatch.append("line")
+      .attr("x1", 0).attr("y1", 0).attr("x2", 0).attr("y2", 6)
+      .attr("stroke", "var(--bar-removed-edge)")
+      .attr("stroke-width", 1.5);
+
+    /* いま見ている範囲の下敷き（クイック・マージで使う） */
+    var gRange = svg.append("g");
+    var rangeRect = gRange.append("rect")
+      .attr("fill", "var(--accent-wash)")
+      .attr("opacity", 0);
+
+    var baseline = svg.append("line")
+      .attr("x1", PAD_X).attr("x2", VIEW_W - PAD_X)
+      .attr("y1", MAIN_BOTTOM + 0.5).attr("y2", MAIN_BOTTOM + 0.5)
+      .attr("stroke", "var(--plot-axis)").attr("stroke-width", 1);
+
+    var gMain = svg.append("g");
+    var gMarks = svg.append("g")
+      .attr("text-anchor", "middle")
+      .attr("font-size", 13)
+      .attr("aria-hidden", "true");
+    var gLabels = svg.append("g")
+      .attr("text-anchor", "middle")
+      .attr("font-size", 11)
+      .attr("fill", "var(--ink-soft)")
+      .attr("aria-hidden", "true");
+
+    var auxTitle = svg.append("text")
+      .attr("x", PAD_X).attr("y", AUX_TOP - 10)
+      .attr("font-size", 12)
+      .attr("fill", "var(--ink-muted)")
+      .attr("aria-hidden", "true")
+      .text("");
+    var auxBaseline = svg.append("line")
+      .attr("x1", PAD_X).attr("x2", VIEW_W - PAD_X)
+      .attr("y1", AUX_BOTTOM + 0.5).attr("y2", AUX_BOTTOM + 0.5)
+      .attr("stroke", "var(--plot-axis)").attr("stroke-width", 1)
+      .attr("opacity", 0);
+    var gAux = svg.append("g");
+    var gAuxMarks = svg.append("g")
+      .attr("text-anchor", "middle")
+      .attr("font-size", 13)
+      .attr("aria-hidden", "true");
+
+    /**
+     * 1 つの行を描く。
+     * @param {Object} group    描く先の g
+     * @param {Array} cells     {id, value, sorted, removed, mark}
+     * @param {Object} geometry  top / bottom / slots / maxValue
+     */
+    function drawRow(group, marksGroup, cells, geometry, settings) {
+      var slots = geometry.slots;
+      var step = (VIEW_W - 2 * PAD_X) / Math.max(1, slots);
+      var width = Math.max(2, step * (1 - GAP_RATIO));
+      var height = geometry.bottom - geometry.top;
+      var maxValue = Math.max(1, geometry.maxValue);
+      var duration = settings.duration;
+
+      function xOf(index) { return PAD_X + index * step + (step - width) / 2; }
+      function hOf(value) { return Math.max(2, (value / maxValue) * height); }
+
+      var bars = group.selectAll("rect").data(cells, function (d) { return d.id; });
+
+      bars.exit().remove();
+
+      var entered = bars.enter().append("rect")
+        .attr("x", function (d, i) { return xOf(i); })
+        .attr("width", width)
+        .attr("y", function (d) { return geometry.bottom - hOf(d.value); })
+        .attr("height", function (d) { return hOf(d.value); });
+
+      var all = entered.merge(bars);
+
+      /* 色は遷移させない。即時に設定する（冒頭の注意を参照）。 */
+      all
+        .attr("fill", function (d) {
+          var status = statusOf(d, settings.pivotId);
+          return status === "removed" ? "url(#bars-hatch)" : FILL[status];
+        })
+        .attr("stroke", function (d) {
+          var status = statusOf(d, settings.pivotId);
+          if (status === "removed") { return "var(--bar-removed-edge)"; }
+          if (status === "compare" || status === "swap" || status === "write") {
+            return "var(--ink)";
+          }
+          return "none";
+        })
+        .attr("stroke-width", 1);
+
+      /* 位置と高さだけ動かす。入れ替えが「動いて見える」のはここ。 */
+      maybeAnimate(all, duration)
+        .attr("x", function (d, i) { return xOf(i); })
+        .attr("width", width)
+        .attr("y", function (d) { return geometry.bottom - hOf(d.value); })
+        .attr("height", function (d) { return hOf(d.value); });
+
+      /* 印の行。色を区別できなくても何が起きたか分かるようにする。 */
+      var marks = marksGroup.selectAll("text").data(cells, function (d) { return d.id; });
+      marks.exit().remove();
+      marks.enter().append("text")
+        .merge(marks)
+        .attr("x", function (d, i) { return xOf(i) + width / 2; })
+        .attr("y", geometry.markY)
+        .attr("fill", function (d) {
+          var status = statusOf(d, settings.pivotId);
+          return status === "idle" ? "var(--ink-muted)" : FILL[status];
+        })
+        .text(function (d) {
+          var status = statusOf(d, settings.pivotId);
+          return MARKS[status] || "";
+        });
+
+      return { xOf: xOf, width: width, step: step };
+    }
+
+    function render(state, settings) {
+      var opts = settings || {};
+      var duration = opts.animate === false ? 0 : (opts.duration || 200);
+      var cells = state.main;
+      var hasAux = !!(state.aux && state.aux.length > 0);
+
+      svg.attr("viewBox", "0 0 " + VIEW_W + " " +
+               (hasAux ? VIEW_H_AUX : VIEW_H_PLAIN));
+
+      var maxValue = 1;
+      cells.forEach(function (c) { maxValue = Math.max(maxValue, c.value); });
+      if (hasAux) {
+        state.aux.forEach(function (c) { maxValue = Math.max(maxValue, c.value); });
+      }
+
+      var geo = drawRow(gMain, gMarks, cells, {
+        top: MAIN_TOP, bottom: MAIN_BOTTOM, markY: MARK_Y,
+        slots: cells.length, maxValue: maxValue
+      }, { duration: duration, pivotId: state.pivotId });
+
+      /* 値の文字。多すぎると読めないので、少ないときだけ出す。 */
+      var labelData = cells.length <= LABEL_MAX ? cells : [];
+      var texts = gLabels.selectAll("text").data(labelData, function (d) { return d.id; });
+      texts.exit().remove();
+      texts.enter().append("text")
+        .merge(texts)
+        .attr("x", function (d, i) { return geo.xOf(i) + geo.width / 2; })
+        .attr("y", LABEL_Y)
+        .text(function (d) { return d.value; });
+
+      /* いま見ている範囲 */
+      if (state.range) {
+        rangeRect
+          .attr("x", geo.xOf(state.range.lo) - (geo.step - geo.width) / 2)
+          .attr("y", MAIN_TOP - 8)
+          .attr("width", (state.range.hi - state.range.lo + 1) * geo.step)
+          .attr("height", MAIN_BOTTOM - MAIN_TOP + 16)
+          .attr("opacity", 1);
+      } else {
+        rangeRect.attr("opacity", 0);
+      }
+
+      /* 控えの行。マージソートの作業用か、スリープソートの出力。 */
+      if (hasAux) {
+        auxBaseline.attr("opacity", 1);
+        auxTitle.text(opts.auxLabel || "");
+        drawRow(gAux, gAuxMarks, state.aux, {
+          top: AUX_TOP, bottom: AUX_BOTTOM, markY: AUX_MARK_Y,
+          slots: Math.max(cells.length, state.aux.length), maxValue: maxValue
+        }, { duration: duration, pivotId: null });
+      } else {
+        auxBaseline.attr("opacity", 0);
+        auxTitle.text("");
+        gAux.selectAll("rect").remove();
+        gAuxMarks.selectAll("text").remove();
+      }
+    }
+
+    function setAriaLabel(text) { svg.attr("aria-label", text); }
+
+    return {
+      render: render,
+      setAriaLabel: setAriaLabel,
+      svg: svg,
+      background: background,
+      baseline: baseline
+    };
+  }
+
+  JsDemo.Bars = {
+    create: create,
+    statusOf: statusOf,
+    FILL: FILL,
+    MARKS: MARKS
+  };
+})(window);

@@ -681,5 +681,179 @@
     equal(a.centroids.join(";"), b.centroids.join(";"), "中心");
   });
 
+
+  /* --- ソート ----------------------------------------------------------- */
+
+  var Sorts = JsDemo.Sorts;
+
+  /* 手法ごとに「どう終われば正しいか」を先に書く。
+     冗談の手法は「そろわないのが正しい」ので、まとめて合格にしない。 */
+  var SORT_EXPECT = {
+    bubble: "sorted", cocktail: "sorted", gnome: "sorted", comb: "sorted",
+    pancake: "sorted", insertion: "sorted", binary: "sorted", shell: "sorted",
+    selection: "sorted", heap: "sorted", cycle: "sorted", merge: "sorted",
+    quick: "sorted", stooge: "sorted", counting: "sorted", radix: "sorted",
+    bucket: "sorted", sleep: "sorted",
+    stalin: "lossy", thanos: "lossy", bogo: "sorted", bozo: "sorted",
+    quantum: "unchangedOrSorted", miracle: "untouched", design: "untouched"
+  };
+
+  function sortRun(id, count, seed) {
+    var algorithm = Sorts.get(id);
+    var n = Math.min(count, algorithm.maxCount);
+    var values = Sorts.values({ count: n, random: Random.create(seed) });
+    var plan = Sorts.run({ id: id, values: values, random: Random.create(seed + 1) });
+    var state = Sorts.replay({ values: values, steps: plan.steps });
+    return { values: values, plan: plan, state: state, n: n };
+  }
+
+  function multiset(list) { return list.slice().sort(function (p, q) { return p - q; }).join(","); }
+
+  Sorts.ALGORITHMS.forEach(function (algorithm) {
+    test("ソート", algorithm.id + " が期待どおりに終わる", function () {
+      var out = sortRun(algorithm.id, 16, 97);
+      var visible = Sorts.visibleValues(out.state);
+      var expect = SORT_EXPECT[algorithm.id];
+
+      isTrue(out.plan.finished, algorithm.id + " が上限で打ち切られていない");
+
+      if (expect === "sorted") {
+        isTrue(Sorts.isSorted(visible), algorithm.id + " の結果がそろっている");
+        equal(visible.length, out.n, algorithm.id + " の要素数");
+        equal(multiset(visible), multiset(out.values), algorithm.id + " が値を変えていない");
+      } else if (expect === "lossy") {
+        isTrue(Sorts.isSorted(visible), algorithm.id + " の残りがそろっている");
+        isTrue(visible.length < out.n, algorithm.id + " で要素が減っている");
+      } else if (expect === "untouched") {
+        equal(out.state.main.map(function (c) { return c.value; }).join(","),
+              out.values.join(","),
+              algorithm.id + " が並びを変えていない");
+      } else if (expect === "unchangedOrSorted") {
+        equal(multiset(visible), multiset(out.values), algorithm.id + " が値を増減させていない");
+      }
+    });
+  });
+
+  test("ソート", "手順から数えた比較・交換が状態と一致する", function () {
+    var out = sortRun("bubble", 20, 11);
+    var compares = 0;
+    var swaps = 0;
+    out.plan.steps.forEach(function (step) {
+      if (step.type === "compare") { compares += 1; }
+      if (step.type === "swap") { swaps += 1; }
+    });
+    equal(out.state.counts.compare, compares, "比較の数");
+    equal(out.state.counts.swap, swaps, "交換の数");
+  });
+
+  test("ソート", "1 手ずつ進めた状態と、畳み込んだ状態が一致する", function () {
+    var out = sortRun("quick", 18, 23);
+    var stepwise = Sorts.initial(out.values);
+    for (var i = 0; i < out.plan.steps.length; i += 1) {
+      Sorts.applyStep(stepwise, out.plan.steps[i]);
+    }
+    equal(stepwise.main.map(function (c) { return c.value; }).join(","),
+          out.state.main.map(function (c) { return c.value; }).join(","),
+          "並び");
+    equal(stepwise.counts.compare, out.state.counts.compare, "比較の数");
+    equal(stepwise.cursor, out.plan.steps.length, "進めた手数");
+  });
+
+  test("ソート", "途中の状態は、何手目から作っても同じになる", function () {
+    var out = sortRun("merge", 16, 31);
+    var half = Math.floor(out.plan.steps.length / 2);
+    var once = Sorts.replay({ values: out.values, steps: out.plan.steps, upTo: half });
+    var twice = Sorts.initial(out.values);
+    for (var i = 0; i < half; i += 1) { Sorts.applyStep(twice, out.plan.steps[i]); }
+    equal(once.main.map(function (c) { return c.value; }).join(","),
+          twice.main.map(function (c) { return c.value; }).join(","),
+          half + " 手目の並び");
+  });
+
+  test("ソート", "バブルソートは隣どうししか入れ替えない", function () {
+    var out = sortRun("bubble", 24, 7);
+    out.plan.steps.forEach(function (step) {
+      if (step.type === "swap") {
+        equal(Math.abs(step.i - step.j), 1, "入れ替えた 2 つの距離");
+      }
+    });
+  });
+
+  test("ソート", "そろった列を挿入ソートに渡すと一度も入れ替えない", function () {
+    var sorted = [];
+    for (var i = 1; i <= 16; i += 1) { sorted.push(i); }
+    var plan = Sorts.run({ id: "insertion", values: sorted });
+    var state = Sorts.replay({ values: sorted, steps: plan.steps });
+    equal(state.counts.swap, 0, "交換の数");
+    equal(state.counts.compare, 15, "比較の数（n − 1 回）");
+  });
+
+  test("ソート", "二分挿入ソートは挿入ソートより比較が少ない", function () {
+    var values = Sorts.values({ count: 32, random: Random.create(2026) });
+    var plain = Sorts.replay({
+      values: values, steps: Sorts.run({ id: "insertion", values: values }).steps
+    });
+    var binary = Sorts.replay({
+      values: values, steps: Sorts.run({ id: "binary", values: values }).steps
+    });
+    isTrue(binary.counts.compare < plain.counts.compare,
+           "比較: 二分 " + binary.counts.compare + " < 挿入 " + plain.counts.compare);
+    /* ずらす回数は変わらない。ここがこの手法の要点。 */
+    equal(binary.counts.swap, plain.counts.swap, "ずらした回数");
+  });
+
+  test("ソート", "計数ソートと基数ソートは一度も比べない", function () {
+    ["counting", "radix"].forEach(function (id) {
+      var out = sortRun(id, 24, 41);
+      equal(out.state.counts.compare, 0, id + " の比較の数");
+      isTrue(out.state.counts.read > 0, id + " は値を読んでいる");
+    });
+  });
+
+  test("ソート", "スターリンソートの結果は増える一方で、元より短い", function () {
+    var out = sortRun("stalin", 24, 53);
+    var visible = Sorts.visibleValues(out.state);
+    isTrue(Sorts.isSorted(visible), "増える一方になっている");
+    isTrue(visible.length < out.n, "要素が減っている");
+    equal(out.state.counts.remove, out.n - visible.length, "取り除いた数");
+  });
+
+  test("ソート", "ミラクルソートは一つも動かさない", function () {
+    var out = sortRun("miracle", 16, 61);
+    equal(out.state.counts.swap, 0, "交換の数");
+    equal(out.state.counts.write, 0, "書き込みの数");
+    equal(out.state.main.map(function (c) { return c.value; }).join(","),
+          out.values.join(","), "並び");
+  });
+
+  test("ソート", "同じ種を渡せばボゴソートの手順が再現する", function () {
+    var values = Sorts.values({ count: 6, random: Random.create(77) });
+    var first = Sorts.run({ id: "bogo", values: values, random: Random.create(99) });
+    var second = Sorts.run({ id: "bogo", values: values, random: Random.create(99) });
+    equal(first.steps.length, second.steps.length, "手順の数");
+    equal(first.result.join(","), second.result.join(","), "結果");
+  });
+
+  test("ソート", "要素数の上限を超えない範囲で手順が打ち切られない", function () {
+    ["bubble", "quick", "merge", "heap", "stooge", "cycle", "radix"].forEach(function (id) {
+      var out = sortRun(id, Sorts.get(id).maxCount, 13);
+      isTrue(out.plan.finished, id + " が上限 " + Sorts.get(id).maxCount + " 個で終わる");
+    });
+  });
+
+  test("ソート", "並びは 1 から n までを 1 回ずつ使う", function () {
+    var values = Sorts.values({ count: 40, random: Random.create(5) });
+    equal(values.length, 40, "要素数");
+    var expected = [];
+    for (var i = 1; i <= 40; i += 1) { expected.push(i); }
+    equal(multiset(values), expected.join(","), "値の集まり");
+  });
+
+  test("ソート", "種が違えば並びも変わる", function () {
+    var a = Sorts.values({ count: 24, random: Random.create(1) });
+    var b = Sorts.values({ count: 24, random: Random.create(2) });
+    isTrue(a.join(",") !== b.join(","), "別の種で別の並びになる");
+  });
+
   JsDemo.Tests = { cases: cases };
 })(typeof window !== "undefined" ? window : globalThis);

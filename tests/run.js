@@ -22,6 +22,7 @@ var root = path.join(__dirname, "..");
   "js/core/numeric.js",
   "js/linear-algebra/matrix3.js",
   "js/clustering/kmeans.js",
+  "js/sorting/sorts.js",
   "js/ui/share-link.js",
   "tests/cases.js"
 ].forEach(function (file) {

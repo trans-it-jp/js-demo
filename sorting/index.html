@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ソートの手順くらべ — JavaScript 学習デモ</title>
+<meta name="description" content="バブル・クイック・マージから冗談のスターリンソートまで25種のソートを、1手ずつ、または複数同時に動かして見比べるデモ。">
+<link rel="stylesheet" href="../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../js/core/seeded-random.js"></script>
+<script src="../js/core/numeric.js"></script>
+<script src="../js/sorting/sorts.js"></script>
+<script src="../js/viz/bars.js"></script>
+<script src="../js/ui/i18n.js"></script>
+<script src="../js/ui/controls.js"></script>
+<script src="../js/ui/learning.js"></script>
+<script src="../js/ui/share-link.js"></script>
+<script src="../js/ui/tables.js"></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <span aria-current="true">日本語</span>
+      <a href="../en/sorting/index.html" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../index.html">デモ一覧</a></li>
+        <li>ソートの手順くらべ</li>
+      </ol>
+    </nav>
+
+    <h1>ソートの手順くらべ</h1>
+    <p class="lede">25 種類の並べ替えの手順を、<strong>1 手ずつ</strong>、または<strong>複数同時に</strong>動かして見比べます。効率の良いものも、わざと悪いものも、冗談のものも同じ並びで走らせます。</p>
+
+    <dl class="framing">
+      <div>
+        <dt>中心の問い</dt>
+        <dd>同じ並びを渡しても、手法によって何が違うのでしょうか。何回比べて、何回動かしているでしょうか。</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>「大きい・小さい」で順番を決められること。繰り返しの考えに触れていること。中学以降・高校・大学・社会人を想定しています。</dd>
+      </div>
+      <div>
+        <dt>動かす前に予想する</dt>
+        <dd>バブルソートとクイックソートに同じ並びを渡したら、比べる回数はどちらが多いと思いますか。</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar" id="modes">
+          <span class="toolbar__label">進め方</span>
+          <button type="button" data-mode="auto">自動で見る</button>
+          <button type="button" data-mode="manual">1 手ずつ進める</button>
+        </div>
+
+        <div class="toolbar">
+          <button type="button" id="play" class="is-primary">再生</button>
+          <button type="button" id="step">次へ進む</button>
+          <button type="button" id="step-back">一手戻る</button>
+          <button type="button" id="to-end">最後まで進める</button>
+          <button type="button" id="reset">初期化</button>
+          <p class="toolbar__hint">初期化を押すたびに、並びを完全な乱数で選び直します。手法を選び直したときは並びを変えないので、同じ並びで見比べられます。</p>
+        </div>
+
+        <div id="tracks" class="tracks is-single"></div>
+
+        <p class="notice" id="notice"></p>
+
+        <p class="plot__caption">棒の高さが値です。棒の下の印は、▲ 比べている／⇄ 入れ替えた／▼ 書き込んだ／P 基準／✓ 位置が確定／✕ 取り除かれた、を表します。色を区別できない場合はこの印と下の表で追えます。</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="compare-table"></div>
+        </div>
+
+        <details class="fold" style="margin-top: 1rem;">
+          <summary>いまの並びを数字で見る</summary>
+          <div class="fold__body">
+            <div class="table-scroll">
+              <div id="value-table"></div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">動かす前に予想する</h2>
+          <fieldset class="predict" id="predict">
+            <legend class="predict__question">バブルソートとクイックソートに同じ並びを渡したら、比べる回数はどちらが多いと思いますか。</legend>
+            <div class="predict__choices">
+              <label><input type="radio" name="predict" value="a">バブルソートのほうが多い</label>
+              <label><input type="radio" name="predict" value="b">クイックソートのほうが多い</label>
+              <label><input type="radio" name="predict" value="c">だいたい同じ</label>
+            </div>
+            <p class="predict__note">選ばなくても操作できます。選ぶと、あとで結果と見比べられます。</p>
+          </fieldset>
+          <p class="predict__result" id="predict-result" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">手法を選ぶ</h2>
+          <p class="share__help">いくつでも選べます（同時に動かせるのは 6 種まで）。選んだ手法には<strong>同じ並び</strong>を配ります。</p>
+          <div class="picker" id="picker"></div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">条件を変える</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="count">
+                要素の数
+                <span class="control__note">手法によって上限が違います。終わらない手法は少なく制限しています</span>
+              </label>
+              <input id="count" type="range" min="4" max="64" step="1" value="24">
+              <input id="count-num" type="number" min="4" max="64" step="1" value="24">
+            </div>
+            <div class="control">
+              <label class="control__label" for="speed">
+                1 手あたりの間（ミリ秒）
+                <span class="control__note">自動で見るときの速さ</span>
+              </label>
+              <input id="speed" type="range" min="10" max="1200" step="10" value="180">
+              <input id="speed-num" type="number" min="10" max="1200" step="10" value="180">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">授業で共有する</h2>
+          <p class="share__help">このリンクを開くと、いまの条件（選んだ手法・要素の数）で始まります。並びは開くたびに変わります。個人情報は含まれません。</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">共有用のリンク</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">リンクをコピー</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">凡例</h2>
+          <ul class="legend" id="legend"></ul>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose measure" style="max-width: none;">
+      <h3>確かめてほしいこと</h3>
+      <ul>
+        <li><strong>比較</strong>：バブルソートとクイックソートを同時に選び、同じ並びで「比べた回数」を見比べてください。要素の数を 8 → 32 → 64 と増やすと、差はどう変わりますか。</li>
+        <li><strong>説明</strong>：二分挿入ソートは<strong>比べた回数が少ないのに入れ替えた回数は減りません</strong>。なぜそうなるか言い直してみてください。</li>
+        <li><strong>転移</strong>：計数ソートは一度も比べずに並べます。では、比べないソートはいつでも使えますか。使えない場合があるとしたら、それはどんなときでしょうか。</li>
+      </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>「比べた回数」と「入れ替えた回数」は別に数えてあります。まず 2 つを区別して見てください。</p>
+        <p class="hints__step" hidden>二分挿入ソートは、入れる場所を探すのに二分探索を使います。探す手間は減りますが、場所をあけるには後ろを 1 つずつずらすしかありません。</p>
+        <p class="hints__step" hidden>計数ソートは「値そのもの」を置き場所の番号に使います。だから値が整数で、範囲が分かっていないと使えません。</p>
+        <button type="button" class="hints__more">次のヒント</button>
+      </div>
+
+      <details class="fold">
+        <summary>もっと詳しく</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">言い方</span>
+            <button type="button" data-level="plain">やさしく</button>
+            <button type="button" data-level="formal">式で</button>
+          </div>
+          <p data-level="plain">同じ「並べる」仕事でも、やり方で手間がぜんぜん違います。隣とくらべて入れ替えるだけのやり方は、数が増えるととても手間がかかります。半分に分けてから合わせるやり方は、数が増えても手間の増え方がゆるやかです。くらべないで配るやり方もありますが、こちらは値が整数で範囲が分かっているときだけ使えます。</p>
+          <p data-level="formal">比較に基づくソートの最悪計算量は Ω(n log n) で下から押さえられる。バブル・選択・挿入は O(n²)、マージ・ヒープは最悪 O(n log n)、クイックは平均 O(n log n)・最悪 O(n²)。計数ソートは O(n + k)、基数ソートは O(d(n + k)) で、いずれも比較ではなく鍵の値を住所として使うため、この下界の対象外である。</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>教える方へ</summary>
+        <div class="fold__body">
+          <p>起きやすい誤解: 「1 手あたりの時間が同じ」と受け取ること。この画面は同時に 1 手ずつ進めますが、1 手の中身（比較 1 回か、書き込み 1 回か、全体を混ぜる 1 回か）は手法ごとに違います。<strong>速さの比較にはなりません。</strong>比べられるのは回数です。</p>
+          <p>短い課題案（5〜10 分）: バブルソートとクイックソートを同時に選び、要素の数を変えながら「比べた回数」を記録する。回数が n に対してどう増えるか、表にして話し合う。</p>
+          <p>冗談の手法の使い方: スターリンソートとサノスソートは<strong>要素が消えます</strong>。ボゴソートは終わらないことがあります。ミラクルソートは一つも動きません。インテリジェントデザインソートは確定の印だけ付けて、実際にはそろっていません。「正しいソートとは何か」を問い直す材料として使ってください。</p>
+        </div>
+      </details>
+
+      <h3>この手順の限界</h3>
+      <ul>
+        <li><strong>速さの比較ではありません。</strong>同時に 1 手ずつ進めるだけで、1 手の重さは手法ごとに違います。実際の実行時間を測ったものではありません。</li>
+        <li>渡す値は <strong>1 から要素数までを 1 回ずつ</strong>並べ替えたものです。同じ値は出てきません。そのため、同じ値の前後関係が保たれるか（安定性）はこの画面では確かめられません。計数ソートの個数はすべて 1 になります。</li>
+        <li>基数ソートは 10 進の桁で配ります。負の数・小数・文字列は扱いません。</li>
+        <li>スリープソートは、実際の時間ではなく<strong>順序</strong>として表しています。本物の時計で動かすと、待ち時間の差が小さいときに順序は保証されません。</li>
+        <li>ボゴソート・ボゾソートは要素 7 個まで、手順 6 万で打ち切ります。それでも終わらないことがあります。</li>
+        <li>スターリンソート・サノスソートは要素が消えます。<strong>並べ替えではありません。</strong></li>
+        <li>ミラクルソート・インテリジェントデザインソートは、そろえません。冗談として置いています。</li>
+        <li>量子ボゴソートは「そろっていない宇宙を捨てる」という冗談で、実際に何かが起きるわけではありません。</li>
+        <li>クイックソートの基準は範囲の右端で固定です。基準の選び方による違いは扱っていません。</li>
+      </ul>
+
+      <h3>既知の未対応</h3>
+      <ul>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+        <li>対応端末の実機確認は未了です。</li>
+        <li>同時に動かす手法は 6 種までに制限しています。7 種以上の比較は試していません。</li>
+      </ul>
+    </div>
+
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
+      <dl class="page-meta__list">
+        <dt>版</dt><dd>2026-10-26</dd>
+        <dt>公開日</dt><dd>2026-10-26</dd>
+        <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
+        <dt>再利用条件</dt><dd>コードは <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>、教材本文は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>。出典を示せば改変・再配布できます（商用を含む）</dd>
+        <dt>保守・訂正の担当</dt><dd>未定</dd>
+        <dt>既知の制約</dt><dd>このページの「この手順の限界」「既知の未対応」に記載</dd>
+        <dt>問題報告</dt><dd><a href="https://trans-it.jp/">トランジット株式会社</a>へご連絡ください。個人情報を含む内容は送らないでください</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+      <p class="site-foot__licence">コード <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT</a> / 教材 <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE-CONTENT">CC BY 4.0</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

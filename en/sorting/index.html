@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sorting side by side — JavaScript Learning Demos</title>
+<meta name="description" content="Twenty-five sorting algorithms, from bubble and quicksort to the Stalin sort joke, run one step at a time or several at once on the same row.">
+<link rel="stylesheet" href="../../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../../js/core/seeded-random.js"></script>
+<script src="../../js/core/numeric.js"></script>
+<script src="../../js/sorting/sorts.js"></script>
+<script src="../../js/viz/bars.js"></script>
+<script src="../../js/ui/i18n.js"></script>
+<script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/learning.js"></script>
+<script src="../../js/ui/share-link.js"></script>
+<script src="../../js/ui/tables.js"></script>
+<script src="../../sorting/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript Learning Demos</a></p>
+    <nav class="site-head__nav" aria-label="Language">
+      <a href="../../sorting/index.html" hreflang="ja">日本語</a>
+      <span aria-current="true">English</span>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="../index.html">All demos</a></li>
+        <li>Sorting side by side</li>
+      </ol>
+    </nav>
+
+    <h1>Sorting side by side</h1>
+    <p class="lede">Twenty-five ways of putting a row in order, run <strong>one step at a time</strong> or <strong>several at once</strong>. The efficient ones, the deliberately terrible ones and the jokes all get the same row to work on.</p>
+
+    <dl class="framing">
+      <div>
+        <dt>The question</dt>
+        <dd>Given the same row, what actually differs between the algorithms? How many comparisons, and how many moves?</dd>
+      </div>
+      <div>
+        <dt>What you need first</dt>
+        <dd>Being able to say which of two values is larger, and having met the idea of repetition. Written for lower secondary upwards.</dd>
+      </div>
+      <div>
+        <dt>Predict before you run it</dt>
+        <dd>Give bubble sort and quicksort the same row. Which one makes more comparisons?</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar" id="modes">
+          <span class="toolbar__label">How to run it</span>
+          <button type="button" data-mode="auto">Watch it run</button>
+          <button type="button" data-mode="manual">One step at a time</button>
+        </div>
+
+        <div class="toolbar">
+          <button type="button" id="play" class="is-primary">Play</button>
+          <button type="button" id="step">Next step</button>
+          <button type="button" id="step-back">Back one step</button>
+          <button type="button" id="to-end">Run to the end</button>
+          <button type="button" id="reset">Reset</button>
+          <p class="toolbar__hint">Reset picks a brand new random row every time. Changing which algorithms are selected keeps the row as it is, so you can compare them on the same data.</p>
+        </div>
+
+        <div id="tracks" class="tracks is-single"></div>
+
+        <p class="notice" id="notice"></p>
+
+        <p class="plot__caption">Bar height is the value. The marks under the bars mean: ▲ being compared, ⇄ swapped, ▼ written, P pivot, ✓ settled, ✕ removed. If you cannot tell the colours apart, these marks and the table below carry the same information.</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="compare-table"></div>
+        </div>
+
+        <details class="fold" style="margin-top: 1rem;">
+          <summary>See the row as numbers</summary>
+          <div class="fold__body">
+            <div class="table-scroll">
+              <div id="value-table"></div>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">Predict before you run it</h2>
+          <fieldset class="predict" id="predict">
+            <legend class="predict__question">Give bubble sort and quicksort the same row. Which one makes more comparisons?</legend>
+            <div class="predict__choices">
+              <label><input type="radio" name="predict" value="a">Bubble sort makes more</label>
+              <label><input type="radio" name="predict" value="b">Quicksort makes more</label>
+              <label><input type="radio" name="predict" value="c">About the same</label>
+            </div>
+            <p class="predict__note">You can use everything without choosing. If you do choose, you can hold it against the result afterwards.</p>
+          </fieldset>
+          <p class="predict__result" id="predict-result" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Choose the algorithms</h2>
+          <p class="share__help">Pick as many as you like (up to 6 run at once). Every one you pick gets <strong>the same row</strong>.</p>
+          <div class="picker" id="picker"></div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Change the conditions</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="count">
+                Number of elements
+                <span class="control__note">The limit differs by algorithm; the ones that never finish are held to a small number</span>
+              </label>
+              <input id="count" type="range" min="4" max="64" step="1" value="24">
+              <input id="count-num" type="number" min="4" max="64" step="1" value="24">
+            </div>
+            <div class="control">
+              <label class="control__label" for="speed">
+                Milliseconds per step
+                <span class="control__note">How fast it runs on its own</span>
+              </label>
+              <input id="speed" type="range" min="10" max="1200" step="10" value="180">
+              <input id="speed-num" type="number" min="10" max="1200" step="10" value="180">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Share with a class</h2>
+          <p class="share__help">Opening this link starts with the same settings: the algorithms you picked and the number of elements. The row itself is new every time. It contains no personal data.</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">Link to share</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">Copy the link</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Legend</h2>
+          <ul class="legend" id="legend"></ul>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose measure" style="max-width: none;">
+      <h3>Things worth checking</h3>
+      <ul>
+        <li><strong>Compare</strong>: select bubble sort and quicksort together and watch the comparison counts on the same row. Take the number of elements from 8 to 32 to 64 — what happens to the gap?</li>
+        <li><strong>Explain</strong>: binary insertion sort <strong>makes far fewer comparisons but exactly as many swaps</strong>. Say in your own words why.</li>
+        <li><strong>Transfer</strong>: counting sort never compares anything. So can you always use a sort that does not compare? If not, when can you not?</li>
+      </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>Comparisons and swaps are counted separately. Start by keeping the two apart.</p>
+        <p class="hints__step" hidden>Binary insertion sort finds the slot with a binary search. Finding it is cheap — but making room still means shifting everything after it, one at a time.</p>
+        <p class="hints__step" hidden>Counting sort uses the value itself as the address to store at. That only works when the values are whole numbers and you know their range.</p>
+        <button type="button" class="hints__more">Next hint</button>
+      </div>
+
+      <details class="fold">
+        <summary>In more detail</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">Wording</span>
+            <button type="button" data-level="plain">Plainly</button>
+            <button type="button" data-level="formal">Formally</button>
+          </div>
+          <p data-level="plain">The same job — putting things in order — costs wildly different amounts of work depending on how you go about it. Only ever swapping with your neighbour gets very expensive as the row grows. Splitting the row in half and merging the halves grows much more gently. There are also ways that never compare anything at all, but those only work when the values are whole numbers in a range you already know.</p>
+          <p data-level="formal">Any comparison-based sort needs Ω(n log n) comparisons in the worst case. Bubble, selection and insertion sort are O(n²); merge sort and heapsort are O(n log n) in the worst case; quicksort is O(n log n) on average and O(n²) at worst. Counting sort runs in O(n + k) and radix sort in O(d(n + k)); neither is bound by that lower bound, because they use the key itself as an address rather than comparing keys.</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>For teachers</summary>
+        <div class="fold__body">
+          <p>The easy misreading: that one step takes the same time everywhere. The algorithms advance one step together, but a step means different work in each one — a single comparison, a single write, or shuffling the whole row. <strong>This is not a race.</strong> What it does compare honestly is counts.</p>
+          <p>A short task (5–10 minutes): select bubble sort and quicksort, vary the number of elements and record the comparison counts. Tabulate how each count grows with n, and discuss.</p>
+          <p>On the joke algorithms: Stalin sort and Thanos sort <strong>destroy elements</strong>. Bogosort may never finish. Miracle sort moves nothing at all. Intelligent design sort marks everything settled while the row is plainly not sorted. Use them to ask what makes a sort correct in the first place.</p>
+        </div>
+      </details>
+
+      <h3>Where this stops</h3>
+      <ul>
+        <li><strong>It is not a speed comparison.</strong> Everything advances one step at a time, and a step is not the same amount of work in each algorithm. Nothing here is a measurement of real running time.</li>
+        <li>The values are <strong>1 to n, each used once</strong>, in random order. No value ever repeats, so you cannot see here whether equal values keep their original order (stability). Every count in counting sort is 1.</li>
+        <li>Radix sort distributes by decimal digits. Negative numbers, decimals and text are out of scope.</li>
+        <li>Sleep sort is shown as an <strong>order</strong>, not as real elapsed time. Run against a real clock, close values are not guaranteed to come out in order.</li>
+        <li>Bogosort and bozo sort are capped at 7 elements and 60,000 steps, and may still not finish.</li>
+        <li>Stalin sort and Thanos sort lose elements. <strong>They do not rearrange anything.</strong></li>
+        <li>Miracle sort and intelligent design sort do not sort. They are here as jokes.</li>
+        <li>Quantum bogosort "discards the universe" as a joke; nothing actually happens.</li>
+        <li>Quicksort always takes the rightmost element of the range as its pivot. Other pivot choices are out of scope.</li>
+      </ul>
+
+      <h3>Known gaps</h3>
+      <ul>
+        <li>No check of learning outcomes has been carried out. This screen is a trial of the subject matter.</li>
+        <li>No testing on the target devices has been done yet.</li>
+        <li>At most 6 algorithms run at once. More than that has not been tried.</li>
+      </ul>
+    </div>
+
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
+      <dl class="page-meta__list">
+        <dt>Version</dt><dd>2026-10-26</dd>
+        <dt>Published</dt><dd>2026-10-26</dd>
+        <dt>Source and dependencies</dt><dd>Built by Trans-IT. Drawing uses D3.js v7.9.0 (from a CDN, pinned to an exact version)</dd>
+        <dt>Terms of reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching material under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Adapt and redistribute freely, including commercially, with attribution</dd>
+        <dt>Maintenance and corrections</dt><dd>Not yet assigned</dd>
+        <dt>Known limits</dt><dd>See "Where this stops" and "Known gaps" on this page</dd>
+        <dt>Reporting a problem</dt><dd>Contact <a href="https://trans-it.jp/">Trans-IT</a>. Please do not send anything containing personal data</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社 (Trans-IT)" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript Learning Demos</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+      <p class="site-foot__licence">Code <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT</a> / material <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE-CONTENT">CC BY 4.0</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
