@@ -69,6 +69,7 @@
       /* --- ソート --- */
       "figure.bars": "棒グラフ。棒の高さが値で、左から順に並んでいる。棒の下の印は、比較・交換・書込・基準・確定・取り除きを表す。",
 
+      "related.shared": "共有する前提：{premise}",
       "catalog.all": "すべて",
       "catalog.concept.coord": "座標",
       "catalog.concept.mean": "平均",
@@ -337,6 +338,7 @@
       /* --- Sorting --- */
       "figure.bars": "Bar chart. Each bar's height is its value, read left to right. The marks under the bars show comparing, swapping, writing, the pivot, settled positions and removals.",
 
+      "related.shared": "Shared prerequisite: {premise}",
       "catalog.all": "All",
       "catalog.concept.coord": "Coordinates",
       "catalog.concept.mean": "Averages",

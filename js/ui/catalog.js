@@ -12,9 +12,10 @@
  *   分野はカードに書いてある文字をそのまま見出しに使う。題材ごとに違う言葉を
  *   使うので、辞書に写すと二重管理になるため。
  *
- *   前提概念は card の data-concepts（統制語彙の ID を空白で区切る）で持つ。
+ *   前提概念は js/ui/demos.js が正本で、カードのリンク先から引く。各デモ画面の
+ *   「同じ前提を使う画面」も同じ表を見るので、カード側に書くと二重管理になる。
  *   概念は**絞り込み**として使い、見出しで群を作らない。公開3題では重なる概念が
- *   1 つだけで、群にすると 1 件きりの群が並ぶため（planning/LEARNING-DESIGN.md 9章）。
+ *   1 つだけで、群にすると 1 件きりの群が並ぶため（決めごとは管理リポジトリの planning/LEARNING-DESIGN.md 9章）。
  *
  *   選んだ概念は URL に残す（?concept=coord）。URL は誰でも書き換えられるので、
  *   カードに実際にある概念だけを受け取り、知らない値は捨てる。
@@ -77,9 +78,14 @@
     return "";
   }
 
+  /* 題材の id はカードのリンク先（<id>/index.html）から取る。
+     前提概念は js/ui/demos.js が正本なので、カードには書かない。 */
   function conceptsOf(card) {
-    var raw = (card.dataset.concepts || "").trim();
-    return raw ? raw.split(/\s+/) : [];
+    if (!JsDemo.Demos) { return []; }
+    var link = card.querySelector(".demo-card__title a");
+    var href = link ? link.getAttribute("href") : "";
+    var id = href.replace(/^\.\//, "").replace(/\/index\.html$/, "");
+    return JsDemo.Demos.conceptsOf(id);
   }
 
   /** URL から絞り込みを読む。一覧に無い値は捨てる。 */

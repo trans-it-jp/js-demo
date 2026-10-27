@@ -101,6 +101,7 @@ node tools/check-contrast.js   # colour contrast (4.5:1 for text, 3:1 for contro
 node tools/check-controls.js   # slider and number field ranges agree
 node tools/check-transitions.js # no colour is animated
 node tools/check-unused.js     # no definition is left behind unused
+node tools/check-catalog.js    # the demo list and the published pages agree
 ```
 
 The same verification opens in a browser as well ([tests/index.html](tests/index.html)).
@@ -109,7 +110,7 @@ What a machine cannot measure — keyboard operation, screen readers, real devic
 
 ## Adding a demo
 
-There is a [guide](guides/adding-a-demo.en.md) and a [page template](templates/demo.html). The template carries the six stages of the learning flow — question, prediction, operation, comparison, explanation, transfer — as markers.
+There is a [guide](guides/adding-a-demo.en.md) and a [page template](templates/demo.html). The template carries five of the six stages of the learning flow — question, prediction, operation, comparison, explanation, transfer — as markers; prediction was taken out of the template by the decision of 2026-10-26.
 
 ## Running it locally
 

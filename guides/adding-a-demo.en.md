@@ -105,6 +105,7 @@ node tools/check-contrast.js   # colour contrast ratios
 node tools/check-controls.js   # slider and number field ranges agree
 node tools/check-transitions.js # no colour is animated
 node tools/check-unused.js     # no definition is left behind unused
+node tools/check-catalog.js    # the demo list and the published pages agree
 python -m http.server 8000     # check display and interaction in a real browser
 ```
 
@@ -112,7 +113,21 @@ Work through the [accessibility checklist](accessibility.en.md) once per demo. W
 
 ## 4. Listing it in the catalogue
 
-Add a card to the demo list in `index.html` and `en/index.html`, with the title and description plus the field, the level and the status.
+**First add the demo to [`js/ui/demos.js`](../js/ui/demos.js).** That file is the single source for prerequisite concepts: both the filter on the top page and the "same prerequisites" links on each demo page read it.
+
+```js
+{
+  id: "folder-name",
+  title: { ja: "題名", en: "Title" },      // the same text as each page's <h1>
+  concepts: ["coord", "mean"]             // ids from the controlled vocabulary, at most 3
+}
+```
+
+**When a demo introduces a new prerequisite concept, add its short label (`catalog.concept.*`) and its sentence (`catalog.premise.*`) to [`js/ui/i18n.js`](../js/ui/i18n.js) in both languages.** `node tools/check-catalog.js` reports titles that drift apart and wording that is missing.
+
+Then add a card to the demo list in `index.html` and `en/index.html`, with the title and description plus the field, the written-for level and the status. Keep the card title identical to the one in `demos.js`.
+
+The "same prerequisites" section at the foot of a demo page is in the template. Point its `data-demo` at the `id` in `demos.js` and load `js/ui/demos.js` and `js/ui/related-page.js`. **Nothing is shown when no other demo shares a prerequisite.**
 
 Give it a figure that shows what the demo actually does. The figures on the top page are built from computed coordinates.
 

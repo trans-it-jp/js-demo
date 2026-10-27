@@ -105,6 +105,7 @@ node tools/check-contrast.js   # 色のコントラスト比
 node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
 node tools/check-transitions.js # 色をアニメーションさせていないか
 node tools/check-unused.js     # 使われなくなった定義が残っていないか
+node tools/check-catalog.js    # 題材の一覧と公開ページが食い違っていないか
 python -m http.server 8000     # 実ブラウザで表示・操作を確認
 ```
 
@@ -112,7 +113,21 @@ python -m http.server 8000     # 実ブラウザで表示・操作を確認
 
 ## 4. 目録への登録
 
-`index.html` と `en/index.html` の「デモ」一覧へカードを足す。題名・説明のほか、分野・対象・状態を書く。
+**まず [`js/ui/demos.js`](../js/ui/demos.js) へ題材を足す。** ここが前提概念の正本で、トップページの絞り込みと各画面の「同じ前提を使う画面」の両方がこの表を見る。
+
+```js
+{
+  id: "フォルダ名",
+  title: { ja: "題名", en: "Title" },      // 各ページの <h1> と同じ文字にする
+  concepts: ["coord", "mean"]             // 統制語彙の ID。1 題材 3 つまで
+}
+```
+
+**新しい前提概念を使うときは、[`js/ui/i18n.js`](../js/ui/i18n.js) へ名札（`catalog.concept.*`）と前提の文（`catalog.premise.*`）を日英そろえて足す。** 語彙の決めごとは社内の学習設計にある。`node tools/check-catalog.js` が、題名の食い違いと文言の抜けを見つける。
+
+そのうえで `index.html` と `en/index.html` の「デモ」一覧へカードを足す。題名・説明のほか、分野・想定学年・状態を書く。カードの題名は `demos.js` と同じ文字にする。
+
+デモ画面の末尾に置く「同じ前提を使う画面」は雛形に入っている。`data-demo` を `demos.js` の `id` に合わせ、`js/ui/demos.js` と `js/ui/related-page.js` を読み込む。**前提を共有する題材が無ければ、枠ごと出ない。**
 
 図は各デモの中身が分かるものにする。トップページの図は座標を計算して組んである。
 

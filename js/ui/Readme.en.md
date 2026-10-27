@@ -11,8 +11,10 @@ Input wiring, numeric tables, and the Japanese and English wording. Anything spe
 | `learning.js` | Predictions, progressive hints, switchable wording (`JsDemo.Learning`) |
 | `share-link.js` | Putting initial conditions in the URL so they can be shared (`JsDemo.ShareLink`) |
 | `tables.js` | Matrices and breakdowns rendered as tables of numbers (`JsDemo.Tables`) |
+| `demos.js` | The list of published demos. **The single source for prerequisite concepts** (`JsDemo.Demos`) |
 | `catalog.js` | Regrouping and filtering the catalog on the top page (`JsDemo.Catalog`) |
 | `catalog-page.js` | The wiring that calls `catalog.js` from the top page |
+| `related-page.js` | Lists demos with the same prerequisites at the foot of a demo page |
 
 ## Loading
 
@@ -157,11 +159,26 @@ Each card carries two attributes.
 | Attribute | Content |
 | --- | --- |
 | `data-stage` | Written-for level (`primary` / `lower` / `upper` / `adult`) |
-| `data-concepts` | Prerequisite concept ids, space separated (e.g. `coord mean distance`) |
+
+Prerequisite concepts are not written on the card. **They live in `demos.js`** and are looked up from the card's link target (`<id>/index.html`), because the "same prerequisites" links on each demo page read the same table and writing them twice would mean maintaining them twice.
 
 Field headings are not kept in the dictionary: the text written on the card is used as it stands, because each demo uses its own words and copying them would mean maintaining them twice.
 
-**Concepts are used as a filter, not as group headings.** Across the three published demos only one concept is shared, so headings would list groups of one (the decision is recorded in `planning/LEARNING-DESIGN.md`, chapter 9).
+**Concepts are used as a filter, not as group headings.** Across the three published demos only one concept is shared, so headings would list groups of one.
+
+## JsDemo.Demos
+
+The list of published demos, and **the single source for prerequisite concepts**. Titles must match each page's heading exactly (`tools/check-catalog.js` compares them).
+
+```js
+JsDemo.Demos.list;                       // [{ id, title: {ja, en}, concepts }]
+JsDemo.Demos.conceptsOf("k-means");      // ["coord", "mean", "distance"]
+JsDemo.Demos.related("k-means");         // demos sharing a prerequisite [{ id, title, shared }]
+```
+
+`conceptsOf` and `related` touch no DOM, so they can be verified from Node. `related` never includes the demo itself and returns an empty list when nothing is shared.
+
+The page-side wiring is `related-page.js`. It fills `<section id="related" data-demo="k-means" hidden>` and **leaves the whole section out when no concept is shared**, rather than taking up space to say "none".
 
 The chosen concept is kept in the URL (`?concept=coord`). Anyone can edit a URL, so **only concepts that actually appear on the cards are accepted and anything else is discarded.**
 

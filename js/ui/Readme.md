@@ -11,8 +11,10 @@
 | `learning.js` | 予想・段階的なヒント・語彙の切り替え（`JsDemo.Learning`） |
 | `share-link.js` | 初期条件を URL へ載せて共有する（`JsDemo.ShareLink`） |
 | `tables.js` | 行列や内訳を数値の表にする（`JsDemo.Tables`） |
+| `demos.js` | 公開している題材の一覧。**前提概念の正本**（`JsDemo.Demos`） |
 | `catalog.js` | トップページの目録のまとめ直しと絞り込み（`JsDemo.Catalog`） |
 | `catalog-page.js` | トップページから `catalog.js` を呼ぶだけの配線 |
+| `related-page.js` | 各デモ画面の末尾に「同じ前提を使う画面」を出す |
 
 ## 読み込み方
 
@@ -157,11 +159,26 @@ JsDemo.Catalog.conceptsIn(items);       // 出現順・重複なしの概念の�
 | 属性 | 中身 |
 | --- | --- |
 | `data-stage` | 想定学年（`primary` / `lower` / `upper` / `adult`） |
-| `data-concepts` | 前提概念の ID を空白で区切る（例: `coord mean distance`） |
+
+前提概念はカードに書かない。**正本は `demos.js`** で、カードのリンク先（`<id>/index.html`）から引く。各デモ画面の「同じ前提を使う画面」も同じ表を見るので、カード側にも書くと二重管理になる。
 
 分野は見出しの文言を辞書に持たず、カードに書いてある文字をそのまま使う。題材ごとに違う言葉を使うので、写すと二重管理になる。
 
-**前提概念は絞り込みとして使い、見出しで群を作らない。** 公開3題では重なる概念が 1 つだけで、群にすると 1 件きりの群が並ぶため（決めごとは `planning/LEARNING-DESIGN.md` 9章）。
+**前提概念は絞り込みとして使い、見出しで群を作らない。** 公開3題では重なる概念が 1 つだけで、群にすると 1 件きりの群が並ぶため。
+
+## JsDemo.Demos
+
+公開している題材の一覧。**前提概念の正本。** 題名は各ページの見出しと同じ文字にする（`tools/check-catalog.js` が照合する）。
+
+```js
+JsDemo.Demos.list;                       // [{ id, title: {ja, en}, concepts }]
+JsDemo.Demos.conceptsOf("k-means");      // ["coord", "mean", "distance"]
+JsDemo.Demos.related("k-means");         // 前提を共有する題材 [{ id, title, shared }]
+```
+
+`conceptsOf` と `related` は DOM に触らない純粋な関数で、Node からも検証できる。`related` は自分自身を含めず、共有が無ければ空の並びを返す。
+
+画面側の配線は `related-page.js`。`<section id="related" data-demo="k-means" hidden>` の中へ一覧を作り、**共有する概念が無ければ枠ごと出さない**（「関連なし」と書いて場所を取らない）。
 
 選んだ概念は URL に残る（`?concept=coord`）。URL は誰でも書き換えられるので、**カードに実際にある概念だけを受け取り、知らない値は捨てる。**
 

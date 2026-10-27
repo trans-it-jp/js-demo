@@ -101,6 +101,7 @@ node tools/check-contrast.js   # 色のコントラスト比（文字 4.5:1、�
 node tools/check-controls.js   # スライダーと数値入力の範囲が揃っているか
 node tools/check-transitions.js # 色をアニメーションさせていないか
 node tools/check-unused.js     # 使われなくなった定義が残っていないか
+node tools/check-catalog.js    # 題材の一覧と公開ページが食い違っていないか
 ```
 
 同じ検証はブラウザでも開ける（[tests/index.html](tests/index.html)）。
@@ -109,7 +110,7 @@ node tools/check-unused.js     # 使われなくなった定義が残ってい�
 
 ## 題材を追加する
 
-[題材を追加する手順](guides/adding-a-demo.md)と[デモページの雛形](templates/demo.html)がある。雛形には学習の 6 段階（問い・予想・操作・比較・説明・転移）が印で入っている。
+[題材を追加する手順](guides/adding-a-demo.md)と[デモページの雛形](templates/demo.html)がある。雛形には学習の 6 段階（問い・予想・操作・比較・説明・転移）のうち、**予想を除く 5 段階**が印で入っている（予想は 2026-10-26 の決定で雛形から外した）。
 
 ## 手元で開く
 

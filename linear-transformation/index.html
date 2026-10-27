@@ -6,6 +6,9 @@
 <title>2D 座標変換 — JavaScript 学習デモ</title>
 <meta name="description" content="3×3 行列の同次座標で、一次変換・平行移動・回転を操作しながら学ぶ5つのレッスン。">
 <link rel="stylesheet" href="../css/site.css">
+<script src="../js/ui/i18n.js"></script>
+<script src="../js/ui/demos.js"></script>
+<script src="../js/ui/related-page.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">本文へ移動</a>
@@ -98,6 +101,13 @@
       <h3>詳しい解説</h3>
       <p>行列の定義、逆行列、任意点中心の回転の一般式、例題は <a href="https://github.com/trans-it-jp/js-demo/blob/main/linear-transformation/Readme.md">解説（Readme.md）</a> にあります。</p>
     </div>
+
+    <!-- 同じ前提を使う画面。共有する前提概念から作る（正本は js/ui/demos.js）。
+         共有する概念が無ければ枠ごと出ない。 -->
+    <section class="related" id="related" data-demo="linear-transformation" hidden>
+      <h2 class="related__title">同じ前提を使う画面</h2>
+      <ul class="related__list"></ul>
+    </section>
 
   </div>
 </main>

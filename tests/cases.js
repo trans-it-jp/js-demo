@@ -19,6 +19,7 @@
   var Matrix3 = JsDemo.Matrix3;
   var KMeans = JsDemo.KMeans;
   var Catalog = JsDemo.Catalog;
+  var Demos = JsDemo.Demos;
 
   /* --- 照合の道具 ------------------------------------------------------- */
 
@@ -1084,6 +1085,46 @@
     equal(Catalog.conceptsIn(items).indexOf("undefined"), -1, "一覧に入らない");
     equal(ids(Catalog.select(items, "coord")), "D01,D02", "絞り込みに出ない");
     equal(ids(Catalog.select(items, "")).split(",").length, 4, "全件には出る");
+  });
+
+  /* --- 同じ前提を使う画面 ----------------------------------------------- */
+
+  test("目録", "前提を共有する画面だけが関連に出る", function () {
+    var items = Demos.related("k-means");
+    equal(items.length, 1, "k-means の関連");
+    equal(items[0].id, "linear-transformation", "行き先");
+    equal(items[0].shared.join(","), "coord", "共有している前提");
+  });
+
+  test("目録", "共有が無ければ関連は空になる", function () {
+    /* ソートはどの題材とも前提を共有していない。空欄を作らずに枠ごと出さない。 */
+    equal(Demos.related("sorting").length, 0, "ソートの関連");
+    equal(Demos.related("まだ無い題材").length, 0, "知らない id");
+  });
+
+  test("目録", "関連に自分自身は入らない", function () {
+    Demos.list.forEach(function (demo) {
+      var ids = Demos.related(demo.id).map(function (item) { return item.id; });
+      equal(ids.indexOf(demo.id), -1, demo.id + " は自分を指さない");
+    });
+  });
+
+  test("目録", "関連は双方向になる", function () {
+    /* A から B が見えるなら、B からも A が見える。片側だけの行き止まりを作らない。 */
+    Demos.list.forEach(function (demo) {
+      Demos.related(demo.id).forEach(function (item) {
+        var back = Demos.related(item.id).map(function (other) { return other.id; });
+        isTrue(back.indexOf(demo.id) >= 0, demo.id + " ⇔ " + item.id);
+      });
+    });
+  });
+
+  test("目録", "題材の前提はすべて 3 つまで", function () {
+    /* 決めごと（LEARNING-DESIGN 9.2）。増えるなら題材が大きすぎる。 */
+    Demos.list.forEach(function (demo) {
+      isTrue(demo.concepts.length <= 3, demo.id + " の前提は " + demo.concepts.length + " 個");
+      equal(demo.concepts.length, new Set(demo.concepts).size, demo.id + " の前提に重複が無い");
+    });
   });
 
   JsDemo.Tests = { cases: cases };

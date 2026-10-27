@@ -24,6 +24,7 @@ var root = path.join(__dirname, "..");
   "js/clustering/kmeans.js",
   "js/sorting/sorts.js",
   "js/ui/share-link.js",
+  "js/ui/demos.js",
   "js/ui/catalog.js",
   "tests/cases.js"
 ].forEach(function (file) {

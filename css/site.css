@@ -693,6 +693,30 @@ td {
 
 /* --- 14. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
 
+/* 同じ前提を使う画面。共有する概念が無ければ JavaScript が枠ごと出さない。 */
+.related {
+  margin-top: var(--s-6);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule);
+}
+.related__title {
+  margin-bottom: var(--s-3);
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+}
+.related__list {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.related__shared {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+}
+
 /* 決まっていない項目は「未定」と出す。空欄にして決定済みに見せない。 */
 .page-meta {
   margin-top: var(--s-6);
