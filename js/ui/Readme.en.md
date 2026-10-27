@@ -11,6 +11,8 @@ Input wiring, numeric tables, and the Japanese and English wording. Anything spe
 | `learning.js` | Predictions, progressive hints, switchable wording (`JsDemo.Learning`) |
 | `share-link.js` | Putting initial conditions in the URL so they can be shared (`JsDemo.ShareLink`) |
 | `tables.js` | Matrices and breakdowns rendered as tables of numbers (`JsDemo.Tables`) |
+| `catalog.js` | Regrouping and filtering the catalog on the top page (`JsDemo.Catalog`) |
+| `catalog-page.js` | The wiring that calls `catalog.js` from the top page |
 
 ## Loading
 
@@ -130,6 +132,39 @@ Wire the share field with `wireField` and `refreshField`, so both demos behave t
 ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 ShareLink.refreshField("share-url", values, spec);
 ```
+
+## JsDemo.Catalog
+
+Regroups the catalog on the top page **by written-for level or by field, and filters it by prerequisite concept**.
+
+```js
+JsDemo.Catalog.create({
+  list: "catalog",           // id of the <ul> holding the cards
+  controls: "catalog-modes", // id of the container for the grouping buttons
+  filter: "catalog-filter",  // id of the container for the filter (optional)
+  status: "catalog-status",  // id of the element that reports the count (optional)
+  initial: "stage"           // "stage" (written for) or "field"
+});
+
+JsDemo.Catalog.select(items, "coord");  // pure function; verifiable from Node
+JsDemo.Catalog.conceptsIn(items);       // concepts in order of appearance, no repeats
+```
+
+**The cards are written in the HTML as a plain list.** Without JavaScript that list still reads; it simply gets no headings and no filter. Regrouping moves the cards rather than rebuilding them.
+
+Each card carries two attributes.
+
+| Attribute | Content |
+| --- | --- |
+| `data-stage` | Written-for level (`primary` / `lower` / `upper` / `adult`) |
+| `data-concepts` | Prerequisite concept ids, space separated (e.g. `coord mean distance`) |
+
+Field headings are not kept in the dictionary: the text written on the card is used as it stands, because each demo uses its own words and copying them would mean maintaining them twice.
+
+**Concepts are used as a filter, not as group headings.** Across the three published demos only one concept is shared, so headings would list groups of one (the decision is recorded in `planning/LEARNING-DESIGN.md`, chapter 9).
+
+The chosen concept is kept in the URL (`?concept=coord`). Anyone can edit a URL, so **only concepts that actually appear on the cards are accepted and anything else is discarded.**
+
 
 ## JsDemo.Learning
 

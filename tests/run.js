@@ -13,8 +13,8 @@ var path = require("path");
 var root = path.join(__dirname, "..");
 
 /* 計算だけのライブラリは DOM を使わないので Node でそのまま読める。
-   js/ui/share-link.js は読み込み時に DOM へ触らないので、ここでも検証できる
-   （parse と build は純粋な関数）。
+   js/ui/share-link.js と js/ui/catalog.js は読み込み時に DOM へ触らないので、
+   ここでも検証できる（parse・build・select・conceptsIn は純粋な関数）。
    描画（js/viz）と画面の配線は d3 と DOM が要るため、ここでは扱わない。
    それらは tests/index.html をブラウザで開いて確かめる。 */
 [
@@ -24,6 +24,7 @@ var root = path.join(__dirname, "..");
   "js/clustering/kmeans.js",
   "js/sorting/sorts.js",
   "js/ui/share-link.js",
+  "js/ui/catalog.js",
   "tests/cases.js"
 ].forEach(function (file) {
   require(path.join(root, file));

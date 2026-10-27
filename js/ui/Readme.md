@@ -11,6 +11,8 @@
 | `learning.js` | 予想・段階的なヒント・語彙の切り替え（`JsDemo.Learning`） |
 | `share-link.js` | 初期条件を URL へ載せて共有する（`JsDemo.ShareLink`） |
 | `tables.js` | 行列や内訳を数値の表にする（`JsDemo.Tables`） |
+| `catalog.js` | トップページの目録のまとめ直しと絞り込み（`JsDemo.Catalog`） |
+| `catalog-page.js` | トップページから `catalog.js` を呼ぶだけの配線 |
 
 ## 読み込み方
 
@@ -130,6 +132,39 @@ JsDemo.ShareLink.build(values, SPEC);     // "?seed=7"（既定値と同じも�
 ShareLink.wireField({ field: "share-url", button: "share-copy", status: "share-status" });
 ShareLink.refreshField("share-url", values, spec);
 ```
+
+## JsDemo.Catalog
+
+トップページの目録を**想定学年か分野でまとめ直し、前提概念で絞り込む**。
+
+```js
+JsDemo.Catalog.create({
+  list: "catalog",          // カードが入っている <ul> の id
+  controls: "catalog-modes",// 並べ方の切替を置く入れ物の id
+  filter: "catalog-filter", // 絞り込みを置く入れ物の id（省略可）
+  status: "catalog-status", // 件数を出す要素の id（省略可）
+  initial: "stage"          // "stage"（想定学年）か "field"（分野）
+});
+
+JsDemo.Catalog.select(items, "coord");  // 純粋な関数。Node からも検証できる
+JsDemo.Catalog.conceptsIn(items);       // 出現順・重複なしの概念の一覧
+```
+
+**HTML にはカードをふつうの一覧として書く。** JavaScript が動かないときはその一覧がそのまま読め、見出しも絞り込みも付かない。まとめ直すときもカードは作り直さず、置き場所を移すだけ。
+
+カードが持つ属性は 2 つ。
+
+| 属性 | 中身 |
+| --- | --- |
+| `data-stage` | 想定学年（`primary` / `lower` / `upper` / `adult`） |
+| `data-concepts` | 前提概念の ID を空白で区切る（例: `coord mean distance`） |
+
+分野は見出しの文言を辞書に持たず、カードに書いてある文字をそのまま使う。題材ごとに違う言葉を使うので、写すと二重管理になる。
+
+**前提概念は絞り込みとして使い、見出しで群を作らない。** 公開3題では重なる概念が 1 つだけで、群にすると 1 件きりの群が並ぶため（決めごとは `planning/LEARNING-DESIGN.md` 9章）。
+
+選んだ概念は URL に残る（`?concept=coord`）。URL は誰でも書き換えられるので、**カードに実際にある概念だけを受け取り、知らない値は捨てる。**
+
 
 ## JsDemo.Learning
 

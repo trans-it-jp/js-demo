@@ -18,6 +18,7 @@
   var Numeric = JsDemo.Numeric;
   var Matrix3 = JsDemo.Matrix3;
   var KMeans = JsDemo.KMeans;
+  var Catalog = JsDemo.Catalog;
 
   /* --- 照合の道具 ------------------------------------------------------- */
 
@@ -1039,6 +1040,50 @@
     var a = Sorts.values({ count: 24, random: Random.create(1) });
     var b = Sorts.values({ count: 24, random: Random.create(2) });
     isTrue(a.join(",") !== b.join(","), "別の種で別の並びになる");
+  });
+
+  /* --- 目録の絞り込み --------------------------------------------------- */
+
+  /* 画面のカードの代わりに、同じ形の並びで確かめる。
+     DOM を使わない select と conceptsIn だけを対象にする。 */
+  var CATALOG = [
+    { id: "D01", concepts: ["coord", "mean", "distance"] },
+    { id: "D02", concepts: ["coord", "matrix", "vector"] },
+    { id: "D03", concepts: ["order", "repeat", "bar"] }
+  ];
+
+  function ids(items) {
+    return items.map(function (item) { return item.id; }).join(",");
+  }
+
+  test("目録", "概念を選ばなければ全部残る", function () {
+    equal(ids(Catalog.select(CATALOG, "")), "D01,D02,D03", "空の指定");
+    equal(ids(Catalog.select(CATALOG, null)), "D01,D02,D03", "指定なし");
+  });
+
+  test("目録", "選んだ概念を前提にするものだけ残る", function () {
+    equal(ids(Catalog.select(CATALOG, "coord")), "D01,D02", "座標");
+    equal(ids(Catalog.select(CATALOG, "order")), "D03", "大小の順序");
+    equal(ids(Catalog.select(CATALOG, "mean")), "D01", "平均");
+  });
+
+  test("目録", "知らない概念では何も残らない", function () {
+    /* URL は誰でも書き換えられる。知らない値で例外にせず、空振りで済ませる。 */
+    equal(Catalog.select(CATALOG, "fraction").length, 0, "まだ無い概念");
+    equal(Catalog.select(CATALOG, "../etc").length, 0, "でたらめな値");
+  });
+
+  test("目録", "概念の一覧は出現順で重複しない", function () {
+    equal(Catalog.conceptsIn(CATALOG).join(","),
+          "coord,mean,distance,matrix,vector,order,repeat,bar",
+          "選択肢の並び");
+  });
+
+  test("目録", "概念を持たないものは絞り込みで必ず外れる", function () {
+    var items = CATALOG.concat([{ id: "D04" }]);
+    equal(Catalog.conceptsIn(items).indexOf("undefined"), -1, "一覧に入らない");
+    equal(ids(Catalog.select(items, "coord")), "D01,D02", "絞り込みに出ない");
+    equal(ids(Catalog.select(items, "")).split(",").length, 4, "全件には出る");
   });
 
   JsDemo.Tests = { cases: cases };
