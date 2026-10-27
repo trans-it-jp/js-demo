@@ -69,6 +69,11 @@
       /* --- ソート --- */
       "figure.bars": "棒グラフ。棒の高さが値で、左から順に並んでいる。棒の下の印は、比較・交換・書込・基準・確定・取り除きを表す。",
 
+      "catalog.stage.primary": "小学校",
+      "catalog.stage.lower": "中学校",
+      "catalog.stage.upper": "高校",
+      "catalog.stage.adult": "大学・社会人",
+
       "sort.group.exchange": "交換で並べる",
       "sort.group.insert": "挿入で並べる",
       "sort.group.select": "選び出して並べる",
@@ -311,6 +316,11 @@
 
       /* --- Sorting --- */
       "figure.bars": "Bar chart. Each bar's height is its value, read left to right. The marks under the bars show comparing, swapping, writing, the pivot, settled positions and removals.",
+
+      "catalog.stage.primary": "Primary school",
+      "catalog.stage.lower": "Lower secondary",
+      "catalog.stage.upper": "Upper secondary",
+      "catalog.stage.adult": "University and adult learners",
 
       "sort.group.exchange": "Sorting by swapping",
       "sort.group.insert": "Sorting by inserting",

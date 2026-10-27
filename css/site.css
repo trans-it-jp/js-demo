@@ -309,6 +309,17 @@ img { max-width: 100%; height: auto; }
 }
 .status--review { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
 
+/* 目録のまとまり（想定学年・分野で切り替える）。 */
+.catalog-group { margin-top: var(--s-6); }
+.catalog-group:first-of-type { margin-top: var(--s-4); }
+.catalog-group__title {
+  margin: 0 0 var(--s-3);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--rule);
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+
 /* --- 6. レッスン一覧（順序のある並び） ------------------------------------ */
 
 .lessons {

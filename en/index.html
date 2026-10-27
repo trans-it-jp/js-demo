@@ -6,6 +6,9 @@
 <title>JavaScript Learning Demos — Transit</title>
 <meta name="description" content="Interactive JavaScript demos for concepts in mathematics, science, computing, data science, statistics and AI.">
 <link rel="stylesheet" href="../css/site.css">
+<script src="../js/ui/i18n.js"></script>
+<script src="../js/ui/catalog.js"></script>
+<script src="../js/ui/catalog-page.js" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -26,41 +29,49 @@
     <p class="lede">Concepts that are hard to hold on to from a formula alone, turned into something you can operate. Each demo keeps to one question: change one condition and compare, restate the reason, then see whether the explanation still holds for a different example.</p>
 
     <h2 style="margin-top: 3rem;">Demos</h2>
-    <ul class="catalog">
-      <li class="demo-card">
+
+    <!-- Grouping control. Hidden without JavaScript; the plain list below still reads. -->
+    <div class="toolbar" id="catalog-modes" hidden>
+      <span class="toolbar__label">Group by</span>
+      <button type="button" data-mode="stage">Written for</button>
+      <button type="button" data-mode="field">Field</button>
+    </div>
+
+    <ul class="catalog" id="catalog">
+      <li class="demo-card" data-stage="adult">
         <figure class="demo-card__figure"><svg viewBox="0 0 320 160" role="img" aria-label="3 つのまとまりに分かれた点と中心"><rect x="24" y="12" width="272" height="136" fill="none" stroke="var(--rule)"/><g><circle cx="56.0" cy="48.0" r="3.1" fill="var(--series-1)"/><circle cx="69.0" cy="74.0" r="3.1" fill="var(--series-1)"/><circle cx="84.0" cy="42.0" r="3.1" fill="var(--series-1)"/><circle cx="94.0" cy="68.0" r="3.1" fill="var(--series-1)"/><circle cx="62.0" cy="68.0" r="3.1" fill="var(--series-1)"/><circle cx="80.0" cy="80.0" r="3.1" fill="var(--series-1)"/><circle cx="100.0" cy="56.0" r="3.1" fill="var(--series-1)"/><circle cx="74.0" cy="58.0" r="3.1" fill="var(--series-1)"/><rect x="143.3" y="95.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="156.3" y="121.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="171.3" y="89.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="181.3" y="115.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="149.3" y="115.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="167.3" y="127.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="187.3" y="103.3" width="5.5" height="5.5" fill="var(--series-2)"/><rect x="161.3" y="105.3" width="5.5" height="5.5" fill="var(--series-2)"/><polygon points="218.0,34.2 221.3,39.9 214.7,39.9" fill="var(--series-3)"/><polygon points="231.0,60.2 234.3,65.9 227.7,65.9" fill="var(--series-3)"/><polygon points="246.0,28.2 249.3,33.9 242.7,33.9" fill="var(--series-3)"/><polygon points="256.0,54.2 259.3,59.9 252.7,59.9" fill="var(--series-3)"/><polygon points="224.0,54.2 227.3,59.9 220.7,59.9" fill="var(--series-3)"/><polygon points="242.0,66.2 245.3,71.9 238.7,71.9" fill="var(--series-3)"/><polygon points="262.0,42.2 265.3,47.9 258.7,47.9" fill="var(--series-3)"/><polygon points="236.0,44.2 239.3,49.9 232.7,49.9" fill="var(--series-3)"/></g><g><g><circle cx="78.0" cy="62.0" r="7.2" fill="var(--surface)" stroke="var(--series-1)" stroke-width="2.4"/><text x="78.0" y="50.0" text-anchor="middle" font-size="10" font-weight="600" fill="var(--series-1)" paint-order="stroke" stroke="var(--surface)" stroke-width="3">1</text></g><g><rect x="161.6" y="105.6" width="12.7" height="12.7" fill="var(--surface)" stroke="var(--series-2)" stroke-width="2.4"/><text x="168.0" y="100.0" text-anchor="middle" font-size="10" font-weight="600" fill="var(--series-2)" paint-order="stroke" stroke="var(--surface)" stroke-width="3">2</text></g><g><polygon points="240.0,43.2 247.7,56.4 232.3,56.4" fill="var(--surface)" stroke="var(--series-3)" stroke-width="2.4"/><text x="240.0" y="40.0" text-anchor="middle" font-size="10" font-weight="600" fill="var(--series-3)" paint-order="stroke" stroke="var(--surface)" stroke-width="3">3</text></g></g></svg></figure>
         <div class="demo-card__body">
           <h3 class="demo-card__title"><a href="k-means/index.html">k-means</a></h3>
           <p class="demo-card__desc">Splitting a set of points into groups, one step at a time: assign, then move the centroids. Shows what follows from a person choosing the number of clusters.</p>
           <dl class="demo-card__meta">
-            <dt>Field</dt><dd>Data science and AI</dd>
-            <dt>Level</dt><dd>Upper secondary and above</dd>
+            <dt data-key="field">Field</dt><dd>Data science and AI</dd>
+            <dt>Written for</dt><dd>University and adult learners</dd>
             <dt>Status</dt>
             <dd><span class="status status--review">In review</span></dd>
           </dl>
         </div>
       </li>
-      <li class="demo-card">
+      <li class="demo-card" data-stage="adult">
         <figure class="demo-card__figure"><svg viewBox="0 0 320 160" role="img" aria-label="格子が平行四辺形へ移る様子"><g stroke="var(--plot-grid)" stroke-width="1"><line x1="56.0" y1="24.0" x2="56.0" y2="134.0"/><line x1="56.0" y1="24.0" x2="166.0" y2="24.0"/><line x1="78.0" y1="24.0" x2="78.0" y2="134.0"/><line x1="56.0" y1="46.0" x2="166.0" y2="46.0"/><line x1="100.0" y1="24.0" x2="100.0" y2="134.0"/><line x1="56.0" y1="68.0" x2="166.0" y2="68.0"/><line x1="122.0" y1="24.0" x2="122.0" y2="134.0"/><line x1="56.0" y1="90.0" x2="166.0" y2="90.0"/><line x1="144.0" y1="24.0" x2="144.0" y2="134.0"/><line x1="56.0" y1="112.0" x2="166.0" y2="112.0"/><line x1="166.0" y1="24.0" x2="166.0" y2="134.0"/><line x1="56.0" y1="134.0" x2="166.0" y2="134.0"/></g><g stroke="var(--plot-grid-warp)" stroke-width="1.2"><line x1="124.2" y1="24.0" x2="56.0" y2="134.0"/><line x1="124.2" y1="24.0" x2="234.2" y2="24.0"/><line x1="146.2" y1="24.0" x2="78.0" y2="134.0"/><line x1="110.6" y1="46.0" x2="220.6" y2="46.0"/><line x1="168.2" y1="24.0" x2="100.0" y2="134.0"/><line x1="96.9" y1="68.0" x2="206.9" y2="68.0"/><line x1="190.2" y1="24.0" x2="122.0" y2="134.0"/><line x1="83.3" y1="90.0" x2="193.3" y2="90.0"/><line x1="212.2" y1="24.0" x2="144.0" y2="134.0"/><line x1="69.6" y1="112.0" x2="179.6" y2="112.0"/><line x1="234.2" y1="24.0" x2="166.0" y2="134.0"/><line x1="56.0" y1="134.0" x2="166.0" y2="134.0"/></g><g stroke-width="2.4" stroke-linecap="round"><line x1="56.0" y1="134.0" x2="78.0" y2="134.0" stroke="var(--series-2)"/><line x1="56.0" y1="134.0" x2="69.6" y2="112.0" stroke="var(--series-1)"/></g><circle cx="56.0" cy="134.0" r="2.6" fill="var(--ink)"/></svg></figure>
         <div class="demo-card__body">
           <h3 class="demo-card__title"><a href="linear-transformation/index.html">2D coordinate transforms</a></h3>
           <p class="demo-card__desc">Moving a shape turns out to be multiplication by a matrix. Five lessons, from a plain linear transform to rotation about an arbitrary point.</p>
           <dl class="demo-card__meta">
-            <dt>Field</dt><dd>Mathematics (linear algebra)</dd>
-            <dt>Level</dt><dd>Upper secondary and above</dd>
+            <dt data-key="field">Field</dt><dd>Mathematics (linear algebra)</dd>
+            <dt>Written for</dt><dd>University and adult learners</dd>
             <dt>Status</dt>
             <dd><span class="status status--review">In review</span></dd>
           </dl>
         </div>
       </li>
-      <li class="demo-card">
+      <li class="demo-card" data-stage="adult">
         <figure class="demo-card__figure"><svg viewBox="0 0 320 160" role="img" aria-label="Bars of differing heights, settling in order from the left"><rect x="24" y="12" width="272" height="136" fill="none" stroke="var(--rule)"/><rect x="40.0" y="104.0" width="15.0" height="28.0" fill="var(--bar-sorted)"/><rect x="60.0" y="85.3" width="15.0" height="46.7" fill="var(--bar-sorted)"/><rect x="80.0" y="66.7" width="15.0" height="65.3" fill="var(--bar-sorted)"/><rect x="100.0" y="48.0" width="15.0" height="84.0" fill="var(--bar-sorted)"/><rect x="120.0" y="113.3" width="15.0" height="18.7" fill="var(--bar-look)"/><rect x="140.0" y="29.3" width="15.0" height="102.7" fill="var(--bar-look)"/><rect x="160.0" y="76.0" width="15.0" height="56.0" fill="var(--bar)"/><rect x="180.0" y="20.0" width="15.0" height="112.0" fill="var(--bar)"/><rect x="200.0" y="94.7" width="15.0" height="37.3" fill="var(--bar)"/><rect x="220.0" y="38.7" width="15.0" height="93.3" fill="var(--bar)"/><rect x="240.0" y="122.7" width="15.0" height="9.3" fill="var(--bar)"/><rect x="260.0" y="57.3" width="15.0" height="74.7" fill="var(--bar)"/><text x="47.5" y="146" text-anchor="middle" font-size="9" fill="var(--bar-sorted)">✓</text><text x="67.5" y="146" text-anchor="middle" font-size="9" fill="var(--bar-sorted)">✓</text><text x="87.5" y="146" text-anchor="middle" font-size="9" fill="var(--bar-sorted)">✓</text><text x="107.5" y="146" text-anchor="middle" font-size="9" fill="var(--bar-sorted)">✓</text><text x="127.5" y="146" text-anchor="middle" font-size="9" fill="var(--bar-look)">▲</text><text x="147.5" y="146" text-anchor="middle" font-size="9" fill="var(--bar-look)">▲</text><line x1="34" y1="132.5" x2="286" y2="132.5" stroke="var(--plot-axis)"/></svg></figure>
         <div class="demo-card__body">
           <h3 class="demo-card__title"><a href="sorting/index.html">Sorting side by side</a></h3>
           <p class="demo-card__desc">Twenty-five ways of putting a row in order, run one step at a time or several at once. The efficient ones, the deliberately terrible ones and the jokes all get the same row.</p>
           <dl class="demo-card__meta">
-            <dt>Field</dt><dd>Computing and programming</dd>
-            <dt>Written for</dt><dd>Lower secondary upwards</dd>
+            <dt data-key="field">Field</dt><dd>Computing and programming</dd>
+            <dt>Written for</dt><dd>University and adult learners</dd>
             <dt>Status</dt>
             <dd><span class="status status--review">Under review</span></dd>
           </dl>
