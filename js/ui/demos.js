@@ -35,6 +35,11 @@
       id: "sorting",
       title: { ja: "ソートの手順くらべ", en: "Sorting side by side" },
       concepts: ["order", "repeat", "bar"]
+    },
+    {
+      id: "backprop",
+      title: { ja: "順伝播と逆伝播", en: "Forward and backward passes" },
+      concepts: ["chain", "slope", "repeat"]
     }
   ];
 

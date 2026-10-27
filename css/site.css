@@ -693,6 +693,20 @@ td {
 
 /* --- 14. 画面の素性（版・出典・担当・訂正受付） --------------------------- */
 
+/* hidden 属性は display の指定より弱い。flex や grid を当てた要素は
+   hidden を付けても出てしまうので、ここで打ち消す。
+   （JavaScript が動かないときに目録の切替が出てしまっていた。） */
+[hidden] { display: none !important; }
+
+/* いまの手の計算を 1 行で出す。数字が並ぶので等幅にする。 */
+.formula {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: var(--ink);
+}
+
 /* 同じ前提を使う画面。共有する概念が無ければ JavaScript が枠ごと出さない。 */
 .related {
   margin-top: var(--s-6);

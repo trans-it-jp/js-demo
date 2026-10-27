@@ -23,6 +23,7 @@ var root = path.join(__dirname, "..");
   "js/linear-algebra/matrix3.js",
   "js/clustering/kmeans.js",
   "js/sorting/sorts.js",
+  "js/learning/net.js",
   "js/ui/share-link.js",
   "js/ui/demos.js",
   "js/ui/catalog.js",

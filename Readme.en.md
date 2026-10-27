@@ -48,7 +48,9 @@ The Japanese pages sit at the default locations and the English ones mirror them
 │   ├── core/                       random numbers and number handling
 │   ├── linear-algebra/             matrices in homogeneous coordinates
 │   ├── clustering/                 the k-means procedure
-│   ├── viz/                        drawing the plane and the scatter plot
+│   ├── sorting/                    twenty-five sorting procedures
+│   ├── learning/                   the forward and backward passes
+│   ├── viz/                        plane, scatter plot, bar chart and network
 │   └── ui/                         controls, tables, Japanese and English wording
 │
 ├── k-means/
@@ -83,10 +85,12 @@ What the demos are made of lives under `js/`, split by purpose. Each folder docu
 | [`js/core`](js/core/Readme.en.md) | Seeded randomness, rounding, input parsing | The base layer; no DOM and no drawing |
 | [`js/linear-algebra`](js/linear-algebra/Readme.en.md) | Building, composing and applying 3×3 matrices | Checkable against known values without a browser |
 | [`js/clustering`](js/clustering/Readme.en.md) | The k-means state machine and synthetic data | Advances assignment and update one step at a time |
-| [`js/viz`](js/viz/Readme.en.md) | Drawing the coordinate plane and scatter plot | Holds no mathematics; renders what it is handed |
+| [`js/sorting`](js/sorting/Readme.en.md) | Twenty-five sorting procedures as lists of steps | Procedures with no known end are not built up front |
+| [`js/learning`](js/learning/Readme.en.md) | Forward pass, backward pass, numerical differentiation, updates | Solved with the chain rule; numerical differentiation is the cross-check |
+| [`js/viz`](js/viz/Readme.en.md) | Drawing the plane, scatter plot, bar chart and network | Holds no mathematics; renders what it is handed |
 | [`js/ui`](js/ui/Readme.en.md) | Controls, numeric tables, wording | Anything page-specific stays with that demo |
 
-Dependencies run one way: `core` → `linear-algebra` / `clustering` → `viz` / `ui` → each demo. Demo code also uses `core` directly.
+Dependencies run one way: `core` → `linear-algebra` / `clustering` / `sorting` / `learning` → `viz` / `ui` → each demo. Demo code also uses `core` directly.
 
 There is no build step. Load the files with `<script>` in order and they register onto `window.JsDemo`. The only external dependency is D3.js v7, loaded from a CDN at a pinned version.
 

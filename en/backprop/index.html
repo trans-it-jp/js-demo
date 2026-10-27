@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forward and backward passes — JavaScript Learning Demos</title>
+<meta name="description" content="Step through the forward and backward passes of a small neural network and cross-check the gradients from the chain rule against numerical differentiation.">
+<link rel="stylesheet" href="../../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../../js/core/seeded-random.js"></script>
+<script src="../../js/core/numeric.js"></script>
+<script src="../../js/learning/net.js"></script>
+<script src="../../js/viz/network.js"></script>
+<script src="../../js/ui/i18n.js"></script>
+<script src="../../js/ui/demos.js"></script>
+<script src="../../js/ui/related-page.js" defer></script>
+<script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/learning.js"></script>
+<script src="../../js/ui/share-link.js"></script>
+<script src="../../js/ui/tables.js"></script>
+<script src="../../backprop/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript Learning Demos</a></p>
+    <nav class="site-head__nav" aria-label="Language">
+      <a href="../../backprop/index.html" hreflang="ja">日本語</a>
+      <span aria-current="true">English</span>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="../index.html">All demos</a></li>
+        <li>Forward and backward passes</li>
+      </ol>
+    </nav>
+
+    <h1>Forward and backward passes</h1>
+    <p class="lede">A small neural network, advanced <strong>one node at a time</strong>. The forward pass that carries values onward, the backward pass that carries slopes back, and the weight update all happen on the same screen. Every gradient the backward pass produces can be set beside the answer you get by <strong>nudging that one weight and running the forward pass again</strong>.</p>
+
+    <dl class="framing">
+      <div>
+        <dt>Central question</dt>
+        <dd>How can we tell which weight to move, and in which direction, to make the error smaller?</dd>
+      </div>
+      <div>
+        <dt>Assumed background</dt>
+        <dd>You have met differentiating a composed function (the chain rule). You can read the slope of a graph. You have met the idea of repeating the same operation.</dd>
+      </div>
+      <div>
+        <dt>Written for</dt>
+        <dd>University and adult learners</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar">
+          <button type="button" id="reset">Reset</button>
+          <button type="button" id="step" class="is-primary">Next step</button>
+          <button type="button" id="back">Step back</button>
+          <button type="button" id="epoch">One full pass</button>
+          <button type="button" id="play">Run automatically</button>
+          <p class="toolbar__hint">A step is <strong>one node</strong>. A pass runs from the forward pass to the weight update.</p>
+        </div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">Circles are nodes and lines are weights. The node of the current step is outlined, with a mark above it (▶ forward, ◀ backward, ∂ gradient, ± cross-check, ↻ update). Weight values appear only on the lines involved in that step. The number inside a circle is that node's output; δ below a circle is the value from the backward pass. The same numbers appear in the tables below.</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <section class="panel" style="margin-top: 1.5rem;">
+          <h2 class="panel__title">The current step</h2>
+          <p class="formula" id="formula">Reset. Use “Next step” to begin the forward pass.</p>
+        </section>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="node-table"></div>
+        </div>
+        <div class="table-scroll" style="margin-top: 1rem;">
+          <div id="weight-table"></div>
+        </div>
+        <div class="table-scroll" style="margin-top: 1rem;">
+          <div id="loss-table"></div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">Shape of the network</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="inputs">Input nodes</label>
+              <input id="inputs" type="range" min="1" max="4" step="1" value="2">
+              <input id="inputs-num" type="number" min="1" max="4" step="1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="layers">
+                Hidden layers
+                <span class="control__note">0 connects the input straight to the output</span>
+              </label>
+              <input id="layers" type="range" min="0" max="3" step="1" value="1">
+              <input id="layers-num" type="number" min="0" max="3" step="1" value="1">
+            </div>
+            <div class="control" id="h1-row">
+              <label class="control__label" for="h1">Nodes in hidden layer 1</label>
+              <input id="h1" type="range" min="1" max="5" step="1" value="3">
+              <input id="h1-num" type="number" min="1" max="5" step="1" value="3">
+            </div>
+            <div class="control" id="h2-row">
+              <label class="control__label" for="h2">Nodes in hidden layer 2</label>
+              <input id="h2" type="range" min="1" max="5" step="1" value="3">
+              <input id="h2-num" type="number" min="1" max="5" step="1" value="3">
+            </div>
+            <div class="control" id="h3-row">
+              <label class="control__label" for="h3">Nodes in hidden layer 3</label>
+              <input id="h3" type="range" min="1" max="5" step="1" value="2">
+              <input id="h3-num" type="number" min="1" max="5" step="1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="outputs">Output nodes</label>
+              <input id="outputs" type="range" min="1" max="3" step="1" value="1">
+              <input id="outputs-num" type="number" min="1" max="3" step="1" value="1">
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top: 1rem;">
+            <span class="toolbar__label">Hidden activation</span>
+            <div id="activation">
+              <button type="button" data-mode="sigmoid">Sigmoid</button>
+              <button type="button" data-mode="relu">ReLU</button>
+            </div>
+            <p class="toolbar__hint">The output layer is the identity and the loss is squared error.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Values</h2>
+          <div class="controls">
+            <div class="control" id="x1-row">
+              <label class="control__label" for="x1">Input 1</label>
+              <input id="x1" type="range" min="-3" max="3" step="0.1" value="0.5">
+              <input id="x1-num" type="number" min="-3" max="3" step="0.1" value="0.5">
+            </div>
+            <div class="control" id="x2-row">
+              <label class="control__label" for="x2">Input 2</label>
+              <input id="x2" type="range" min="-3" max="3" step="0.1" value="-0.2">
+              <input id="x2-num" type="number" min="-3" max="3" step="0.1" value="-0.2">
+            </div>
+            <div class="control" id="x3-row">
+              <label class="control__label" for="x3">Input 3</label>
+              <input id="x3" type="range" min="-3" max="3" step="0.1" value="1">
+              <input id="x3-num" type="number" min="-3" max="3" step="0.1" value="1">
+            </div>
+            <div class="control" id="x4-row">
+              <label class="control__label" for="x4">Input 4</label>
+              <input id="x4" type="range" min="-3" max="3" step="0.1" value="0.4">
+              <input id="x4-num" type="number" min="-3" max="3" step="0.1" value="0.4">
+            </div>
+            <div class="control" id="t1-row">
+              <label class="control__label" for="t1">Target output 1</label>
+              <input id="t1" type="range" min="-3" max="3" step="0.1" value="1">
+              <input id="t1-num" type="number" min="-3" max="3" step="0.1" value="1">
+            </div>
+            <div class="control" id="t2-row">
+              <label class="control__label" for="t2">Target output 2</label>
+              <input id="t2" type="range" min="-3" max="3" step="0.1" value="0">
+              <input id="t2-num" type="number" min="-3" max="3" step="0.1" value="0">
+            </div>
+            <div class="control" id="t3-row">
+              <label class="control__label" for="t3">Target output 3</label>
+              <input id="t3" type="range" min="-3" max="3" step="0.1" value="0.5">
+              <input id="t3-num" type="number" min="-3" max="3" step="0.1" value="0.5">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">How it runs</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="rate">
+                Learning rate
+                <span class="control__note">how much of the gradient the update uses</span>
+              </label>
+              <input id="rate" type="range" min="0.05" max="2" step="0.05" value="0.1">
+              <input id="rate-num" type="number" min="0.05" max="2" step="0.05" value="0.1">
+            </div>
+            <div class="control">
+              <label class="control__label" for="speed">
+                Pause per step
+                <span class="control__note">speed when running automatically (ms)</span>
+              </label>
+              <input id="speed" type="range" min="10" max="1200" step="10" value="400">
+              <input id="speed-num" type="number" min="10" max="1200" step="10" value="400">
+            </div>
+            <div class="control">
+              <label class="control__label" for="seed">
+                Seed
+                <span class="control__note">sets the initial weights; the same seed gives the same run</span>
+              </label>
+              <input id="seed" type="range" min="1" max="999" step="1" value="3">
+              <input id="seed-num" type="number" min="1" max="999" step="1" value="3">
+            </div>
+          </div>
+          <div class="control" style="margin-top: 1rem;">
+            <label class="control__label" for="probe">
+              Weight to cross-check
+              <span class="control__note">one per pass, set beside numerical differentiation</span>
+            </label>
+            <select id="probe" style="grid-column: 2 / 3;"></select>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Share with a class</h2>
+          <p class="share__help">Opening this link starts from the current settings (shape, inputs, target outputs, learning rate, seed). It contains no personal data.</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">Link to share</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">Copy link</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Current state</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose" style="max-width: none;">
+      <h3>What you can do here</h3>
+      <ul>
+        <li><strong>Set side by side</strong> the gradient from the chain rule and the one you get by <strong>nudging that weight and running the forward pass again</strong>. Both losses, at ±0.001, are shown.</li>
+        <li>Step through one node at a time to follow <strong>which value came from which expression</strong>. You can step back as well.</li>
+        <li>Change the number of layers and nodes, the inputs, the targets, the learning rate and the initial weights (the seed), and <strong>compare how the loss comes down</strong>.</li>
+      </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>Start at the output node. There δ is simply "output − target".</p>
+        <p class="hints__step" hidden>For a hidden node, δ is the δ of the next layer times the weights, added up, then multiplied by the slope of the activation. The next layer has to be done first.</p>
+        <p class="hints__step" hidden>The gradient of a weight is "the value it carries" × "the δ of the node it feeds". So once δ is known, every weight into that node is settled at the same time.</p>
+        <button type="button" class="hints__more">Next hint</button>
+      </div>
+
+      <details class="fold">
+        <summary>In more detail</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">Wording</span>
+            <button type="button" data-level="plain">Plain</button>
+            <button type="button" data-level="formal">Formal</button>
+          </div>
+          <p data-level="plain">Measure how far off the answer is at the exit, then hand that miss back along the paths it came by. Once it has been handed all the way back, you know which way and how far to move every weight. Unlike nudging and testing, <strong>nothing has to be run again</strong>.</p>
+          <p data-level="formal">With L = ½Σ(y − t)², the output layer has δ = ∂L/∂z = y − t. A hidden layer has δ<sub>j</sub> = f′(z<sub>j</sub>) Σ<sub>k</sub> w<sub>kj</sub> δ<sub>k</sub>. For the weights, ∂L/∂w<sub>ji</sub> = a<sub>i</sub> δ<sub>j</sub>, and for the biases ∂L/∂b<sub>j</sub> = δ<sub>j</sub>. The update is w ← w − η ∂L/∂w.</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>For teachers</summary>
+        <div class="fold__body">
+          <p>A common misreading: that backpropagation works by changing weights a little and seeing what happens. The numerical differentiation here is done for <strong>one weight only, as a check</strong>. With twenty weights, testing would mean forty more forward passes; backpropagation settles all of them in a single backward sweep.</p>
+          <p>A short task (5–10 minutes): compare learning rates of 0.1 and 1.5 and watch how the loss comes down. Find a setting where it stops coming down, or bounces, and put into words why that happens.</p>
+        </div>
+      </details>
+
+      <h3>What this screen covers</h3>
+      <ul>
+        <li><strong>This is not a working trainer.</strong> There is a single training example, and the network is limited to 3 hidden layers of up to 5 nodes. It cannot be used to compare speed either.</li>
+        <li>The output layer is the identity and the loss is squared error only. Softmax and cross-entropy, used for classification, are not included.</li>
+        <li>The step for numerical differentiation is fixed at 0.001. A different step gives a slightly different value, so <strong>the two numbers need not agree to every digit shown</strong>.</li>
+        <li>The arithmetic is floating point, and values are rounded to six decimals for display.</li>
+        <li>The only optimiser is plain gradient descent. Momentum, Adam, regularisation and mini-batches are not included.</li>
+        <li>No check of learning effect has been carried out. What is published here is a draft of the material.</li>
+      </ul>
+    </div>
+
+    <!-- Demos with the same prerequisites. Built from the shared concepts
+         (js/ui/demos.js holds them). Nothing is shown when none are shared. -->
+    <section class="related" id="related" data-demo="backprop" hidden>
+      <h2 class="related__title">Demos with the same prerequisites</h2>
+      <ul class="related__list"></ul>
+    </section>
+
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
+      <dl class="page-meta__list">
+        <dt>Version</dt><dd>2026-10-27</dd>
+        <dt>Published</dt><dd>2026-10-27</dd>
+        <dt>Source and dependencies</dt><dd>Implemented by Transit. Drawing uses D3.js v7.9.0 (CDN, pinned version)</dd>
+        <dt>Reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching text under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. With attribution you may adapt and redistribute it, including commercially</dd>
+        <dt>Maintenance and corrections</dt><dd>Not yet assigned</dd>
+        <dt>Known limits</dt><dd>See "What this screen covers" on this page</dd>
+        <dt>Reporting a problem</dt><dd>Please contact <a href="https://trans-it.jp/">Transit Inc.</a> Do not send anything containing personal data</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="Transit Inc." width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript Learning Demos</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+      <p class="site-foot__licence">Code <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT</a> / teaching text <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE-CONTENT">CC BY 4.0</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

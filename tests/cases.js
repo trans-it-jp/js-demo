@@ -20,6 +20,7 @@
   var KMeans = JsDemo.KMeans;
   var Catalog = JsDemo.Catalog;
   var Demos = JsDemo.Demos;
+  var Net = JsDemo.Net;
 
   /* --- 照合の道具 ------------------------------------------------------- */
 
@@ -1094,12 +1095,24 @@
     equal(items.length, 1, "k-means の関連");
     equal(items[0].id, "linear-transformation", "行き先");
     equal(items[0].shared.join(","), "coord", "共有している前提");
+
+    /* ソートと順伝播・逆伝播は「繰り返し」を共有する。 */
+    var sorting = Demos.related("sorting");
+    equal(sorting.length, 1, "ソートの関連");
+    equal(sorting[0].id, "backprop", "行き先");
+    equal(sorting[0].shared.join(","), "repeat", "共有している前提");
   });
 
   test("目録", "共有が無ければ関連は空になる", function () {
-    /* ソートはどの題材とも前提を共有していない。空欄を作らずに枠ごと出さない。 */
-    equal(Demos.related("sorting").length, 0, "ソートの関連");
+    /* 共有が無いときは空欄を作らず、画面側が枠ごと出さない。
+       公開中の題材は増えるので、振る舞いは自前の一覧で確かめる。 */
+    var lonely = [
+      { id: "a", concepts: ["x"] },
+      { id: "b", concepts: ["y"] }
+    ];
+    equal(Demos.related("a", lonely).length, 0, "共有が無い");
     equal(Demos.related("まだ無い題材").length, 0, "知らない id");
+    equal(Demos.related("c", lonely).length, 0, "一覧に無い id");
   });
 
   test("目録", "関連に自分自身は入らない", function () {
@@ -1125,6 +1138,145 @@
       isTrue(demo.concepts.length <= 3, demo.id + " の前提は " + demo.concepts.length + " 個");
       equal(demo.concepts.length, new Set(demo.concepts).size, demo.id + " の前提に重複が無い");
     });
+  });
+
+  /* --- 順伝播・逆伝播 ------------------------------------------- */
+
+  var NET_SHAPES = [
+    { label: "2-3-1 シグモイド", config: {
+      inputs: 2, outputs: 1, hidden: [3], input: [0.5, -0.2], target: [1],
+      rate: 0.5, seed: 3, activation: "sigmoid" } },
+    { label: "3-4-3-2 ReLU", config: {
+      inputs: 3, outputs: 2, hidden: [4, 3], input: [1, 0.2, -1],
+      target: [0.5, -0.5], rate: 0.2, seed: 7, activation: "relu" } },
+    { label: "1-1 中間層なし", config: {
+      inputs: 1, outputs: 1, hidden: [], input: [2], target: [1],
+      rate: 0.1, seed: 11, activation: "sigmoid" } }
+  ];
+
+  /** 重みを 1 つだけ動かした損失。数値微分のために使う。 */
+  function lossWithShift(state, layer, node, from, shift) {
+    var w = state.w.map(function (rows) {
+      return rows ? rows.map(function (row) { return row.slice(); }) : rows;
+    });
+    w[layer][node][from] += shift;
+    return Net.forward(state, w, state.b).loss;
+  }
+
+  NET_SHAPES.forEach(function (entry) {
+    test("順伝播・逆伝播",
+         entry.label + " の傾きが数値微分と一致する",
+         function () {
+      /* これがこの題材の要。連鎖律で出した値が正しいことを、
+         少し動かして順伝播をやり直すやり方と照らし合わせる。 */
+      var state = Net.initial(entry.config);
+      var steps = Net.epochSteps(state, { probe: null });
+      var h = 1e-4;
+      var checked = 0;
+      steps.forEach(function (step) {
+        if (step.type !== "grad") { return; }
+        step.weights.forEach(function (item) {
+          var up = lossWithShift(state, step.layer, step.node, item.from, h);
+          var down = lossWithShift(state, step.layer, step.node, item.from, -h);
+          near((up - down) / (2 * h), item.grad, 1e-4,
+               step.layer + "層 " + step.node + "番 ← " + item.from);
+          checked += 1;
+        });
+      });
+      isTrue(checked > 0, "傾きを 1 つ以上調べた");
+    });
+  });
+
+  test("順伝播・逆伝播", "答え合わせの差が小さい", function () {
+    NET_SHAPES.forEach(function (entry) {
+      var state = Net.initial(entry.config);
+      var steps = Net.epochSteps(state, { probe: "max" });
+      var probe = steps.filter(function (step) { return step.type === "probe"; });
+      equal(probe.length, 1, entry.label + " の答え合わせは 1 周に 1 本");
+      near(probe[0].numeric, probe[0].analytic, 1e-4, entry.label + " の差");
+    });
+  });
+
+  test("順伝播・逆伝播", "手計算と一致する", function () {
+    /* 入力1・中間層なし・出力1。重みを 0.5 に置き換えると、
+       y = 2×0.5 = 1、損失 = ½(1−0.5)² = 0.125、δ = 0.5、
+       ∂L/∂w = 2×0.5 = 1、更新後の w = 0.5 − 0.1×1 = 0.4。 */
+    var state = Net.initial({ inputs: 1, outputs: 1, hidden: [], input: [2],
+                              target: [0.5], rate: 0.1, seed: 1,
+                              activation: "sigmoid" });
+    state.w[1][0][0] = 0.5;
+    var steps = Net.epochSteps(state, { probe: null });
+    var byType = {};
+    steps.forEach(function (step) { byType[step.type] = step; });
+
+    equal(byType.forward.z, 1, "z");
+    equal(byType.loss.loss, 0.125, "損失");
+    equal(byType.delta.delta, 0.5, "δ");
+    equal(byType.grad.weights[0].grad, 1, "∂L/∂w");
+    equal(byType.update.changes[0].after, 0.4, "更新後の重み");
+  });
+
+  test("順伝播・逆伝播", "δ が決まる前に傾きは出ない", function () {
+    /* 逆伝播の順序が崩れていないこと。
+       傾きはそのノードの δ が出たあとでなければ決まらない。 */
+    var state = Net.initial(NET_SHAPES[1].config);
+    var seen = {};
+    Net.epochSteps(state, { probe: null }).forEach(function (step) {
+      var key = step.layer + ":" + step.node;
+      if (step.type === "delta") { seen[key] = true; }
+      if (step.type === "grad") {
+        isTrue(seen[key] === true, key + " の δ が先に出ている");
+      }
+    });
+  });
+
+  test("順伝播・逆伝播", "1 手ずつ進めた結果は、まとめて畳んだ結果と一致する",
+       function () {
+    var plan = Net.run(NET_SHAPES[0].config);
+    plan.ensure(60, { probe: "max" });
+    var one = plan.initial;
+    for (var i = 0; i < 60; i += 1) {
+      one = Net.applyStep(one, plan.steps[i]);
+    }
+    var all = Net.replay(plan.initial, plan.steps, 60);
+    equal(JSON.stringify(all.w), JSON.stringify(one.w), "重み");
+    equal(all.epoch, one.epoch, "周回");
+    equal(all.loss, one.loss, "損失");
+  });
+
+  test("順伝播・逆伝播", "同じ種なら同じ重みから始まる", function () {
+    var config = NET_SHAPES[0].config;
+    var a = Net.initial(config);
+    var b = Net.initial(config);
+    var other = Net.initial({
+      inputs: 2, outputs: 1, hidden: [3], input: [0.5, -0.2], target: [1],
+      rate: 0.5, seed: 4, activation: "sigmoid"
+    });
+    equal(JSON.stringify(a.w), JSON.stringify(b.w), "同じ種");
+    isTrue(JSON.stringify(a.w) !== JSON.stringify(other.w), "別の種");
+  });
+
+  test("順伝播・逆伝播", "繰り返すと損失が下がる", function () {
+    /* 毎回単調に下がるとは限らないので、始めと終わりで比べる。 */
+    NET_SHAPES.forEach(function (entry) {
+      var plan = Net.run(entry.config);
+      plan.ensure(600, { probe: null });
+      var end = Net.replay(plan.initial, plan.steps, plan.steps.length);
+      isTrue(end.history.length >= 2, entry.label + " の周回数");
+      isTrue(end.history[end.history.length - 1] < end.history[0],
+             entry.label + " の損失：" + end.history[0] + " → " +
+             end.history[end.history.length - 1]);
+    });
+  });
+
+  test("順伝播・逆伝播", "手順を先に全部は作らない", function () {
+    /* 学習は何周でも続けられるので、終わりまでの手数は存在しない。
+       求められた分だけ作る。 */
+    var plan = Net.run(NET_SHAPES[0].config);
+    equal(plan.steps.length, 0, "作った直後は 0 件");
+    plan.ensure(5, { probe: null });
+    isTrue(plan.steps.length >= 5, "求めた分だけ伸びる");
+    equal(plan.epochs, 1, "1 周分だけ作った");
   });
 
   JsDemo.Tests = { cases: cases };

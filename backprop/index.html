@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>順伝播と逆伝播 — JavaScript 学習デモ</title>
+<meta name="description" content="小さなニューラルネットの順伝播と逆伝播を1手ずつ進め、連鎖律で出した傾きを数値微分で答え合わせできるデモ。">
+<link rel="stylesheet" href="../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../js/core/seeded-random.js"></script>
+<script src="../js/core/numeric.js"></script>
+<script src="../js/learning/net.js"></script>
+<script src="../js/viz/network.js"></script>
+<script src="../js/ui/i18n.js"></script>
+<script src="../js/ui/demos.js"></script>
+<script src="../js/ui/related-page.js" defer></script>
+<script src="../js/ui/controls.js"></script>
+<script src="../js/ui/learning.js"></script>
+<script src="../js/ui/share-link.js"></script>
+<script src="../js/ui/tables.js"></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <span aria-current="true">日本語</span>
+      <a href="../en/backprop/index.html" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../index.html">デモ一覧</a></li>
+        <li>順伝播と逆伝播</li>
+      </ol>
+    </nav>
+
+    <h1>順伝播と逆伝播</h1>
+    <p class="lede">小さなニューラルネットを、<strong>ノード 1 つ分</strong>ずつ動かします。値を前へ送る順伝播、傾きを後ろへ送る逆伝播、そして重みの更新を、同じ画面で続けて追えます。逆伝播で出した傾きは、<strong>その重みを少しだけ動かして順伝播をやり直す</strong>やり方と並べて確かめられます。</p>
+
+    <dl class="framing">
+      <div>
+        <dt>中心の問い</dt>
+        <dd>誤差を小さくするには、どの重みをどちらへ動かせばよいと、どうして分かるのでしょうか。</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>合成関数の微分（連鎖律）に触れていること。グラフの傾きを読めること。同じ操作を繰り返すという考えに触れていること。</dd>
+      </div>
+      <div>
+        <dt>想定学年</dt>
+        <dd>大学・社会人</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar">
+          <button type="button" id="reset">初期化</button>
+          <button type="button" id="step" class="is-primary">次へ進む</button>
+          <button type="button" id="back">一手戻る</button>
+          <button type="button" id="epoch">1 周進む</button>
+          <button type="button" id="play">自動で進む</button>
+          <p class="toolbar__hint">1 手は<strong>ノード 1 つ分</strong>です。1 周は順伝播から重みの更新までです。</p>
+        </div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">丸がノード、線が重みです。いま進めた手のノードを太い枠で囲み、上に印を出します（▶ 順伝播／◀ 逆伝播／∂ 傾き／± 答え合わせ／↻ 更新）。関わっている線だけに重みの値を出します。円の中の数は各ノードの出力、円の下の δ は逆伝播で出した値です。同じ数値は下の表にも並びます。</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <section class="panel" style="margin-top: 1.5rem;">
+          <h2 class="panel__title">いまの手の計算</h2>
+          <p class="formula" id="formula">初期化しました。「次へ進む」で順伝播から始まります。</p>
+        </section>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="node-table"></div>
+        </div>
+        <div class="table-scroll" style="margin-top: 1rem;">
+          <div id="weight-table"></div>
+        </div>
+        <div class="table-scroll" style="margin-top: 1rem;">
+          <div id="loss-table"></div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">形を決める</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="inputs">入力ノード数</label>
+              <input id="inputs" type="range" min="1" max="4" step="1" value="2">
+              <input id="inputs-num" type="number" min="1" max="4" step="1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="layers">
+                中間層の数
+                <span class="control__note">0 なら入力から出力へ直につなぎます</span>
+              </label>
+              <input id="layers" type="range" min="0" max="3" step="1" value="1">
+              <input id="layers-num" type="number" min="0" max="3" step="1" value="1">
+            </div>
+            <div class="control" id="h1-row">
+              <label class="control__label" for="h1">中間層 1 のノード数</label>
+              <input id="h1" type="range" min="1" max="5" step="1" value="3">
+              <input id="h1-num" type="number" min="1" max="5" step="1" value="3">
+            </div>
+            <div class="control" id="h2-row">
+              <label class="control__label" for="h2">中間層 2 のノード数</label>
+              <input id="h2" type="range" min="1" max="5" step="1" value="3">
+              <input id="h2-num" type="number" min="1" max="5" step="1" value="3">
+            </div>
+            <div class="control" id="h3-row">
+              <label class="control__label" for="h3">中間層 3 のノード数</label>
+              <input id="h3" type="range" min="1" max="5" step="1" value="2">
+              <input id="h3-num" type="number" min="1" max="5" step="1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="outputs">出力ノード数</label>
+              <input id="outputs" type="range" min="1" max="3" step="1" value="1">
+              <input id="outputs-num" type="number" min="1" max="3" step="1" value="1">
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top: 1rem;">
+            <span class="toolbar__label">中間層の活性化</span>
+            <div id="activation">
+              <button type="button" data-mode="sigmoid">シグモイド</button>
+              <button type="button" data-mode="relu">ReLU</button>
+            </div>
+            <p class="toolbar__hint">出力層は恒等（そのまま）、損失は二乗誤差です。</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">値を決める</h2>
+          <div class="controls">
+            <div class="control" id="x1-row">
+              <label class="control__label" for="x1">入力 1</label>
+              <input id="x1" type="range" min="-3" max="3" step="0.1" value="0.5">
+              <input id="x1-num" type="number" min="-3" max="3" step="0.1" value="0.5">
+            </div>
+            <div class="control" id="x2-row">
+              <label class="control__label" for="x2">入力 2</label>
+              <input id="x2" type="range" min="-3" max="3" step="0.1" value="-0.2">
+              <input id="x2-num" type="number" min="-3" max="3" step="0.1" value="-0.2">
+            </div>
+            <div class="control" id="x3-row">
+              <label class="control__label" for="x3">入力 3</label>
+              <input id="x3" type="range" min="-3" max="3" step="0.1" value="1">
+              <input id="x3-num" type="number" min="-3" max="3" step="0.1" value="1">
+            </div>
+            <div class="control" id="x4-row">
+              <label class="control__label" for="x4">入力 4</label>
+              <input id="x4" type="range" min="-3" max="3" step="0.1" value="0.4">
+              <input id="x4-num" type="number" min="-3" max="3" step="0.1" value="0.4">
+            </div>
+            <div class="control" id="t1-row">
+              <label class="control__label" for="t1">教師の出力 1</label>
+              <input id="t1" type="range" min="-3" max="3" step="0.1" value="1">
+              <input id="t1-num" type="number" min="-3" max="3" step="0.1" value="1">
+            </div>
+            <div class="control" id="t2-row">
+              <label class="control__label" for="t2">教師の出力 2</label>
+              <input id="t2" type="range" min="-3" max="3" step="0.1" value="0">
+              <input id="t2-num" type="number" min="-3" max="3" step="0.1" value="0">
+            </div>
+            <div class="control" id="t3-row">
+              <label class="control__label" for="t3">教師の出力 3</label>
+              <input id="t3" type="range" min="-3" max="3" step="0.1" value="0.5">
+              <input id="t3-num" type="number" min="-3" max="3" step="0.1" value="0.5">
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">進め方</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="rate">
+                学習率
+                <span class="control__note">更新のとき、傾きをどれだけ使うか</span>
+              </label>
+              <input id="rate" type="range" min="0.05" max="2" step="0.05" value="0.1">
+              <input id="rate-num" type="number" min="0.05" max="2" step="0.05" value="0.1">
+            </div>
+            <div class="control">
+              <label class="control__label" for="speed">
+                1 手あたりの間
+                <span class="control__note">自動で進むときの速さ（ミリ秒）</span>
+              </label>
+              <input id="speed" type="range" min="10" max="1200" step="10" value="400">
+              <input id="speed-num" type="number" min="10" max="1200" step="10" value="400">
+            </div>
+            <div class="control">
+              <label class="control__label" for="seed">
+                種
+                <span class="control__note">最初の重みを決めます。同じ種なら同じ実験になります</span>
+              </label>
+              <input id="seed" type="range" min="1" max="999" step="1" value="3">
+              <input id="seed-num" type="number" min="1" max="999" step="1" value="3">
+            </div>
+          </div>
+          <div class="control" style="margin-top: 1rem;">
+            <label class="control__label" for="probe">
+              答え合わせする重み
+              <span class="control__note">1 周に 1 本、数値微分と並べます</span>
+            </label>
+            <select id="probe" style="grid-column: 2 / 3;"></select>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">授業で共有する</h2>
+          <p class="share__help">このリンクを開くと、いまの条件（形・入力・教師の出力・学習率・種）で始まります。個人情報は含まれません。</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">共有用のリンク</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">リンクをコピー</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">いまの状態</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose" style="max-width: none;">
+      <h3>この画面でできること</h3>
+      <ul>
+        <li>連鎖律で出した傾きと、<strong>その重みを少し動かして順伝播をやり直した</strong>数値微分を<strong>並べて見比べられます</strong>。±0.001 動かした 2 回の損失も出ます。</li>
+        <li>1 手ずつ進めて、<strong>どの値がどの式で決まったか</strong>を追えます。一手戻ることもできます。</li>
+        <li>層の数・ノードの数・入力・教師の出力・学習率・最初の重み（種）を変えて、<strong>損失の下がり方を見比べられます</strong>。</li>
+      </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>出力のノードから見てください。δ はまず「出力 − 教師の値」です。</p>
+        <p class="hints__step" hidden>中間のノードの δ は、次の層の δ に重みを掛けて足し、活性化の傾きを掛けたものです。先に次の層が決まっていないと出せません。</p>
+        <p class="hints__step" hidden>重みの傾きは「その重みが運んでくる値」×「受け取る側の δ」です。だから δ が分かれば、その層へ入る重みの傾きはすべて同時に決まります。</p>
+        <button type="button" class="hints__more">次のヒント</button>
+      </div>
+
+      <details class="fold">
+        <summary>もっと詳しく</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">言い方</span>
+            <button type="button" data-level="plain">やさしく</button>
+            <button type="button" data-level="formal">式で</button>
+          </div>
+          <p data-level="plain">出口でどれだけずれたかを測り、そのずれを「どの道から来たか」をたどって手前へ配っていきます。配り終えると、どの重みをどちらへどれだけ動かせばよいかが全部そろいます。少し動かして試すのとは違い、<strong>やり直しは一度も要りません</strong>。</p>
+          <p data-level="formal">損失 L = ½Σ(y − t)² に対し、出力層では δ = ∂L/∂z = y − t。中間層では δ<sub>j</sub> = f′(z<sub>j</sub>) Σ<sub>k</sub> w<sub>kj</sub> δ<sub>k</sub>。重みの偏微分は ∂L/∂w<sub>ji</sub> = a<sub>i</sub> δ<sub>j</sub>、偏りは ∂L/∂b<sub>j</sub> = δ<sub>j</sub>。更新は w ← w − η ∂L/∂w。</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>教える方へ</summary>
+        <div class="fold__body">
+          <p>起きやすい誤解: 逆伝播を「重みを少しずつ変えて試している」と受け取ること。この画面の数値微分は<strong>答え合わせのために 1 本だけ</strong>行うものです。重みが 20 本あれば、試す方法では順伝播を 40 回やり直すことになります。逆伝播は 1 回の逆向きの計算で全部そろいます。</p>
+          <p>短い課題案（5〜10分）: 学習率を 0.1 と 1.5 で比べ、損失の下がり方を見る。下がらない（または跳ねる）条件を見つけて、なぜそうなるかを言葉にする。</p>
+        </div>
+      </details>
+
+      <h3>この画面の範囲</h3>
+      <ul>
+        <li><strong>実務の学習器ではありません。</strong>学習データは 1 組だけで、層は 3 つ・各層 5 ノードまでに制限しています。速さの比較にも使えません。</li>
+        <li>出力層は恒等（そのまま）、損失は二乗誤差だけです。分類で使う softmax や交差エントロピーは含みません。</li>
+        <li>数値微分の刻み幅は 0.001 に固定しています。刻み幅を変えれば数値微分の値も少し変わります。<strong>逆伝播の値と完全に同じ桁まで一致するとは限りません。</strong></li>
+        <li>浮動小数で計算しているため、表示は小数 6 桁までの丸めです。</li>
+        <li>最適化は単純な勾配降下だけです。慣性・Adam・正則化・ミニバッチは含みません。</li>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+      </ul>
+    </div>
+
+    <!-- 同じ前提を使う画面。共有する前提概念から作る（正本は js/ui/demos.js）。
+         共有する概念が無ければ枠ごと出ない。 -->
+    <section class="related" id="related" data-demo="backprop" hidden>
+      <h2 class="related__title">同じ前提を使う画面</h2>
+      <ul class="related__list"></ul>
+    </section>
+
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
+      <dl class="page-meta__list">
+        <dt>版</dt><dd>2026-10-27</dd>
+        <dt>公開日</dt><dd>2026-10-27</dd>
+        <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
+        <dt>再利用条件</dt><dd>コードは <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>、教材本文は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>。出典を示せば改変・再配布できます（商用を含む）</dd>
+        <dt>保守・訂正の担当</dt><dd>未定</dd>
+        <dt>既知の制約</dt><dd>このページの「この画面の範囲」に記載</dd>
+        <dt>問題報告</dt><dd><a href="https://trans-it.jp/">トランジット株式会社</a>へご連絡ください。個人情報を含む内容は送らないでください</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+      <p class="site-foot__licence">コード <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT</a> / 教材 <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE-CONTENT">CC BY 4.0</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

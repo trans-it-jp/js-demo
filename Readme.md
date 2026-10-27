@@ -48,7 +48,9 @@
 │   ├── core/                       乱数と数値の整形
 │   ├── linear-algebra/             同次座標の行列演算
 │   ├── clustering/                 k-means の手順
-│   ├── viz/                        座標平面と散布図の描画
+│   ├── sorting/                    25 種のソートの手順
+│   ├── learning/                   順伝播・逆伝播の手順
+│   ├── viz/                        座標平面・散布図・棒グラフ・ネットワークの描画
 │   └── ui/                         操作部品・表・日英の文言
 │
 ├── k-means/
@@ -83,10 +85,12 @@
 | [`js/core`](js/core/Readme.md) | 種を指定できる乱数、丸めと入力値の正規化 | 描画も DOM も扱わない土台 |
 | [`js/linear-algebra`](js/linear-algebra/Readme.md) | 3×3 行列の生成・合成・点への適用 | ブラウザなしで既知値と照合できる |
 | [`js/clustering`](js/clustering/Readme.md) | k-means の状態機械と合成データ生成 | 割当と中心の更新を 1 手ずつ進める |
-| [`js/viz`](js/viz/Readme.md) | 座標平面と散布図の描画 | 計算は持たず、渡された値を図にする |
+| [`js/sorting`](js/sorting/Readme.md) | 25 種のソートを手順の列として出す | 終わりが分からない手法は先に全部作らない |
+| [`js/learning`](js/learning/Readme.md) | 順伝播・逆伝播・数値微分・更新の手順 | 連鎖律で解き、数値微分は答え合わせに使う |
+| [`js/viz`](js/viz/Readme.md) | 座標平面・散布図・棒グラフ・ネットワークの描画 | 計算は持たず、渡された値を図にする |
 | [`js/ui`](js/ui/Readme.md) | 入力部品・数値の表・日英の文言 | ページ固有の事情は各デモ側に置く |
 
-依存は一方向です。`core` → `linear-algebra` / `clustering` → `viz` / `ui` → 各デモ。デモ側のコードから `core` を直接使うこともあります。
+依存は一方向です。`core` → `linear-algebra` / `clustering` / `sorting` / `learning` → `viz` / `ui` → 各デモ。デモ側のコードから `core` を直接使うこともあります。
 
 ビルド手順はありません。`<script>` で順に読み込むと `window.JsDemo` に登録されていきます。外部の依存は D3.js v7 だけで、CDN から版を固定して読み込みます。
 
