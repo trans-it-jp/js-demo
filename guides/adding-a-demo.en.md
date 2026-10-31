@@ -32,6 +32,13 @@ The template is **the copy-source for future demos**. The existing k-means and 2
 
 Progressive hints (`.hints`) and the vocabulary switch (`.wording`) are built as shared components; the template carries their markers, and the page wires them with `JsDemo.Learning.wireHints` and `wireWording`.
 
+The **short tasks under "For teachers"** number three to six. Every one has the same shape: change something, watch, then put it into words (all four published demos follow this).
+
+- **Check on the screen that it really happens, before writing it.** Running the library in Node is not enough; look at where the value is actually shown
+- Only write a number down when it **survives a reset**. Anything redrawn each time is written as a relationship instead (for example "the comparison count drops, but the number of moves does not")
+- When a task needs something the screen does not show, **say that it is worked out by hand** (the composition lesson is fixed to T·L, so L·T is marked that way)
+- Make the last task one that brings out **what this screen cannot check**
+
 **The share panel** (`#share-url`) is in the template. The page wires it with three calls.
 
 ```js
