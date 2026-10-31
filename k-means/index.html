@@ -155,7 +155,15 @@
         <summary>教える方へ</summary>
         <div class="fold__body">
           <p>起きやすい誤解: 境界ができたことを「データにまとまりが見つかった」と受け取ること。この画面の点は一様で、本来の正しい分かれ方はありません。</p>
-          <p>短い課題案（5〜10分）: k を 2・3・5 と変えて分かれ方を見比べ、「どの k が正しいか」を決められるか話し合う。決められないことに気づけば到達です。</p>
+          <p>短い課題案（5〜10 分）。どれも「変える → 見る → 言葉にする」の形にしてあります。</p>
+          <ul>
+            <li><strong>どの k が正しいか。</strong>k を 2・3・5 と変えて分かれ方を見比べ、「どの k が正しいか」を決められるか話し合う。決められないことに気づけば到達です。</li>
+            <li><strong>k を増やすと必ず小さくなる。</strong>k を 2・3・5・8 と増やし、収束したときの「距離の2乗和」を記録する。<strong>必ず小さくなる</strong>ので、「小さいほど良いなら k は大きいほど良いのか」を問う。</li>
+            <li><strong>増えないことを確かめる。</strong>1 手ずつ進めながら「距離の2乗和」を書き出す。<strong>増える回が一度も無い</strong>ことを確かめ、なぜ増えないのかを割当と中心の更新の二段階から説明する。</li>
+            <li><strong>止まる合図を見つける。</strong>「割当が変わった点」を反復ごとに記録する。<strong>0 になった回で止まる</strong>ことを確かめ、「止まった＝正しく分かれた」と言えるかを話し合う。</li>
+            <li><strong>初期化を 3 回押す。</strong>k を変えずに初期化を 3 回押し、終わったときの分かれ方を見比べる。点の配置も最初の中心も選び直されるので、<strong>どちらの影響かはこの画面では切り分けられない</strong>ことまで言う。</li>
+            <li><strong>一様な点にも境界ができる。</strong>この画面の点は一様にばらまいてある。それでも境界ができることを見て、「境界ができた＝まとまりがあった」と言えるかを言葉にする。</li>
+          </ul>
         </div>
       </details>
 
@@ -187,7 +195,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
       <dl class="page-meta__list">
-        <dt>版</dt><dd>2026-10-27</dd>
+        <dt>版</dt><dd>2026-10-31</dd>
         <dt>公開日</dt><dd>2026-10-25</dd>
         <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
         <dt>再利用条件</dt><dd>コードは <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>、教材本文は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>。出典を示せば改変・再配布できます（商用を含む）</dd>

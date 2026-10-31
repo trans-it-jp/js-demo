@@ -144,7 +144,12 @@
         <summary>For teachers</summary>
         <div class="fold__body">
           <p>The easy misreading: Thinking a rotation about an arbitrary point can be written with one rotation matrix. It takes three steps: move to the origin, rotate, move back.</p>
-          <p>A short task (5–10 minutes): Check that putting the centre c at the origin gives the same matrix as the previous lesson, then move c and watch only the third column of the combined matrix change.</p>
+          <p>Short tasks (5–10 minutes each). Every one has the same shape: change something, watch, then put it into words.</p>
+          <ul>
+            <li><strong>Put the centre back at the origin.</strong> Check that c at the origin gives the same matrix as the previous lesson.</li>
+            <li><strong>Only the third column changes.</strong> Keeping θ = 90°, set the centre to (2, 1) and then (5, −3) and write out the combined matrix. <strong>The upper-left 2×2 stays [0 −1 ; 1 0]</strong> while the third column changes to (3, −1) and (2, −8).</li>
+            <li><strong>The order of the three matrices.</strong> Predict what would happen if one of T(c), R(θ) and T(−c) were dropped, then test the prediction by moving the centre back to the origin.</li>
+          </ul>
         </div>
       </details>
 
@@ -161,7 +166,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
       <dl class="page-meta__list">
-        <dt>Version</dt><dd>2026-10-27</dd>
+        <dt>Version</dt><dd>2026-10-31</dd>
         <dt>Published</dt><dd>2026-10-25</dd>
         <dt>Source and dependencies</dt><dd>Written in-house. Drawing uses D3.js v7.9.0 (CDN, pinned version)</dd>
         <dt>Terms of reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching material under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Adapt and redistribute freely, including commercially, with attribution</dd>

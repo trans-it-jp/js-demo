@@ -155,7 +155,15 @@
         <summary>For teachers</summary>
         <div class="fold__body">
           <p>A common misreading: treating the boundaries as evidence that groups were found in the data. The points here are uniform, so there is no correct division to find.</p>
-          <p>A short task (5–10 minutes): compare k at 2, 3 and 5, then discuss whether one of them can be called correct. Realising that none can is the point.</p>
+          <p>Short tasks (5–10 minutes each). Every one has the same shape: change something, watch, then put it into words.</p>
+          <ul>
+            <li><strong>Which k is correct?</strong> Compare k at 2, 3 and 5, then discuss whether one of them can be called correct. Realising that none can is the point.</li>
+            <li><strong>A larger k always scores lower.</strong> Set k to 2, 3, 5 and 8 and record the sum of squared distances at convergence. It <strong>always goes down</strong>, so ask: if lower is better, is a larger k always better?</li>
+            <li><strong>Check that it never rises.</strong> Step through one move at a time and write down the sum of squared distances. Confirm that it <strong>never increases</strong>, and explain why, from the two stages of assigning and moving the centroids.</li>
+            <li><strong>Find the stopping signal.</strong> Record the number of points whose assignment changed at each iteration. Confirm that it stops on the iteration where that reaches <strong>zero</strong>, and discuss whether "it stopped" means "it divided the data correctly".</li>
+            <li><strong>Press Reset three times.</strong> Keeping k the same, press Reset three times and compare how the data ends up divided. Both the points and the starting centroids are drawn again, so say as well that <strong>this screen cannot separate which of the two caused the difference</strong>.</li>
+            <li><strong>Uniform points still get boundaries.</strong> The points here are scattered uniformly. Watch boundaries appear anyway, and put into words whether "a boundary appeared" can mean "there were clusters".</li>
+          </ul>
         </div>
       </details>
 
@@ -187,7 +195,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
       <dl class="page-meta__list">
-        <dt>Version</dt><dd>2026-10-27</dd>
+        <dt>Version</dt><dd>2026-10-31</dd>
         <dt>Published</dt><dd>2026-10-25</dd>
         <dt>Source and dependencies</dt><dd>Written in-house. Drawing uses D3.js v7.9.0 (CDN, pinned version)</dd>
         <dt>Terms of reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching material under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Adapt and redistribute freely, including commercially, with attribution</dd>
