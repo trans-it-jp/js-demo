@@ -416,6 +416,14 @@
     };
 
     if (step.type === "forward") {
+      /* 周回の 1 手目で、前の周回の δ・傾き・答え合わせを片付ける。
+         周回の終わりで消すと、1 周進めたあとに傾きの表が空になり、
+         「1 周進めて傾きを見る」ができなくなる。 */
+      if (step.layer === 1 && step.node === 0) {
+        next.d = [];
+        next.gw = [];
+        next.probe = null;
+      }
       while (next.a.length <= step.layer) { next.a.push([]); }
       while (next.z.length <= step.layer) { next.z.push([]); }
       next.a[step.layer][step.node] = step.a;
@@ -457,10 +465,9 @@
       next.epoch = step.epoch;
       next.phase = "epochEnd";
       next.history = next.history.concat([step.loss]);
-      /* 次の周回は順伝播から。前の周回の途中の値は残さない。 */
-      next.d = [];
-      next.gw = [];
-      next.probe = null;
+      /* δ・傾き・答え合わせはここで消さない。
+         1 周進めたあとに表で見返せるようにして、
+         次の周回の 1 手目（順伝播）で片付ける。 */
     }
 
     return next;

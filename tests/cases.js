@@ -1269,6 +1269,26 @@
     });
   });
 
+  test("順伝播・逆伝播", "1 周進めたあとも傾きは残る", function () {
+    /* 周回の終わりで消すと、「1 周進めて傾きの表を見る」ができない。
+       片付けるのは次の周回の 1 手目。 */
+    var plan = Net.run(NET_SHAPES[0].config);
+    plan.ensure(60, { probe: "max" });
+    var endIndex = -1;
+    for (var i = 0; i < plan.steps.length; i += 1) {
+      if (plan.steps[i].type === "epochEnd") { endIndex = i + 1; break; }
+    }
+    isTrue(endIndex > 0, "1 周分の手順がある");
+
+    var afterEnd = Net.replay(plan.initial, plan.steps, endIndex);
+    isTrue(afterEnd.gw.length > 0, "周回の終わりでも傾きが残っている");
+    isTrue(afterEnd.probe !== null, "答え合わせも残っている");
+
+    var afterNext = Net.replay(plan.initial, plan.steps, endIndex + 1);
+    equal(afterNext.gw.length, 0, "次の周の 1 手目で片付く");
+    equal(afterNext.probe, null, "答え合わせも片付く");
+  });
+
   test("順伝播・逆伝播", "手順を先に全部は作らない", function () {
     /* 学習は何周でも続けられるので、終わりまでの手数は存在しない。
        求められた分だけ作る。 */

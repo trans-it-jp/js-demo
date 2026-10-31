@@ -269,7 +269,15 @@
         <summary>For teachers</summary>
         <div class="fold__body">
           <p>A common misreading: that backpropagation works by changing weights a little and seeing what happens. The numerical differentiation here is done for <strong>one weight only, as a check</strong>. With twenty weights, testing would mean forty more forward passes; backpropagation settles all of them in a single backward sweep.</p>
-          <p>A short task (5–10 minutes): compare learning rates of 0.1 and 1.5 and watch how the loss comes down. Find a setting where it stops coming down, or bounces, and put into words why that happens.</p>
+          <p>Short tasks (5–10 minutes each). Every one has the same shape: change something, watch, then put it into words.</p>
+          <ul>
+            <li><strong>Compare learning rates.</strong> Compare 0.1 and 1.5 and watch how the loss comes down. Find a setting where it stops coming down, or bounces, and put into words why that happens.</li>
+            <li><strong>Set an input to zero.</strong> Set input 1 to 0, run one pass and look at the table of weights. Every gradient on a weight leaving input 1 is <strong>exactly 0</strong>. Explain why, from “∂L/∂w = output of the previous layer × δ”.</li>
+            <li><strong>Find a node that stops.</strong> Set the hidden activation to ReLU and the seed to 4, then run one pass. Some nodes end up with δ = 0; confirm in the table that the weights into them do not move, then switch back to sigmoid and compare.</li>
+            <li><strong>Count the re-runs.</strong> Set 4 inputs, hidden layers of 5 and 5, and 3 outputs, then count the weights (60). Work out how many forward passes the “nudge and test” method would need, and how many the backward pass needs.</li>
+            <li><strong>Try three seeds.</strong> Keeping the shape and the values, set the seed to 1, 3 and 7 and write down the loss at pass 1 and at pass 6. Say how the starting weights change the run, and what stays the same anyway.</li>
+            <li><strong>Remove the hidden layer.</strong> With no hidden layer the loss still comes all the way down. Tie that to the fact that this screen has <strong>a single training example</strong>, and put into words what can and cannot be checked here.</li>
+          </ul>
         </div>
       </details>
 
@@ -294,7 +302,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
       <dl class="page-meta__list">
-        <dt>Version</dt><dd>2026-10-27</dd>
+        <dt>Version</dt><dd>2026-10-31</dd>
         <dt>Published</dt><dd>2026-10-27</dd>
         <dt>Source and dependencies</dt><dd>Implemented by Transit. Drawing uses D3.js v7.9.0 (CDN, pinned version)</dd>
         <dt>Reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching text under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. With attribution you may adapt and redistribute it, including commercially</dd>
