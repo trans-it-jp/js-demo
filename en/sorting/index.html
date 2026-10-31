@@ -193,7 +193,15 @@
         <div class="fold__body">
           <p>The easy misreading: that one round takes the same time everywhere. The algorithms advance one round together, but a round means different work in each one — comparing a pair and swapping it, or reshuffling the whole row. <strong>This is not a race.</strong> What it does compare honestly is counts.</p>
           <p>An algorithm that finishes stops there, and only the others carry on. Watch both which one finished first and how many steps each needed.</p>
-          <p>A short task (5–10 minutes): select bubble sort and quicksort, vary the number of elements and record the comparison counts. Tabulate how each count grows with n, and discuss.</p>
+          <p>Short tasks (5–10 minutes each). Every one has the same shape: change something, watch, then put it into words.</p>
+          <ul>
+            <li><strong>Record the counts as n grows.</strong> Select bubble sort and merge sort together, set the number of elements to 8, 16 and 32, and record the comparison counts. Tabulate what happens to each count when n doubles, and discuss.</li>
+            <li><strong>Cut the comparisons only.</strong> Select insertion sort and binary insertion sort together. The comparison count drops, but <strong>the number of moves does not change</strong>. Explain why, keeping "finding where it goes" and "shifting the rest along" apart.</li>
+            <li><strong>Sort without comparing at all.</strong> Select counting sort and radix sort. Their comparison count stays at <strong>zero</strong> to the end. Say what they use instead, and what kind of values they cannot handle.</li>
+            <li><strong>Looks sorted, is not a sort.</strong> Run Stalin sort on 16 elements. Read the number of elements left beside the "sorted" line, and put into words what a correct sort has to do.</li>
+            <li><strong>No total number of rounds.</strong> Run bogosort on 8 elements. The screen never shows how many rounds remain, because <strong>it is not run ahead of time</strong>. Discuss whether anyone can say how many it will take.</li>
+            <li><strong>The ones that move nothing.</strong> Put miracle sort and intelligent design sort side by side. Neither ever swaps or writes. Explain why a row can carry "settled" marks and still not be in order.</li>
+          </ul>
           <p>On the joke algorithms: Stalin sort and Thanos sort <strong>destroy elements</strong>. Bogosort may never finish. Miracle sort moves nothing at all. Intelligent design sort marks everything settled while the row is plainly not sorted. Use them to ask what makes a sort correct in the first place.</p>
         </div>
       </details>
@@ -235,7 +243,7 @@
     <section class="page-meta" aria-labelledby="page-meta-heading">
       <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
       <dl class="page-meta__list">
-        <dt>Version</dt><dd>2026-10-27</dd>
+        <dt>Version</dt><dd>2026-10-31</dd>
         <dt>Published</dt><dd>2026-10-26</dd>
         <dt>Source and dependencies</dt><dd>Built by Trans-IT. Drawing uses D3.js v7.9.0 (from a CDN, pinned to an exact version)</dd>
         <dt>Terms of reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching material under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Adapt and redistribute freely, including commercially, with attribution</dd>
