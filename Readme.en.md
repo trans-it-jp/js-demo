@@ -25,7 +25,8 @@ No demo here stops at something you merely watch.
 Alongside that:
 
 - Free to open. No account and no other purchase is a condition of learning here.
-- No advertising, no analytics tags, and nothing is sent anywhere. Input is handled inside the browser.
+- No advertising, no analytics tags, and this site sends nothing anywhere. Input is handled inside the browser.
+- This site is published with GitHub Pages. When a page is visited, the visitor's IP address is logged and stored by GitHub for security purposes. This is not our own logging; it comes from the hosting we use.
 - Every demo states its assumed background, its goal and the limits of its model. No claim is made about curriculum alignment or exam results.
 - No information is carried by colour alone. Shape, dashes, numbers and figures carry it too.
 - Every value can be set in a number field, not only with a slider or by dragging.
