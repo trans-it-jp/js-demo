@@ -121,8 +121,54 @@
       "net.figure.label": "ニューラルネットのノードと重み",
       "net.figure.summary": "形 {shape} のネットワーク。いまの段階は{phase}",
 
+      "frac.side.left": "左",
+      "frac.side.right": "右",
+
+      "frac.phase.start": "まだ分けていない",
+      "frac.phase.divide": "分けた",
+      "frac.phase.fill": "塗った",
+      "frac.phase.recut": "そろえ直した",
+      "frac.phase.count": "数えた",
+
+      "frac.step.divide": "{side}の正方形を {parts} 等分しました。1 つ分が全体の 1/{parts} です",
+      "frac.step.fill": "{side}の {count}/{parts} を塗りました。1/{parts} が {count} 個分です",
+      "frac.step.recut": "両方を {denominator} 等分にそろえ直しました。左は {a}/{denominator}、右は {b}/{denominator}。塗った面積は動いていません",
+      "frac.step.recutSame": "もともと同じ {denominator} 等分なので、そろえ直しても何も変わりません",
+      "frac.step.count": "{denominator} 等分で数えると、左は {a} 個、右は {b} 個。{result}",
+
+      "frac.result.greater": "左のほうが大きい",
+      "frac.result.less": "右のほうが大きい",
+      "frac.result.equal": "同じ大きさ",
+
+      "frac.message.reset": "初期化しました。「次へ進む」で左の正方形を分けます。",
+
+      "frac.note.whole": "まだ分けていない",
+      "frac.note.base": "{parts} 等分",
+      "frac.note.recut": "もとは {base} 等分 → いま {parts} 等分",
+
+      "frac.readout.steps": "手数",
+      "frac.readout.phase": "いまの段階",
+      "frac.readout.common": "そろえた分け方",
+      "frac.readout.result": "結果",
+
+      "frac.table.caption": "2 つの分数",
+      "frac.table.row": "出し方",
+      "frac.table.fraction": "分数",
+      "frac.table.decimal": "小数",
+      "frac.table.percent": "百分率",
+      "frac.table.common": "{denominator} 等分にそろえて",
+
+      "frac.figure.label": "同じ大きさの正方形を分けて塗った図",
+      "frac.figure.summary": "{a} と {b} を同じ大きさの正方形で比べている。いまの段階は{phase}",
+
       "related.shared": "共有する前提：{premise}",
       "catalog.all": "すべて",
+      "catalog.concept.fraction": "分数の表記",
+      "catalog.concept.unit-part": "等分した1つ分",
+      "catalog.concept.area": "面積",
+      "catalog.premise.fraction": "分数の表記 a/b を見たことがある",
+      "catalog.premise.unit-part": "全体を同じ数に分けた1つ分という考えに触れている",
+      "catalog.premise.area": "面積の広い・狭いを目で比べられる",
       "catalog.concept.chain": "連鎖律",
       "catalog.concept.slope": "傾き",
       "catalog.premise.chain": "合成関数の微分（連鎖律）に触れている",
@@ -446,8 +492,54 @@
       "net.figure.label": "Nodes and weights of the network",
       "net.figure.summary": "Network shaped {shape}. Current stage: {phase}",
 
+      "frac.side.left": "Left",
+      "frac.side.right": "Right",
+
+      "frac.phase.start": "Not divided yet",
+      "frac.phase.divide": "Divided",
+      "frac.phase.fill": "Filled",
+      "frac.phase.recut": "Cut to match",
+      "frac.phase.count": "Counted",
+
+      "frac.step.divide": "Divided the {side} square into {parts} equal parts. One part is 1/{parts} of the whole",
+      "frac.step.fill": "Filled {count}/{parts} of the {side} square: {count} pieces of 1/{parts}",
+      "frac.step.recut": "Cut both into {denominator} equal parts. Left is now {a}/{denominator} and right is {b}/{denominator}. The filled area has not moved",
+      "frac.step.recutSame": "Both were already in {denominator} equal parts, so cutting to match changes nothing",
+      "frac.step.count": "Counted in {denominator}ths: {a} on the left, {b} on the right. {result}",
+
+      "frac.result.greater": "the left one is larger",
+      "frac.result.less": "the right one is larger",
+      "frac.result.equal": "they are the same size",
+
+      "frac.message.reset": "Reset. Use “Next step” to divide the left square.",
+
+      "frac.note.whole": "not divided yet",
+      "frac.note.base": "{parts} equal parts",
+      "frac.note.recut": "was {base} parts → now {parts} parts",
+
+      "frac.readout.steps": "Steps",
+      "frac.readout.phase": "Stage",
+      "frac.readout.common": "Matched parts",
+      "frac.readout.result": "Result",
+
+      "frac.table.caption": "The two fractions",
+      "frac.table.row": "Written as",
+      "frac.table.fraction": "Fraction",
+      "frac.table.decimal": "Decimal",
+      "frac.table.percent": "Percentage",
+      "frac.table.common": "in {denominator}ths",
+
+      "frac.figure.label": "Two squares of the same size, divided and filled",
+      "frac.figure.summary": "Comparing {a} and {b} on squares of the same size. Current stage: {phase}",
+
       "related.shared": "Shared prerequisite: {premise}",
       "catalog.all": "All",
+      "catalog.concept.fraction": "Fraction notation",
+      "catalog.concept.unit-part": "Equal parts",
+      "catalog.concept.area": "Area",
+      "catalog.premise.fraction": "You have seen fractions written as a/b",
+      "catalog.premise.unit-part": "You have met the idea of one part of a whole divided equally",
+      "catalog.premise.area": "You can compare areas by eye",
       "catalog.concept.chain": "Chain rule",
       "catalog.concept.slope": "Slopes",
       "catalog.premise.chain": "You have met differentiating a composed function (the chain rule)",

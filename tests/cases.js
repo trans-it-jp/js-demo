@@ -21,6 +21,7 @@
   var Catalog = JsDemo.Catalog;
   var Demos = JsDemo.Demos;
   var Net = JsDemo.Net;
+  var Fraction = JsDemo.Fraction;
 
   /* --- 照合の道具 ------------------------------------------------------- */
 
@@ -1297,6 +1298,110 @@
     plan.ensure(5, { probe: null });
     isTrue(plan.steps.length >= 5, "求めた分だけ伸びる");
     equal(plan.epochs, 1, "1 周分だけ作った");
+  });
+
+  /* --- 分数 --------------------------------------------------------- */
+
+  function frac(n, d) { return Fraction.make(n, d); }
+
+  test("分数", "通分の既知値", function () {
+    var pair = Fraction.common(frac(2, 3), frac(3, 5));
+    equal(pair.denominator, 15, "最小公倍数");
+    equal(pair.a.numerator, 10, "2/3 → 10/15");
+    equal(pair.b.numerator, 9, "3/5 → 9/15");
+
+    var other = Fraction.common(frac(5, 8), frac(2, 3));
+    equal(other.denominator, 24, "最小公倍数");
+    equal(other.a.numerator, 15, "5/8 → 15/24");
+    equal(other.b.numerator, 16, "2/3 → 16/24");
+  });
+
+  test("分数", "大小の判定", function () {
+    equal(Fraction.compare(frac(2, 3), frac(3, 5)), 1, "2/3 > 3/5");
+    equal(Fraction.compare(frac(5, 8), frac(2, 3)), -1, "5/8 < 2/3");
+    equal(Fraction.compare(frac(1, 2), frac(2, 4)), 0, "1/2 = 2/4");
+    equal(Fraction.compare(frac(2, 3), frac(4, 6)), 0, "2/3 = 4/6");
+    equal(Fraction.compare(frac(0, 5), frac(0, 3)), 0, "0 どうし");
+    equal(Fraction.compare(frac(3, 3), frac(5, 5)), 0, "1 どうし");
+  });
+
+  test("分数", "不正な入力は範囲へ寄せる", function () {
+    /* URL も入力欄も誰でも書き換えられる。例外にせず、範囲の中へ寄せる。 */
+    equal(frac(1, 0).denominator, 1, "分母 0");
+    equal(frac(9, 4).numerator, 4, "分子 > 分母");
+    equal(frac(-2, -3).numerator, 0, "負の分子");
+    equal(frac(-2, -3).denominator, 1, "負の分母");
+    equal(frac("x", "y").denominator, 1, "数でない");
+    equal(frac(1.6, 4.2).numerator, 2, "小数の分子");
+    equal(frac(1.6, 4.2).denominator, 4, "小数の分母");
+    equal(frac(3, 99).denominator, Fraction.MAX_DENOMINATOR, "分母の上限");
+  });
+
+  test("分数", "そろえ直しても面積は動かない", function () {
+    /* この題材の要。分け方を細かくしても、塗った割合が変わってはいけない。 */
+    [[2, 3, 3, 5], [5, 8, 2, 3], [1, 2, 2, 4], [1, 1, 0, 7], [7, 12, 2, 9]].forEach(function (set) {
+      var a = frac(set[0], set[1]);
+      var b = frac(set[2], set[3]);
+      var steps = Fraction.steps(a, b);
+      var before = Fraction.replay(a, b, steps, 4);   /* そろえ直す前 */
+      var after = Fraction.replay(a, b, steps, 5);    /* そろえ直したあと */
+      ["a", "b"].forEach(function (side) {
+        near(before[side].filled / before[side].parts,
+             after[side].filled / after[side].parts, 1e-12,
+             set.join("/") + " の " + side);
+      });
+      equal(after.a.parts, after.b.parts, set.join("/") + " の分け方がそろった");
+    });
+  });
+
+  test("分数", "手順は 6 手で、そろえ直す手を必ず通る", function () {
+    var steps = Fraction.steps(frac(2, 3), frac(3, 5));
+    equal(steps.length, 6, "手数");
+    equal(steps.map(function (s) { return s.type; }).join(","),
+          "divide,fill,divide,fill,recut,count", "手の並び");
+    equal(steps[4].already, false, "分け方が違う");
+    equal(Fraction.steps(frac(1, 4), frac(3, 4))[4].already, true,
+          "もとから同じ分け方");
+  });
+
+  test("分数", "1 手ずつ進めた結果は、まとめて畳んだ結果と一致する", function () {
+    var a = frac(5, 8);
+    var b = frac(2, 3);
+    var steps = Fraction.steps(a, b);
+    var one = Fraction.initial(a, b);
+    steps.forEach(function (step) { one = Fraction.applyStep(one, step); });
+    var all = Fraction.replay(a, b, steps);
+    equal(JSON.stringify(all), JSON.stringify(one), "結果が同じ");
+    equal(all.result, -1, "5/8 < 2/3");
+    equal(all.common, 24, "そろえた分け方");
+  });
+
+  test("分数", "もとの分け方は残る", function () {
+    /* 図で「もとは何等分だったか」を太い線で示すために使う。 */
+    var a = frac(2, 3);
+    var b = frac(3, 5);
+    var end = Fraction.replay(a, b, Fraction.steps(a, b));
+    equal(end.a.base, 3, "左のもとの分け方");
+    equal(end.b.base, 5, "右のもとの分け方");
+    equal(end.a.parts, 15, "そろえたあと");
+    equal(end.b.parts, 15, "そろえたあと");
+  });
+
+  test("分数", "小数と百分率", function () {
+    equal(Fraction.toDecimal(frac(1, 2)), 0.5, "1/2");
+    equal(Fraction.toDecimal(frac(2, 3)), 0.667, "2/3 は 3 桁へ丸める");
+    equal(Fraction.toPercent(frac(2, 3)), 66.7, "2/3");
+    equal(Fraction.toPercent(frac(0, 7)), 0, "0");
+    equal(Fraction.toPercent(frac(4, 4)), 100, "1");
+  });
+
+  test("分数", "最大公約数と最小公倍数", function () {
+    equal(Fraction.gcd(12, 18), 6, "gcd(12,18)");
+    equal(Fraction.gcd(7, 13), 1, "互いに素");
+    equal(Fraction.gcd(5, 0), 5, "0 との gcd");
+    equal(Fraction.lcm(4, 6), 12, "lcm(4,6)");
+    equal(Fraction.lcm(3, 5), 15, "互いに素");
+    equal(Fraction.lcm(6, 6), 6, "同じ数");
   });
 
   JsDemo.Tests = { cases: cases };

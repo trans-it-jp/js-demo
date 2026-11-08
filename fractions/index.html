@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分数の大きさくらべ — JavaScript 学習デモ</title>
+<meta name="description" content="2 つの分数を同じ大きさの正方形の面積で比べ、同じ分け方にそろえ直して数えられるデモ。">
+<link rel="stylesheet" href="../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../js/core/numeric.js"></script>
+<script src="../js/fraction/compare.js"></script>
+<script src="../js/viz/area.js"></script>
+<script src="../js/ui/i18n.js"></script>
+<script src="../js/ui/demos.js"></script>
+<script src="../js/ui/related-page.js" defer></script>
+<script src="../js/ui/controls.js"></script>
+<script src="../js/ui/learning.js"></script>
+<script src="../js/ui/share-link.js"></script>
+<script src="../js/ui/tables.js"></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">本文へ移動</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript 学習デモ</a></p>
+    <nav class="site-head__nav" aria-label="言語">
+      <span aria-current="true">日本語</span>
+      <a href="../en/fractions/index.html" hreflang="en">English</a>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="現在の位置">
+      <ol>
+        <li><a href="../index.html">デモ一覧</a></li>
+        <li>分数の大きさくらべ</li>
+      </ol>
+    </nav>
+
+    <h1>分数の大きさくらべ</h1>
+    <p class="lede">2 つの分数を、<strong>同じ大きさの正方形</strong>の面積で比べます。それぞれを分母の数だけ分けて分子だけ塗り、最後に<strong>同じ分け方にそろえ直して</strong>数えます。そろえ直しても塗った面積は動きません。</p>
+
+    <dl class="framing">
+      <div>
+        <dt>中心の問い</dt>
+        <dd>2/3 と 3/5 は、どちらが大きいでしょうか。なぜそう言えますか。</dd>
+      </div>
+      <div>
+        <dt>前提</dt>
+        <dd>分数の表記 a/b を見たことがあること。「全体を同じ数に分けた1つ分」という考えに触れていること。面積の広い狭いを目で比べられること。</dd>
+      </div>
+      <div>
+        <dt>想定学年</dt>
+        <dd>小5〜中1</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar">
+          <button type="button" id="reset">初期化</button>
+          <button type="button" id="step" class="is-primary">次へ進む</button>
+          <button type="button" id="back">一手戻る</button>
+          <button type="button" id="to-end">最後まで</button>
+          <p class="toolbar__hint">1 手ずつ進みます。「分ける → 塗る → そろえ直す → 数える」の 6 手です。</p>
+        </div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">左右の正方形は<strong>いつも同じ大きさ</strong>です。太い線はもとの分け方（分母）、細い線はそろえ直して増えた分け方です。塗った面積が動いていないことを、線の太さで追えます。数えた結果は真ん中の記号（&gt; &lt; =）と下の表にも出ます。</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <section class="panel" style="margin-top: 1.5rem;">
+          <h2 class="panel__title">いまの手</h2>
+          <p class="formula" id="formula">初期化しました。「次へ進む」で左の正方形を分けます。</p>
+        </section>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="compare-table"></div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">条件を変える</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="a-numerator">
+                左の分子
+                <span class="control__note">分母より大きくはできません</span>
+              </label>
+              <input id="a-numerator" type="range" min="0" max="12" step="1" value="2">
+              <input id="a-numerator-num" type="number" min="0" max="12" step="1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="a-denominator">左の分母</label>
+              <input id="a-denominator" type="range" min="1" max="12" step="1" value="3">
+              <input id="a-denominator-num" type="number" min="1" max="12" step="1" value="3">
+            </div>
+            <div class="control">
+              <label class="control__label" for="b-numerator">右の分子</label>
+              <input id="b-numerator" type="range" min="0" max="12" step="1" value="3">
+              <input id="b-numerator-num" type="number" min="0" max="12" step="1" value="3">
+            </div>
+            <div class="control">
+              <label class="control__label" for="b-denominator">右の分母</label>
+              <input id="b-denominator" type="range" min="1" max="12" step="1" value="5">
+              <input id="b-denominator-num" type="number" min="1" max="12" step="1" value="5">
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top: 1rem;">
+            <span class="toolbar__label">数の出し方</span>
+            <div id="notation">
+              <button type="button" data-mode="fraction">分数</button>
+              <button type="button" data-mode="decimal">小数</button>
+              <button type="button" data-mode="percent">百分率</button>
+            </div>
+            <p class="toolbar__hint">同じ大きさを 3 通りの書き方で出します。表には 3 つとも並びます。</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">授業で共有する</h2>
+          <p class="share__help">このリンクを開くと、いまの 2 つの分数で始まります。個人情報は含まれません。</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">共有用のリンク</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">リンクをコピー</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">いまの状態</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose" style="max-width: none;">
+      <h3>この画面でできること</h3>
+      <ul>
+        <li>分子だけ、分母だけを変えて、<strong>面積がどう変わるかを見比べられます</strong>。分子が大きいほうが必ず大きい、とは限らないことを確かめられます。</li>
+        <li>「そろえ直す」手で、<strong>塗った面積が動かないまま分け方だけが細かくなる</strong>ところを 1 手ずつ見られます。</li>
+        <li>1/2 と 2/4 のように<strong>書き方が違って同じ大きさ</strong>の組を入れて、面積と記号（=）で確かめられます。</li>
+      </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>分母は「いくつに分けたか」、分子は「そのうち何個を取ったか」です。まず分け方の数が違うことに注目してください。</p>
+        <p class="hints__step" hidden>分け方が違うままでは、何個どうしを比べても答えになりません。同じ分け方にそろえてから数えます。</p>
+        <p class="hints__step" hidden>3 等分と 5 等分は、どちらも 15 等分にそろえられます。2/3 は 10/15、3/5 は 9/15 です。</p>
+        <button type="button" class="hints__more">次のヒント</button>
+      </div>
+
+      <details class="fold">
+        <summary>もっと詳しく</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">言い方</span>
+            <button type="button" data-level="plain">やさしく</button>
+            <button type="button" data-level="formal">式で</button>
+          </div>
+          <p data-level="plain">同じ大きさのケーキを、片方は 3 つに、もう片方は 5 つに切ったと思ってください。1 切れの大きさが違うので、切れの数だけでは比べられません。どちらも 15 等分にそろえると、1 切れの大きさが同じになるので、やっと数で比べられます。</p>
+          <p data-level="formal">分母の最小公倍数 L を取り、a/b = (a × L/b)/L、c/d = (c × L/d)/L と書き直す。単位分数 1/L がそろうので、分子どうしの比較が大小の比較になる。2/3 と 3/5 では L = 15 で 10/15 と 9/15、よって 2/3 &gt; 3/5。</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>教える方へ</summary>
+        <div class="fold__body">
+          <p>起きやすい誤解: <strong>分子が大きいほう（または分母が大きいほう）が大きい</strong>と決めてしまうこと。この画面では分子と分母を別々に変えられるので、片方だけを動かして確かめられます。分母だけを大きくすると面積が減ることも、その場で見えます。</p>
+          <p>短い課題案（5〜10 分）。どれも「変える → 見る → 言葉にする」の形にしてあります。</p>
+          <ul>
+            <li><strong>分子だけ動かす。</strong>左を 2/3 のまま、右を 3/5 → 4/5 と変えて、どこで大小が入れ替わるかを見る。<strong>入れ替わる場所</strong>を言葉にする。</li>
+            <li><strong>分母だけ動かす。</strong>左を 1/2 にして、分母を 2 → 3 → 4 と大きくする。<strong>分母が大きいほど面積は小さくなる</strong>ことを確かめ、「細かく分けた＝たくさん」との違いを言う。</li>
+            <li><strong>同じ大きさを探す。</strong>1/2 と 2/4、2/3 と 4/6 のように、書き方が違って同じ面積になる組を 3 つ見つける。<strong>分子と分母の間にある関係</strong>を言葉にする。</li>
+            <li><strong>そろえ直す前に予想する。</strong>5/8 と 2/3 を入れ、そろえ直す手の前に「どちらが大きいか」を言ってから進める。<strong>見た目では当たらない</strong>ことを確かめる（15/24 と 16/24）。</li>
+            <li><strong>分け方の数を数える。</strong>3 等分と 5 等分が 15 等分に、4 等分と 6 等分が 12 等分になることを確かめ、<strong>なぜその数になるのか</strong>を言う。</li>
+            <li><strong>この画面で確かめられないこと。</strong>全体の大きさが違うケーキどうしは、この画面では比べられない（枠はいつも同じ大きさ）。<strong>なぜ比べられないのか</strong>を話し合う。</li>
+          </ul>
+        </div>
+      </details>
+
+      <h3>この画面の範囲</h3>
+      <ul>
+        <li><strong>扱うのは 0 以上 1 以下の分数だけです。</strong>分子は分母より大きくできません。仮分数・帯分数・負の分数は含みません。</li>
+        <li><strong>全体の大きさは変えられません。</strong>左右の枠はいつも同じ大きさです。違う全体どうしの比較は、この画面では扱いません。</li>
+        <li>分母は 12 までです。これより細かく分けると、面積の違いが目で分からなくなります。</li>
+        <li>約分はしません。1/2 と 2/4 は<strong>同じ面積</strong>として出ますが、書き方はそのままです。約分の手続きの練習は含みません。</li>
+        <li>たし算・ひき算・かけ算・わり算は含みません。</li>
+        <li>学習効果の確認は行っていません。この画面は題材の試作です。</li>
+      </ul>
+    </div>
+
+    <!-- 同じ前提を使う画面。共有する前提概念から作る（正本は js/ui/demos.js）。
+         共有する概念が無ければ枠ごと出ない。 -->
+    <section class="related" id="related" data-demo="fractions" hidden>
+      <h2 class="related__title">同じ前提を使う画面</h2>
+      <ul class="related__list"></ul>
+    </section>
+
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">この画面について</h2>
+      <dl class="page-meta__list">
+        <dt>版</dt><dd>2026-11-08</dd>
+        <dt>公開日</dt><dd>2026-11-08</dd>
+        <dt>出典・依存</dt><dd>当社による実装。描画に D3.js v7.9.0（CDN、版を固定）を使用</dd>
+        <dt>再利用条件</dt><dd>コードは <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>、教材本文は <a href="https://creativecommons.org/licenses/by/4.0/deed.ja">CC BY 4.0</a>。出典を示せば改変・再配布できます（商用を含む）</dd>
+        <dt>保守・訂正の担当</dt><dd>未定</dd>
+        <dt>既知の制約</dt><dd>このページの「この画面の範囲」に記載</dd>
+        <dt>問題報告</dt><dd><a href="https://trans-it.jp/">トランジット株式会社</a>へご連絡ください。個人情報を含む内容は送らないでください</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="トランジット株式会社" width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript 学習デモ</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+      <p class="site-foot__licence">コード <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT</a> / 教材 <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE-CONTENT">CC BY 4.0</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

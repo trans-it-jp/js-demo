@@ -22,6 +22,11 @@
   /* 並び順は目録に出す順。id はフォルダ名で、場所は <id>/index.html。 */
   var LIST = [
     {
+      id: "fractions",
+      title: { ja: "分数の大きさくらべ", en: "Comparing fractions" },
+      concepts: ["fraction", "unit-part", "area"]
+    },
+    {
       id: "k-means",
       title: { ja: "k-means 法", en: "k-means" },
       concepts: ["coord", "mean", "distance"]

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparing fractions — JavaScript Learning Demos</title>
+<meta name="description" content="Compare two fractions as areas of squares of the same size, then cut both into matching parts and count.">
+<link rel="stylesheet" href="../../css/site.css">
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="../../js/core/numeric.js"></script>
+<script src="../../js/fraction/compare.js"></script>
+<script src="../../js/viz/area.js"></script>
+<script src="../../js/ui/i18n.js"></script>
+<script src="../../js/ui/demos.js"></script>
+<script src="../../js/ui/related-page.js" defer></script>
+<script src="../../js/ui/controls.js"></script>
+<script src="../../js/ui/learning.js"></script>
+<script src="../../js/ui/share-link.js"></script>
+<script src="../../js/ui/tables.js"></script>
+<script src="../../fractions/app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-head">
+  <div class="site-head__inner">
+    <p class="site-head__title"><a href="../index.html">JavaScript Learning Demos</a></p>
+    <nav class="site-head__nav" aria-label="Language">
+      <a href="../../fractions/index.html" hreflang="ja">日本語</a>
+      <span aria-current="true">English</span>
+    </nav>
+  </div>
+</header>
+
+<main class="site-main" id="main">
+  <div class="page">
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <ol>
+        <li><a href="../index.html">All demos</a></li>
+        <li>Comparing fractions</li>
+      </ol>
+    </nav>
+
+    <h1>Comparing fractions</h1>
+    <p class="lede">Two fractions, compared as areas of <strong>squares of the same size</strong>. Each square is divided into as many parts as its denominator and the numerator is filled in; at the end both are <strong>cut into matching parts</strong> and counted. Cutting to match never moves the filled area.</p>
+
+    <dl class="framing">
+      <div>
+        <dt>Central question</dt>
+        <dd>Which is larger, 2/3 or 3/5? How can you tell?</dd>
+      </div>
+      <div>
+        <dt>Assumed background</dt>
+        <dd>You have seen fractions written as a/b. You have met the idea of one part of a whole divided equally. You can compare areas by eye.</dd>
+      </div>
+      <div>
+        <dt>Written for</dt>
+        <dd>Upper primary to lower secondary</dd>
+      </div>
+    </dl>
+
+    <div class="demo">
+      <div>
+        <div class="toolbar">
+          <button type="button" id="reset">Reset</button>
+          <button type="button" id="step" class="is-primary">Next step</button>
+          <button type="button" id="back">Step back</button>
+          <button type="button" id="to-end">To the end</button>
+          <p class="toolbar__hint">Six steps in all: divide, fill, divide, fill, cut to match, count.</p>
+        </div>
+
+        <div class="plot" id="plot"></div>
+        <p class="plot__caption">The two squares are <strong>always the same size</strong>. Thick lines are the original division (the denominator); thin lines are the extra cuts that make the two match. The filled area stays where it was — the line weights let you follow that. The result also appears as the sign in the middle (&gt; &lt; =) and in the table below.</p>
+
+        <div id="live" class="visually-hidden" role="status" aria-live="polite"></div>
+
+        <section class="panel" style="margin-top: 1.5rem;">
+          <h2 class="panel__title">The current step</h2>
+          <p class="formula" id="formula">Reset. Use “Next step” to divide the left square.</p>
+        </section>
+
+        <div class="table-scroll" style="margin-top: 1.5rem;">
+          <div id="compare-table"></div>
+        </div>
+      </div>
+
+      <aside>
+        <section class="panel">
+          <h2 class="panel__title">Settings</h2>
+          <div class="controls">
+            <div class="control">
+              <label class="control__label" for="a-numerator">
+                Left numerator
+                <span class="control__note">cannot exceed the denominator</span>
+              </label>
+              <input id="a-numerator" type="range" min="0" max="12" step="1" value="2">
+              <input id="a-numerator-num" type="number" min="0" max="12" step="1" value="2">
+            </div>
+            <div class="control">
+              <label class="control__label" for="a-denominator">Left denominator</label>
+              <input id="a-denominator" type="range" min="1" max="12" step="1" value="3">
+              <input id="a-denominator-num" type="number" min="1" max="12" step="1" value="3">
+            </div>
+            <div class="control">
+              <label class="control__label" for="b-numerator">Right numerator</label>
+              <input id="b-numerator" type="range" min="0" max="12" step="1" value="3">
+              <input id="b-numerator-num" type="number" min="0" max="12" step="1" value="3">
+            </div>
+            <div class="control">
+              <label class="control__label" for="b-denominator">Right denominator</label>
+              <input id="b-denominator" type="range" min="1" max="12" step="1" value="5">
+              <input id="b-denominator-num" type="number" min="1" max="12" step="1" value="5">
+            </div>
+          </div>
+          <div class="toolbar" style="margin-top: 1rem;">
+            <span class="toolbar__label">Written as</span>
+            <div id="notation">
+              <button type="button" data-mode="fraction">Fraction</button>
+              <button type="button" data-mode="decimal">Decimal</button>
+              <button type="button" data-mode="percent">Percentage</button>
+            </div>
+            <p class="toolbar__hint">The same quantity in three forms. All three appear in the table.</p>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Share with a class</h2>
+          <p class="share__help">Opening this link starts from the two fractions set here. It contains no personal data.</p>
+          <div class="share">
+            <label class="visually-hidden" for="share-url">Link to share</label>
+            <input type="text" id="share-url" class="share__url" readonly>
+            <button type="button" id="share-copy">Copy link</button>
+          </div>
+          <p class="share__status" id="share-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel__title">Current state</h2>
+          <dl class="readout" id="readout"></dl>
+        </section>
+      </aside>
+    </div>
+
+    <div class="note prose" style="max-width: none;">
+      <h3>What you can do here</h3>
+      <ul>
+        <li>Change the numerator alone, or the denominator alone, and <strong>compare how the area changes</strong>. A bigger numerator does not always mean a bigger fraction.</li>
+        <li>Watch the "cut to match" step one move at a time: <strong>the parts get finer while the filled area stays put</strong>.</li>
+        <li>Enter pairs like 1/2 and 2/4 that are <strong>written differently but the same size</strong>, and confirm it by area and by the = sign.</li>
+      </ul>
+
+      <div class="hints" id="hints">
+        <p class="hints__step" hidden>The denominator says how many parts the whole was cut into; the numerator says how many of them were taken. Start from the fact that the two were cut differently.</p>
+        <p class="hints__step" hidden>While the cuts differ, counting pieces against pieces answers nothing. Make the cuts match first, then count.</p>
+        <p class="hints__step" hidden>Thirds and fifths can both be cut into fifteenths: 2/3 is 10/15 and 3/5 is 9/15.</p>
+        <button type="button" class="hints__more">Next hint</button>
+      </div>
+
+      <details class="fold">
+        <summary>In more detail</summary>
+        <div class="fold__body">
+          <div class="wording" id="wording">
+            <span class="wording__label">Wording</span>
+            <button type="button" data-level="plain">Plain</button>
+            <button type="button" data-level="formal">Formal</button>
+          </div>
+          <p data-level="plain">Picture two cakes of the same size, one cut into 3 and the other into 5. A slice from one is not the same as a slice from the other, so counting slices settles nothing. Cut both into 15 and every slice is the same size — now the counts can be compared.</p>
+          <p data-level="formal">Take L, the least common multiple of the denominators, and rewrite a/b = (a × L/b)/L and c/d = (c × L/d)/L. The unit fraction 1/L is now shared, so comparing numerators compares the values. For 2/3 and 3/5, L = 15 gives 10/15 and 9/15, hence 2/3 &gt; 3/5.</p>
+        </div>
+      </details>
+
+      <details class="fold">
+        <summary>For teachers</summary>
+        <div class="fold__body">
+          <p>A common misreading: deciding that <strong>the bigger numerator (or the bigger denominator) wins</strong>. Here the numerator and the denominator move independently, so either can be tested on its own. Raising only the denominator visibly shrinks the area.</p>
+          <p>Short tasks (5–10 minutes each). Every one has the same shape: change something, watch, then put it into words.</p>
+          <ul>
+            <li><strong>Move the numerator only.</strong> Keep the left at 2/3 and take the right from 3/5 to 4/5. Find <strong>where the larger one changes over</strong> and say it out loud.</li>
+            <li><strong>Move the denominator only.</strong> Set the left to 1/2 and raise the denominator to 3, then 4. Confirm that <strong>a larger denominator means a smaller area</strong>, and separate that from "cut finer, so more".</li>
+            <li><strong>Hunt for equal sizes.</strong> Find three pairs, such as 1/2 and 2/4 or 2/3 and 4/6, written differently but equal in area. Put <strong>the relationship between numerator and denominator</strong> into words.</li>
+            <li><strong>Predict before cutting to match.</strong> Enter 5/8 and 2/3 and say which is larger before taking the matching step. Confirm that <strong>the eye cannot settle it</strong> (15/24 against 16/24).</li>
+            <li><strong>Count the parts.</strong> Check that 3 and 5 become 15, and 4 and 6 become 12, then say <strong>why those numbers</strong>.</li>
+            <li><strong>What this screen cannot check.</strong> Cakes of different sizes cannot be compared here — the frames are always equal. Discuss <strong>why they cannot</strong>.</li>
+          </ul>
+        </div>
+      </details>
+
+      <h3>What this screen covers</h3>
+      <ul>
+        <li><strong>Only fractions between 0 and 1.</strong> The numerator cannot exceed the denominator. Improper fractions, mixed numbers and negative fractions are not included.</li>
+        <li><strong>The size of the whole cannot be changed.</strong> Both frames are always equal, so comparisons between different wholes are out of scope here.</li>
+        <li>Denominators go up to 12. Finer than that and the difference in area stops being visible.</li>
+        <li>Nothing is reduced to lowest terms. 1/2 and 2/4 come out as <strong>the same area</strong> but keep their own notation; practising the reduction procedure is not included.</li>
+        <li>Addition, subtraction, multiplication and division are not included.</li>
+        <li>No check of learning effect has been carried out. What is published here is a draft of the material.</li>
+      </ul>
+    </div>
+
+    <!-- Demos with the same prerequisites. Built from the shared concepts
+         (js/ui/demos.js holds them). Nothing is shown when none are shared. -->
+    <section class="related" id="related" data-demo="fractions" hidden>
+      <h2 class="related__title">Demos with the same prerequisites</h2>
+      <ul class="related__list"></ul>
+    </section>
+
+    <section class="page-meta" aria-labelledby="page-meta-heading">
+      <h2 class="page-meta__title" id="page-meta-heading">About this page</h2>
+      <dl class="page-meta__list">
+        <dt>Version</dt><dd>2026-11-08</dd>
+        <dt>Published</dt><dd>2026-11-08</dd>
+        <dt>Source and dependencies</dt><dd>Implemented by Transit. Drawing uses D3.js v7.9.0 (CDN, pinned version)</dd>
+        <dt>Reuse</dt><dd>Code under the <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT License</a>; teaching text under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. With attribution you may adapt and redistribute it, including commercially</dd>
+        <dt>Maintenance and corrections</dt><dd>Not yet assigned</dd>
+        <dt>Known limits</dt><dd>See "What this screen covers" on this page</dd>
+        <dt>Reporting a problem</dt><dd>Please contact <a href="https://trans-it.jp/">Transit Inc.</a> Do not send anything containing personal data</dd>
+      </dl>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="site-foot__inner">
+    <a class="site-foot__brand" href="https://trans-it.jp/">
+      <img src="https://trans-it.jp/wp-content/uploads/2024/02/%E6%A8%AA%E3%80%80%E3%82%AB%E3%83%A9%E3%83%BC600.png"
+           alt="Transit Inc." width="600" height="108" loading="lazy">
+    </a>
+    <div class="site-foot__meta">
+      <p>JavaScript Learning Demos</p>
+      <p><a href="https://trans-it.jp/">trans-it.jp</a></p>
+      <p class="site-foot__licence">Code <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE">MIT</a> / teaching text <a href="https://github.com/trans-it-jp/js-demo/blob/main/LICENSE-CONTENT">CC BY 4.0</a></p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

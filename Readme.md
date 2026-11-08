@@ -48,6 +48,7 @@
 ├── js/                             用途ごとに分けたライブラリ
 │   ├── core/                       乱数と数値の整形
 │   ├── linear-algebra/             同次座標の行列演算
+│   ├── fraction/                   分数を同じ全体で比べる手順
 │   ├── clustering/                 k-means の手順
 │   ├── sorting/                    25 種のソートの手順
 │   ├── learning/                   順伝播・逆伝播の手順
@@ -85,6 +86,7 @@
 | --- | --- | --- |
 | [`js/core`](js/core/Readme.md) | 種を指定できる乱数、丸めと入力値の正規化 | 描画も DOM も扱わない土台 |
 | [`js/linear-algebra`](js/linear-algebra/Readme.md) | 3×3 行列の生成・合成・点への適用 | ブラウザなしで既知値と照合できる |
+| [`js/fraction`](js/fraction/Readme.md) | 通分・比較と「そろえ直して数える」手順 | 0 以上 1 以下の分数だけを扱う |
 | [`js/clustering`](js/clustering/Readme.md) | k-means の状態機械と合成データ生成 | 割当と中心の更新を 1 手ずつ進める |
 | [`js/sorting`](js/sorting/Readme.md) | 25 種のソートを手順の列として出す | 終わりが分からない手法は先に全部作らない |
 | [`js/learning`](js/learning/Readme.md) | 順伝播・逆伝播・数値微分・更新の手順 | 連鎖律で解き、数値微分は答え合わせに使う |

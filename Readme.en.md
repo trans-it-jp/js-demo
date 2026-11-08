@@ -48,6 +48,7 @@ The Japanese pages sit at the default locations and the English ones mirror them
 ├── js/                             libraries, split by purpose
 │   ├── core/                       random numbers and number handling
 │   ├── linear-algebra/             matrices in homogeneous coordinates
+│   ├── fraction/                   comparing fractions on the same whole
 │   ├── clustering/                 the k-means procedure
 │   ├── sorting/                    twenty-five sorting procedures
 │   ├── learning/                   the forward and backward passes
@@ -85,6 +86,7 @@ What the demos are made of lives under `js/`, split by purpose. Each folder docu
 | --- | --- | --- |
 | [`js/core`](js/core/Readme.en.md) | Seeded randomness, rounding, input parsing | The base layer; no DOM and no drawing |
 | [`js/linear-algebra`](js/linear-algebra/Readme.en.md) | Building, composing and applying 3×3 matrices | Checkable against known values without a browser |
+| [`js/fraction`](js/fraction/Readme.en.md) | Common denominators, comparison and the matching step | Only fractions between 0 and 1 |
 | [`js/clustering`](js/clustering/Readme.en.md) | The k-means state machine and synthetic data | Advances assignment and update one step at a time |
 | [`js/sorting`](js/sorting/Readme.en.md) | Twenty-five sorting procedures as lists of steps | Procedures with no known end are not built up front |
 | [`js/learning`](js/learning/Readme.en.md) | Forward pass, backward pass, numerical differentiation, updates | Solved with the chain rule; numerical differentiation is the cross-check |
